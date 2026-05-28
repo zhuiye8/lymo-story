@@ -1,0 +1,89 @@
+{
+  "samples_path": "data/baselines/slop_samples_zh.json",
+  "threshold": 0.5,
+  "n_slop": 100,
+  "n_normal": 50,
+  "tp": 97,
+  "fn": 3,
+  "fp": 0,
+  "tn": 50,
+  "recall": 0.97,
+  "precision": 1.0,
+  "accuracy": 0.98,
+  "f1": 0.9848,
+  "per_category": {
+    "tier1_banned": {
+      "slop_detected": 40,
+      "normal_falsep": 0
+    },
+    "fiction_tell": {
+      "slop_detected": 26,
+      "normal_falsep": 0
+    },
+    "structural": {
+      "slop_detected": 15,
+      "normal_falsep": 0
+    },
+    "tier2_cluster": {
+      "slop_detected": 17,
+      "normal_falsep": 0
+    },
+    "show_vs_tell": {
+      "slop_detected": 11,
+      "normal_falsep": 0
+    },
+    "em_dash_density": {
+      "slop_detected": 7,
+      "normal_falsep": 0
+    },
+    "transition_ratio": {
+      "slop_detected": 6,
+      "normal_falsep": 0
+    },
+    "sentence_cv": {
+      "slop_detected": 4,
+      "normal_falsep": 0
+    }
+  },
+  "misclassified_slop": [
+    {
+      "id": "slop_079",
+      "text": "他难过地说了一声。她紧张地咬着嘴唇。两个人都觉得十分失望。这场争吵让他们感到非常紧张。",
+      "penalty": 0.3,
+      "categories": [
+        "show_vs_tell"
+      ]
+    },
+    {
+      "id": "slop_087",
+      "text": "他抬起手。他看了看表。他放下手。他看向远方。他什么都没说。他转过头。他看着她。他还是没说。他低下头。他叹了气。",
+      "penalty": 0.476,
+      "categories": [
+        "sentence_cv"
+      ]
+    },
+    {
+      "id": "slop_089",
+      "text": "她笑了。他没笑。她又笑了。他还是没笑。她不笑了。他叹气了。她哭了。他不说话。她转身了。他没拦。",
+      "penalty": 0.392,
+      "categories": [
+        "sentence_cv"
+      ]
+    }
+  ],
+  "misclassified_normal": [],
+  "score_distribution": {
+    "slop": {
+      "mean": 1.812,
+      "min": 0.3,
+      "max": 3.0
+    },
+    "normal": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    }
+  },
+  "ac3_pass": true,
+  "ac3_fail_threshold": false
+}

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#e5e2da",
+                    "inverse-on-surface": "#f4f1e8",
+                    "on-surface-variant": "#52443b",
+                    "outline": "#84746a",
+                    "surface-container-highest": "#e5e2da",
+                    "tertiary-fixed": "#a9edff",
+                    "primary-fixed-dim": "#ffb783",
+                    "on-tertiary-fixed": "#001f26",
+                    "surface-dim": "#dddad1",
+                    "tertiary-container": "#8bd1e3",
+                    "error-container": "#ffdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed-dim": "#8bd1e3",
+                    "on-primary-fixed": "#301400",
+                    "outline-variant": "#d7c3b7",
+                    "secondary-container": "#fddab2",
+                    "secondary": "#735a3a",
+                    "on-secondary-fixed-variant": "#594325",
+                    "primary-container": "#ffb783",
+                    "on-secondary-fixed": "#291801",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "surface-bright": "#fcf9f0",
+                    "primary": "#875126",
+                    "surface": "#fcf9f0",
+                    "inverse-surface": "#31312b",
+                    "surface-tint": "#875126",
+                    "surface-container-low": "#f6f3ea",
+                    "on-primary-container": "#79461c",
+                    "surface-container": "#f1eee5",
+                    "on-surface": "#1c1c17",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#ffb783",
+                    "secondary-fixed-dim": "#e2c19b",
+                    "background": "#fcf9f0",
+                    "secondary-fixed": "#ffddb6",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#1c1c17",
+                    "on-primary-fixed-variant": "#6b3a11",
+                    "surface-container-high": "#ebe8df",
+                    "primary-fixed": "#ffdcc5",
+                    "on-tertiary-fixed-variant": "#004e5c",
+                    "on-tertiary-container": "#005b6a",
+                    "error": "#ba1a1a",
+                    "on-primary": "#ffffff",
+                    "tertiary": "#156777",
+                    "on-secondary-container": "#785e3e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif SC", "serif"],
+                    "body": ["Noto Serif SC", "serif"],
+                    "label": ["Public Sans", "sans-serif"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f1eee5 25%, #e5e2da 50%, #f1eee5 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .floating-ink {
+            animation: float 4s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-[#FCF9F0]/80 dark:bg-stone-900/80 backdrop-blur-xl">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#875126] dark:text-[#FFB783] hover:bg-[#E5E2DA] dark:hover:bg-stone-800 transition-colors p-2 rounded-lg" data-icon="menu">menu</button>
+<span class="font-serif text-2xl italic tracking-tighter text-[#875126] dark:text-[#FFB783]">Lymo Story</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#875126] dark:text-[#FFB783] hover:bg-[#E5E2DA] dark:hover:bg-stone-800 transition-colors p-2 rounded-lg" data-icon="search">search</button>
+</div>
+</header>
+<main class="pt-24 pb-32 min-h-screen px-6 max-w-5xl mx-auto">
+<!-- SECTION 1: LOADING STATE (Skeleton) -->
+<section class="mb-20">
+<div class="flex items-baseline justify-between mb-8">
+<div class="h-10 w-48 skeleton rounded-lg"></div>
+<div class="h-4 w-20 skeleton rounded-full"></div>
+</div>
+<!-- Bento Skeleton Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Large Featured Skeleton -->
+<div class="md:col-span-8 h-[400px] bg-surface-container-low p-8 flex flex-col justify-end gap-4">
+<div class="h-12 w-3/4 skeleton rounded-lg"></div>
+<div class="h-4 w-1/2 skeleton rounded-full"></div>
+<div class="space-y-2 mt-4">
+<div class="h-3 w-full skeleton rounded-full"></div>
+<div class="h-3 w-full skeleton rounded-full"></div>
+<div class="h-3 w-4/5 skeleton rounded-full"></div>
+</div>
+</div>
+<!-- Side Skeleton -->
+<div class="md:col-span-4 flex flex-col gap-6">
+<div class="h-full bg-surface-container-low p-6 flex flex-col gap-4">
+<div class="w-24 h-32 skeleton rounded-lg mb-2"></div>
+<div class="h-6 w-full skeleton rounded-lg"></div>
+<div class="h-4 w-2/3 skeleton rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Global Tanuki Loading Overlay Concept -->
+<div class="mt-12 py-12 flex flex-col items-center justify-center text-center">
+<div class="relative w-24 h-24 mb-6 floating-ink flex items-center justify-center bg-primary-container/20 rounded-full">
+<span class="material-symbols-outlined text-primary text-5xl" data-icon="forest" style="font-variation-settings: 'FILL' 1;">forest</span>
+<div class="absolute -top-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined text-white text-[14px]" data-icon="auto_awesome">auto_awesome</span>
+</div>
+</div>
+<h2 class="font-headline text-xl text-primary font-bold mb-2">唤醒狸梦之灵...</h2>
+<p class="font-label text-sm text-on-surface/60 tracking-wider">Waking up the Lymo spirits...</p>
+</div>
+</section>
+<!-- Divider -->
+<div class="w-full h-px bg-surface-variant/30 mb-20"></div>
+<!-- SECTION 2: EMPTY STATE -->
+<section class="flex flex-col items-center text-center max-w-2xl mx-auto py-16">
+<!-- Asymmetric Illustration Layout -->
+<div class="relative mb-12">
+<!-- Decorative Layer -->
+<div class="absolute -top-12 -left-20 w-64 h-64 bg-primary-container/10 rounded-full blur-3xl"></div>
+<div class="relative bg-surface-container-low rounded-2xl p-12 overflow-hidden shadow-sm">
+<!-- Custom Moon and Forest Visual -->
+<div class="absolute top-8 right-8 w-16 h-16 bg-primary-container rounded-full opacity-60 shadow-[0_0_40px_#FFB783]"></div>
+<div class="relative z-10 flex flex-col items-center">
+<img alt="Tanuki silhouette" class="w-48 h-48 object-contain mb-6 grayscale mix-blend-multiply opacity-80" data-alt="Illustration of a cute tanuki silhouette sitting on a pine branch looking at a glowing harvest moon in a foggy mystical forest ink wash style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-VLuj3o_ERqsiBwfWRkAuKgUGKjk1Udcmi_eiJz0WMmhmhHfBHRa9ylxIWFG71_dDJ1AID6mnyFXLRMXZ4a_qmPsTSiZR2bV7upIPXiokkP0POdZaYterSQPGKnMaAQ_Q1Dgib9nKXP_Y0LmYUwnsk1s4bzH0LHqxwQLZSB13KWQ_yIrWylOwSPjr3NxS8_OzQng1SoCyxhUTuVsv8faxHQV2RLpEumcb3Nu_SNTzUU0bUHaGhoIsrZWXgIOLywWlVhFYzmMJLJY"/>
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-primary/40 text-xl" data-icon="star">star</span>
+<span class="material-symbols-outlined text-primary/40 text-2xl" data-icon="star">star</span>
+<span class="material-symbols-outlined text-primary/40 text-xl" data-icon="star">star</span>
+</div>
+</div>
+</div>
+</div>
+<h1 class="font-headline text-3xl md:text-4xl text-on-surface font-black mb-6 tracking-tight">
+                梦境之扉尚未开启
+            </h1>
+<p class="font-body text-lg text-on-surface-variant/80 mb-10 leading-relaxed">
+                这里的书架空空如也，像是一场还未入眠的午后。不如前往“发现”页面，捕捉几则转瞬即逝的灵狐物语。
+            </p>
+<div class="flex flex-col sm:flex-row gap-4 items-center">
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-8 py-3 rounded-lg font-label font-bold tracking-widest shadow-md hover:shadow-lg transition-all active:scale-95">
+                    前往发现
+                </button>
+<button class="bg-surface-container-high text-on-surface px-8 py-3 rounded-lg font-label font-bold tracking-widest hover:bg-surface-variant transition-all">
+                    返回书斋
+                </button>
+</div>
+<p class="mt-12 font-label text-[10px] uppercase tracking-[0.2em] text-primary/40">
+                The dreamscape hasn't opened yet. Go catch some fleeting fox stories on the Discover page.
+            </p>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-[#FCF9F0] dark:bg-stone-900 shadow-[0_-4px_24px_rgba(135,81,38,0.06)] rounded-t-lg">
+<a class="flex flex-col items-center justify-center text-[#1C1C17]/50 dark:text-stone-500 hover:text-[#875126] dark:hover:text-stone-200 transition-all" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="auto_stories">auto_stories</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest">Bookshelf</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#1C1C17]/50 dark:text-stone-500 hover:text-[#875126] dark:hover:text-stone-200 transition-all" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="explore">explore</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest">Discover</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#875126] dark:text-[#FFB783] bg-[#FFB783]/20 rounded-xl px-4 py-1 active:scale-90 duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest">My</span>
+</a>
+</nav>
+</body></html>

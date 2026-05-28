@@ -1,0 +1,2421 @@
+{
+  "schema": {
+    "version": "v5-ac3-wikisource-pd",
+    "purpose": "AC3 calibration corpus — Chinese LLM slop vs normal human-written, split by negative-set domain",
+    "target_size": {
+      "slop": 100,
+      "normal_generic": 50,
+      "normal_fiction": 71
+    },
+    "current_size": {
+      "slop": 100,
+      "normal_generic": 50,
+      "normal_fiction": 71
+    },
+    "expanded_at": "2026-04-27",
+    "domain_split_added_at": "2026-04-27 (Report #2 supervisor correction: in-domain fiction-normal required)",
+    "expansion_method": "engineer-authored (AI-assisted): both negative subsets are written from scratch by the engineer to mimic the target style. NOT independently human-written. Per-sample provenance fields (source_type / source_note / accepted_by / accepted_at) make this auditable. Future work: replace or augment with independently human-written or public-domain-literature-excerpt samples.",
+    "label_meaning": {
+      "slop": "exhibits one or more LLM-fiction tics: 烂用比喻 / 滥用心理描写 / 套话堆砌 / 显式情绪标注 / show-vs-tell 反模式 / 句长过于均匀 / 破折号密集 / 段首转折堆砌",
+      "normal_generic": "engineer-authored daily-life / office / family / travel prose without LLM tics; out-of-domain easy negative reference",
+      "normal_fiction": "engineer-authored Chinese fiction-style paragraphs (民国 / 现代都市 / 乡村 / 历史 / 内心独白 / dialogue scenes) WITHOUT LLM tics; in-domain stress test for the detector. AUTHORED BY THE AI-ASSISTED ENGINEER, NOT BY AN INDEPENDENT HUMAN. precision_fiction must therefore be qualified as 'project-accepted-synthetic' precision until independent human-written samples are added."
+    },
+    "category_distribution_slop": {
+      "tier1_banned": "~40 (high frequency in real LLM output)",
+      "tier2_cluster": "~15",
+      "structural": "~15",
+      "fiction_tell": "~25",
+      "show_vs_tell": "~12",
+      "sentence_cv": "~5 (rare, requires uniform sentence lengths)",
+      "em_dash_density": "~5",
+      "transition_ratio": "~5",
+      "note": "many samples hit multiple categories; counts are primary categories"
+    },
+    "provenance_fix_at": "2026-04-27 (Report #3 review: provenance must be auditable; engineer is AI-assisted so cannot claim human-written)",
+    "provenance_taxonomy": {
+      "engineer_synthetic": "Engineer (AI-assisted) wrote this sample from scratch to mimic the target style. Self-accepted.",
+      "human_authored": "An independent human wrote this sample for the calibration corpus (none currently in v3).",
+      "public_domain_excerpt": "Verbatim excerpt from a public-domain literary work, manually selected (none currently in v3).",
+      "project_accepted_chapter_excerpt": "Excerpt from a chapter in this project's database whose own slop_penalty == 0 was manually re-validated (none currently in v3)."
+    },
+    "pd_excerpts_added_at": "2026-04-27 (Report #4 review §AC3 final standard: ≥20 public_domain_excerpt required)",
+    "wikisource_pd_added_at": "2026-04-27 (Report #5 review: replaced memory-recall PD with source-verifiable wikisource extracted excerpts; supersedes v4 PD samples)",
+    "provenance_summary_v5": {
+      "slop": "100 engineer_synthetic",
+      "normal_generic": "50 engineer_synthetic",
+      "normal_fiction": {
+        "engineer_synthetic": 50,
+        "wikisource_pd_excerpt": 21,
+        "total": 71
+      },
+      "wikisource_authors": [
+        "朱自清",
+        "林徽因",
+        "胡适",
+        "蔡元培",
+        "鲁迅"
+      ],
+      "wikisource_works": [
+        "《一件小事》",
+        "《九十九度中》",
+        "《傷逝》",
+        "《匆匆》",
+        "《好的故事》",
+        "《孔乙己》",
+        "《就任北京大學校長之演說》",
+        "《差不多先生傳》",
+        "《從百草園到三味書屋》",
+        "《故鄉》",
+        "《春》",
+        "《歌聲》",
+        "《狂人日記》",
+        "《社戲》",
+        "《祝福》",
+        "《背影》",
+        "《荷塘月色》",
+        "《藥》",
+        "《阿長與山海經》",
+        "《雪》",
+        "《風箏》"
+      ],
+      "id_stability": {
+        "preserved": 21,
+        "newly_assigned": 0,
+        "newly_assigned_pairs": []
+      }
+    }
+  },
+  "slop": [
+    {
+      "id": "slop_001",
+      "category_hint": [
+        "tier1_banned",
+        "fiction_tell"
+      ],
+      "text": "他的瞳孔骤然紧缩，宛如被无形的手攥住了心脏。在心底深处，那段刻骨铭心的记忆如同潮水般涌来，冲击着他早已疲惫不堪的灵魂。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_002",
+      "category_hint": [
+        "fiction_tell",
+        "show_vs_tell"
+      ],
+      "text": "苏雨感到非常愤怒，她紧紧攥着拳头，心脏漏跳了一拍。嘴角微微勾起一抹冰冷的笑意，眼神变得复杂而深邃。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_003",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "命运的齿轮开始悄然转动，时间的洪流裹挟着每一个微不足道的灵魂。岁月的长河里，千丝万缕的因果纠缠在一起。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_004",
+      "category_hint": [
+        "structural"
+      ],
+      "text": "他不仅仅是一个普通的程序员，更是一个守护者。这不只是一次简单的调试，更是一场无声的战争。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_005",
+      "category_hint": [
+        "tier1_banned",
+        "tier2_cluster"
+      ],
+      "text": "实验室里弥漫着一种说不清的气息，那种复杂的氛围让人心头一颤。她的气场冷冷地、淡淡地、缓缓地散开，仿佛带着某种宿命般的力量。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_006",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "他脸色煞白，呼吸为之一窒，血液几乎凝固。心脏猛地一沉，瞳孔微缩，他终于明白了真相。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_007",
+      "category_hint": [
+        "tier1_banned",
+        "structural"
+      ],
+      "text": "她的眼神犹如一把锋利的刀，仿佛能切开夜幕。在心底深处，她不仅仅是恨，更是怕。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_008",
+      "category_hint": [
+        "show_vs_tell"
+      ],
+      "text": "林默愤怒地拍了拍桌子。苏雨悲伤地低下了头。他们都觉得很失望，却又无能为力。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_009",
+      "category_hint": [
+        "tier2_cluster"
+      ],
+      "text": "那是一种深邃的、复杂的、凌厉的眼神，带着锐利的气场，弥漫在淡淡的氛围里。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_010",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "她仿佛站在时间的边缘，宛如一尊雕像。万千思绪如雷贯耳般涌来，刻骨铭心的过往震耳欲聋。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_011",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "他嘴角微微扬起，眼神变得凌厉。心头一紧，呼吸急促。脸色变得铁青，血液几乎凝住。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_012",
+      "category_hint": [
+        "tier1_banned",
+        "tier2_cluster"
+      ],
+      "text": "命运、宿命、缘分——这些词如同千头万绪般缠绕着他的灵魂。气息在房间里轻轻地、淡淡地飘散开。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_013",
+      "category_hint": [
+        "structural"
+      ],
+      "text": "在他思考的同时，对方也在行动。没有立刻反击，却暗中布局。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_014",
+      "category_hint": [
+        "fiction_tell",
+        "tier1_banned"
+      ],
+      "text": "她的瞳孔一缩，犹如猛兽察觉到威胁。心脏停了一拍，仿佛时间也为之静止。在心底深处，她明白这是一场无法逃避的对决。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_015",
+      "category_hint": [
+        "show_vs_tell",
+        "tier2_cluster"
+      ],
+      "text": "他感到非常焦虑，紧张地来回踱步。冷冷地看着窗外，淡淡地叹了口气。复杂的情绪在心中翻涌。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_016",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "时间的洪流冲刷着记忆，岁月的长河流淌着遗憾。命运的齿轮一旦转动，便再也无法停下。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_017",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "他眼神变得深邃。心头一凉。瞳孔紧缩。嘴角勾起。脸色微微发白。呼吸一滞。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_018",
+      "category_hint": [
+        "tier1_banned",
+        "fiction_tell"
+      ],
+      "text": "如同被命运扼住喉咙，他瞳孔骤缩，心脏漏跳。宛如坠入万丈深渊，犹如被抽干了灵魂。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_019",
+      "category_hint": [
+        "tier2_cluster",
+        "show_vs_tell"
+      ],
+      "text": "她复杂地、深邃地、凌厉地看着他。心中感到一阵难过，却又觉得无可奈何。气氛变得诡异。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_020",
+      "category_hint": [
+        "structural",
+        "tier1_banned"
+      ],
+      "text": "他不仅仅是一个剑客，更是一种象征。在心底深处，他相信自己能改变命运。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_021",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "她嘴角扬起一丝若有若无的笑意。眼神变得复杂深邃。瞳孔一缩，心头微颤。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_022",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "千丝万缕的羁绊。万千思绪的纠葛。如雷贯耳的传闻。震耳欲聋的呐喊。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_023",
+      "category_hint": [
+        "show_vs_tell"
+      ],
+      "text": "他害怕地颤抖着。她惊讶地睁大了眼睛。他们都感到非常紧张，却又非常兴奋。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_024",
+      "category_hint": [
+        "tier2_cluster"
+      ],
+      "text": "气息凝固，气场紧绷，气氛压抑。命运降临，宿命纠缠，缘分难测。冷冷地、淡淡地、缓缓地。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_025",
+      "category_hint": [
+        "tier1_banned",
+        "fiction_tell",
+        "structural"
+      ],
+      "text": "他瞳孔紧缩，宛如被命运攥住咽喉。在心底深处不仅仅是恐惧更是绝望。仿佛千丝万缕的羁绊都化作了枷锁。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_026",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "他静静地站在原地，仿佛与世界隔绝。脑海深处涌起一片潮汐，如同被遗忘多年的旧梦终于回来。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_027",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "夜风吹过，她的发丝犹如黑色的瀑布。月光宛如一层轻纱，覆盖在她孤独的肩头。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_028",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "在心底深处，他知道这一刻将刻骨铭心。命运的齿轮咔哒一响，从此再无回头之路。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_029",
+      "category_hint": [
+        "tier1_banned",
+        "fiction_tell"
+      ],
+      "text": "她的瞳孔微微一缩，仿佛听见了什么不该听见的声音。心头一颤，呼吸为之一滞。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_030",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "时间的洪流席卷一切，岁月的长河磨平棱角。可命运的齿轮一旦咬合，便不肯松开。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_031",
+      "category_hint": [
+        "tier1_banned",
+        "fiction_tell"
+      ],
+      "text": "他眼神变得锐利，宛如一把出鞘的刀。脸色铁青，血液几乎凝住。心脏漏了一拍，又一拍。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_032",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "如同潮水退去后留下的礁石，他独自一人站在沙滩上。仿佛整个世界都已经离他而去。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_033",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "千丝万缕的过往涌上心头。万千思绪如雷贯耳般在脑海深处轰鸣。一切刻骨铭心，一切震耳欲聋。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_034",
+      "category_hint": [
+        "tier1_banned",
+        "tier2_cluster"
+      ],
+      "text": "他望着远方，气息深邃复杂。命运的齿轮在他眼中冷冷地转动，宿命的氛围弥漫在凌厉的气场之中。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_035",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "犹如黑夜中的一道闪电，她的话语刺穿了他全部的防线。仿佛被剥光了所有伪装，他在她面前无处可逃。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_036",
+      "category_hint": [
+        "tier1_banned",
+        "fiction_tell"
+      ],
+      "text": "她嘴角微微勾起一丝冷笑，眼神变得凌厉。仿佛在心底深处早已做出了决断。瞳孔紧缩，心头一凉。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_037",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "他在心底深处早已知道答案。可那答案如同一根细针，刻骨铭心地扎在最柔软的地方。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_038",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "夜色宛如墨水般浓稠。脚步声犹如鼓点般敲击着青石板。整条小巷仿佛被吞没在某种刻骨铭心的寂静里。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_039",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "他的笑容仿佛带着一丝悲凉。她的目光犹如划过夜空的流星。两个人之间千丝万缕的牵绊在岁月的长河中无声延伸。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_040",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "命运的齿轮自始至终都没有停下。岁月的长河流过每一个不眠的夜晚。在心底深处，他知道这场游戏没有赢家。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_041",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "万千思绪化作千丝万缕。脑海深处响起如雷贯耳的回声。仿佛整个宇宙都在为他一个人震耳欲聋地嘶吼。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_042",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "她仿佛已经预见到了结局，犹如先知一般冷冷地微笑。在心底深处，她其实和他一样害怕。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_043",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "他闭上眼，犹如躲进了自己最后的避风港。仿佛只要不睁开，世界就还是原来的样子。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_044",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "如同被一只无形的手推着向前，她不得不走下去。在心底深处，她其实早已疲惫不堪。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_045",
+      "category_hint": [
+        "tier1_banned"
+      ],
+      "text": "命运的齿轮咔哒一声落定。岁月的长河悄然分流。万千思绪在脑海深处归于沉寂。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_046",
+      "category_hint": [
+        "tier2_cluster"
+      ],
+      "text": "她的气息冷冷地、淡淡地散开，气场也轻轻地变得复杂深邃。整个房间的氛围都凌厉起来。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_047",
+      "category_hint": [
+        "tier2_cluster"
+      ],
+      "text": "命运、宿命、缘分这些词缓缓地从她口中吐出。深邃的眼神，复杂的气场，凌厉的氛围在书房内交错。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_048",
+      "category_hint": [
+        "tier2_cluster"
+      ],
+      "text": "他冷冷地、淡淡地、轻轻地说了一句。气息忽然变得凌厉，气场骤然深邃，氛围一时复杂难解。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_049",
+      "category_hint": [
+        "tier2_cluster"
+      ],
+      "text": "整个城市的氛围渐渐地凝重起来。人群中弥漫着复杂的气息，深邃的目光，凌厉的杀机。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_050",
+      "category_hint": [
+        "tier2_cluster"
+      ],
+      "text": "她的声音淡淡地飘过来。复杂、深邃、锐利——三种气质在她身上交织。气场冷冷地压向四周。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_051",
+      "category_hint": [
+        "tier2_cluster"
+      ],
+      "text": "气息凝重，气场紧绷，氛围压抑。她缓缓地、淡淡地抬起头，眼中带着复杂深邃凌厉的笑意。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_052",
+      "category_hint": [
+        "tier2_cluster"
+      ],
+      "text": "命运的安排从来都不简单。宿命般的相遇带着深邃的气息。缘分这种东西，复杂得让人心生凌厉。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_053",
+      "category_hint": [
+        "tier2_cluster"
+      ],
+      "text": "他的眼神冷冷地扫过全场。气场凌厉，气息深邃，氛围一瞬间复杂得无法言说。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_054",
+      "category_hint": [
+        "structural"
+      ],
+      "text": "他不仅仅是为了胜利而战，更是为了曾经死去的兄弟。这一刻，他不只是士兵，而是复仇者。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_055",
+      "category_hint": [
+        "structural"
+      ],
+      "text": "在她转身的同时，他也做出了决断。这场对话不仅仅是告别，更是两个人之间最后的约定。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_056",
+      "category_hint": [
+        "structural"
+      ],
+      "text": "她没有立刻回答，却用沉默给出了答案。在他追问的同时，雨开始下了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_057",
+      "category_hint": [
+        "structural"
+      ],
+      "text": "这把剑不仅仅是一件武器，更是父亲留给他的全部。在他握紧剑柄的同时，过去的画面一帧帧浮现。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_058",
+      "category_hint": [
+        "structural"
+      ],
+      "text": "他没有动手，却让所有人都退了一步。在他开口说话的同时，整个屋子都安静下来。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_059",
+      "category_hint": [
+        "structural"
+      ],
+      "text": "这件事不仅仅关乎他个人，更关乎整个家族的存亡。沉默已经持续了太久，而是该有人打破它。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_060",
+      "category_hint": [
+        "structural"
+      ],
+      "text": "在她说出那句话的同时，三个人同时抬起头。这一夜不只是争吵，更是裂痕的开端。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_061",
+      "category_hint": [
+        "structural"
+      ],
+      "text": "他不只是想要赢，而是想要碾碎对手所有的傲气。他没有威胁，却让对方坐立不安。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_062",
+      "category_hint": [
+        "structural"
+      ],
+      "text": "在他举杯的同时，宴会厅的灯光暗了下来。这场宴席不仅仅是庆功，更是某场清算的开端。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_063",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "他的瞳孔骤然紧缩。心脏猛了一跳。嘴角微微勾起一抹冷笑。眼神变得锐利如刀。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_064",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "她脸色煞白，呼吸为之一窒。心头一紧，血液几乎凝固。瞳孔紧缩，眼神变得深邃。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_065",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "嘴角扬起。瞳孔微缩。心脏漏了一拍。脸色铁青。呼吸一滞。心头一凉。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_066",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "他眼神变得复杂，嘴角微微勾起。心头一颤，瞳孔紧缩。脸色微微发白，呼吸急促起来。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_067",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "她的瞳孔一缩，心脏停了一下。眼神变得凌厉，嘴角上扬。血液几乎凝住，呼吸为之一滞。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_068",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "他心头一紧，脸色惨白。瞳孔紧缩到几乎看不见。嘴角微微一扬，眼神变得锐利。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_069",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "她的嘴角微微勾起，仿佛胸有成竹。心头一颤，瞳孔骤缩。脸色铁青地盯着对方。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_070",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "他眼神变得深邃复杂。瞳孔一缩，心脏漏跳。脸色煞白，呼吸急促，嘴角却勾起一抹笑。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_071",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "他嘴角扬起。瞳孔紧缩。心头一凉。眼神锐利。脸色铁青。血液凝住。呼吸一窒。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_072",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "她心头一紧，瞳孔微缩。嘴角勾起一丝苦笑。眼神变得复杂深邃。脸色变得惨白。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_073",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "瞳孔紧缩的瞬间，他的心脏猛了一下。嘴角微微扬起，眼神变得凌厉。脸色微微发青。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_074",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "他脸色铁青，呼吸为之一窒。心脏漏了一拍。瞳孔紧缩，眼神锐利如刀。嘴角却勾起冷笑。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_075",
+      "category_hint": [
+        "fiction_tell"
+      ],
+      "text": "她瞳孔一缩，嘴角扬起。心头一颤，呼吸一滞。眼神变得深邃，脸色微微煞白。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_076",
+      "category_hint": [
+        "show_vs_tell"
+      ],
+      "text": "他感到非常愤怒，恨不得一拳砸过去。她觉得很难过，却不愿在外人面前流泪。他们都心想：到此为止吧。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_077",
+      "category_hint": [
+        "show_vs_tell"
+      ],
+      "text": "她惊讶地张大了嘴。他愤怒地瞪着对方。我害怕地后退一步。你悲伤地低下了头。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_078",
+      "category_hint": [
+        "show_vs_tell"
+      ],
+      "text": "他感到很高兴。她觉得非常难过。我心想真倒霉。你又一次焦虑地踱步。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_079",
+      "category_hint": [
+        "show_vs_tell"
+      ],
+      "text": "他难过地说了一声。她紧张地咬着嘴唇。两个人都觉得十分失望。这场争吵让他们感到非常紧张。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_080",
+      "category_hint": [
+        "show_vs_tell"
+      ],
+      "text": "她惊讶地后退一步。他愤怒地拍了一下桌子。我害怕地缩起肩膀。你悲伤地叹了口气。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_081",
+      "category_hint": [
+        "show_vs_tell"
+      ],
+      "text": "他感到非常焦虑，他觉得很失望，他心想这下完了。她也感到十分难过，可是又不知道怎么办。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_082",
+      "category_hint": [
+        "show_vs_tell"
+      ],
+      "text": "他愤怒地咆哮起来，她悲伤地哭出声。他们都觉得非常无力，却又只能任由情绪蔓延。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_083",
+      "category_hint": [
+        "show_vs_tell",
+        "tier2_cluster"
+      ],
+      "text": "她紧张地深吸一口气。气息变得复杂，气场凌厉，氛围深邃。他感到非常害怕。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_084",
+      "category_hint": [
+        "show_vs_tell"
+      ],
+      "text": "他高兴地笑了。她惊讶地张开嘴。他们都觉得非常喜悦。这一刻，他们都感到十分满足。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_085",
+      "category_hint": [
+        "sentence_cv"
+      ],
+      "text": "他坐下来。他点了根烟。他看了看窗外。他叹了口气。他喝了口水。他闭上眼睛。他想起了她。他没有说话。他又抽了一口。他把烟掐灭了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_086",
+      "category_hint": [
+        "sentence_cv"
+      ],
+      "text": "她转过身。她推开门。她走出去。她关上门。她走下楼。她推开门。她走出门。她叫了车。她上了车。她说了地址。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_087",
+      "category_hint": [
+        "sentence_cv"
+      ],
+      "text": "他抬起手。他看了看表。他放下手。他看向远方。他什么都没说。他转过头。他看着她。他还是没说。他低下头。他叹了气。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_088",
+      "category_hint": [
+        "sentence_cv"
+      ],
+      "text": "雨在下。风在吹。叶子在落。人在走。车在跑。灯在亮。门在关。窗在开。雨还在下。风还在吹。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_089",
+      "category_hint": [
+        "sentence_cv"
+      ],
+      "text": "她笑了。他没笑。她又笑了。他还是没笑。她不笑了。他叹气了。她哭了。他不说话。她转身了。他没拦。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_090",
+      "category_hint": [
+        "em_dash_density"
+      ],
+      "text": "他走向窗台——风吹过来——窗帘飘起——他闭上眼——一切都已结束——他知道——再也回不去了——",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_091",
+      "category_hint": [
+        "em_dash_density"
+      ],
+      "text": "她说——我不会回头——他答——我也不会——她笑——你从来不会——他沉默——一切尽在不言中——",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_092",
+      "category_hint": [
+        "em_dash_density"
+      ],
+      "text": "他握紧了剑——她转过身——风吹过——叶子落——剑光闪——血溅——一切发生在一瞬之间——",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_093",
+      "category_hint": [
+        "em_dash_density"
+      ],
+      "text": "我看着她——她看着我——我们什么也没说——但什么都说了——这就是——爱情——的样子——大概——吧——",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_094",
+      "category_hint": [
+        "em_dash_density"
+      ],
+      "text": "时间——空间——命运——宿命——一切都在崩塌——一切都在重建——他闭上眼——他睁开眼——世界已经不同——",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_095",
+      "category_hint": [
+        "transition_ratio"
+      ],
+      "text": "他想去找她。\n但是雨太大。\n然而他还是出门了。\n不过路上太堵。\n可是他不肯回头。\n只是天色已晚。\n因此他错过了。\n所以他后悔了一辈子。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_096",
+      "category_hint": [
+        "transition_ratio"
+      ],
+      "text": "她坐在那里发呆。\n但是没人注意她。\n然而她并不在乎。\n不过这种平静很快被打破。\n可是她没有惊讶。\n因此她只是淡淡地笑了一下。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_097",
+      "category_hint": [
+        "transition_ratio"
+      ],
+      "text": "他走进房间。\n但是房间是空的。\n然而桌上有杯热茶。\n不过他没有动。\n因此他确认了自己的判断。\n所以他立刻离开了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_098",
+      "category_hint": [
+        "transition_ratio"
+      ],
+      "text": "门开了。\n但是没人进来。\n然而他听见了脚步声。\n不过那声音很快消失了。\n可是他依然警觉。\n因此他握紧了刀柄。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_099",
+      "category_hint": [
+        "transition_ratio"
+      ],
+      "text": "雨停了。\n但是地上还湿。\n然而他没有回去拿伞。\n不过他走得很慢。\n可是他并不悲伤。\n因此他抬头看了看天。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "slop_100",
+      "category_hint": [
+        "tier1_banned",
+        "fiction_tell",
+        "tier2_cluster",
+        "structural"
+      ],
+      "text": "他瞳孔紧缩，宛如被命运的齿轮碾过。在心底深处，他不仅仅是绝望，更是无奈。气息冷冷地、淡淡地散开，气场凌厉如刀，氛围复杂深邃。仿佛千丝万缕的羁绊都化作了刻骨铭心的枷锁。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored to deliberately trigger one or more slop categories",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    }
+  ],
+  "normal_generic": [
+    {
+      "id": "normal_g_001",
+      "text": "厨房里有股蒸汽味。他把锅盖掀开，米饭快好了。砧板上还堆着没切完的辣椒，汁水把木板染得通红。门外传来电梯的叮咚声，是邻居回来。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_002",
+      "text": "她推开门，发现客厅没人。茶几上一杯凉了的咖啡，遥控器歪在沙发缝里。窗帘被风掀起一角，外面在下雨。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_003",
+      "text": "老张抽了一口烟，把烟头摁在烟灰缸里。\"那批货下周到。\" 他说。我没说话，把茶杯里剩下的半口喝了。窗外路灯亮着。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_004",
+      "text": "他走到楼下时鞋底都湿了。便利店还开着，店员低头玩手机。买了瓶水，结账，店员没抬头，扫了码递回来。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_005",
+      "text": "我妈在厨房擀面，面粉沾了袖口。她头发被热气熏得有点散。\"你回来怎么不打个招呼？\" 她问。我说手机没电。她哦了一声继续擀。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_006",
+      "text": "教室里只剩下他一个人。窗外的梧桐还在掉叶子，落在水泥地上不太响。他翻开课本，发现上一页夹了张字条，是同桌写的，但同桌已经请了三天假。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_007",
+      "text": "电梯停在七楼。门口堆着两个纸箱，胶带没撕干净。他绕过箱子，掏钥匙开门。屋里没开灯，只有冰箱在嗡嗡响。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_008",
+      "text": "下午三点他终于把代码跑通。改了第十七版，问题原来出在一个 typo。他给同事发了条消息：\"修了。\" 然后去倒了杯水。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_009",
+      "text": "雨点砸在伞上的声音和砸在地上的不一样。她把伞向后偏了偏，让小孩走在自己里侧。前面红绿灯刚变绿，他们紧赶两步跑过去。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_010",
+      "text": "饭店里人少，服务员靠在收银台旁边玩手机。我们点了三个菜一碗汤。菜上来的时候鱼是凉的，老板说重新做一条。我们没吭声，等。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_011",
+      "text": "他在医院走廊坐了一晚上。凌晨两点的时候护士过来加水，问他要不要喝点。他摇头。手机没电了，墙上挂钟一直没走对过。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_012",
+      "text": "公司发的是月饼券。他换了双黄莲蓉，妻子换了五仁。回家路上他犹豫要不要再绕去超市，最后还是直接坐地铁回了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_013",
+      "text": "小区门口的快递柜满了。他把箱子搁在地上，从口袋掏出手机扫码，输入取件码。柜门弹开时发出咔哒一声。他蹲下取出包裹。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_014",
+      "text": "周末的菜场比平时挤。她拎着环保袋在鱼摊前站了一会儿，看老板剖鱼。鳞片溅到她裤腿上一点，她也没擦。称完鱼她又去买了一把香菜。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_015",
+      "text": "我把车停在地库 B2。出去的时候发现忘了拍照记位置。绕了三圈才找到自己那辆车。出库的时候排在前面的人在交月卡。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_016",
+      "text": "他考完最后一科出来，校门口已经站满了家长。他爸举着手机在拍他。他装作没看见，低头快走了几步。最后还是停下来等他妈。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_017",
+      "text": "公交车上人多，他被挤到了门口。下一站要下车的人开始往前挪。他贴着扶手让出空间，背包还是被人撞了一下。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_018",
+      "text": "我去取干洗的衣服，老板娘正在缝纽扣。她抬头说：\"你那件外套袖口掉线，我顺手缝了一下。\" 我说谢谢。她哎一声继续穿针。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_019",
+      "text": "他把电脑合上，离开工位。茶水间里同事正在泡面。\"加班？\" 他问。同事点头，没说话。他走了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_020",
+      "text": "她在阳台上晾衣服。风一吹，刚晾好的衬衫又被吹歪。她伸手扶正，夹好夹子。楼下传来孩子的笑声，应该是放学了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_021",
+      "text": "出租车司机问她去哪儿。她说了地址，司机哦了一声。后视镜里挂着小风扇，没开。她把窗户摇下来一点。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_022",
+      "text": "我下楼倒垃圾，电梯里碰到隔壁王阿姨。她拎着一袋葱。\"今天菜便宜。\" 她说。我点头。一楼到了，我们各走各的。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_023",
+      "text": "他在咖啡店等人。点了杯美式，没加奶。半小时过去了，对方还没到。他翻了几次手机，又放下。窗外有人遛狗。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_024",
+      "text": "下大雨那天她忘了带伞。在地铁口站了快二十分钟。雨没停的意思，她干脆跑出去，到家鞋子都灌满了水。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_025",
+      "text": "周一早上电梯坏了。我爬到八楼，喘得不行。同事看到我说脸怎么这么红。我说今天不用做有氧了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_026",
+      "text": "他妈把电话打过来的时候他在开会。会后他回电过去，没人接。他给爸发了条微信，爸说没事，你妈去跳广场舞了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_027",
+      "text": "她推着购物车走过冷冻区。鸡腿在打折。她拿了一袋，又放回去，最后还是拿了。结账队伍排到了零食货架那边。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_028",
+      "text": "公司年会抽奖他抽到了一袋米。同事调侃说总比没有强。他把米搁在工位下面，一直放到第二年三月才带回家。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_029",
+      "text": "我在小区花坛边上看到一只流浪猫。它瘦得皮包骨。我回家拿了点猫粮下来，它已经走了。我把猫粮搁在那儿就回去了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_030",
+      "text": "他周日去了趟书店。没买什么，就在文学区站了一个下午。回家路上看到一家新开的面馆，进去吃了碗刀削面。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_031",
+      "text": "她接完那通电话就坐在那儿没动。过了好几分钟才起身去倒水。水烧开的声音让她回过神。她关了火，但又没倒水。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_032",
+      "text": "他在地铁上看见前排座位的女孩在哭。哭得不大声，但肩膀一抖一抖。他没说话，把座位让出来转去另一节车厢。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_033",
+      "text": "周五晚上加班到十点。出门时保安已经打着哈欠。他叫了辆车，司机迟到了五分钟，连说了三次抱歉。他说没事。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_034",
+      "text": "她带着外甥去公园。小孩跑得太快，她在后面追。最后小孩自己摔了一跤，坐在地上不哭，看着姑姑笑。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_035",
+      "text": "中午食堂排队的人多。他端着餐盘站在队尾。前面是新来的实习生，回头跟他点了下头算打招呼。土豆丝今天少放盐了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_036",
+      "text": "我家楼下有一家修鞋的。师傅七十多岁了，眼神还很好。我把鞋递过去，他翻来覆去看了一会儿。\"半小时。\" 他说。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_037",
+      "text": "他下班路过菜店，老板娘正在收摊。剩下两把空心菜五块钱卖给他。他拎着菜回家，路过快递站顺手把包裹也取了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_038",
+      "text": "她周末去打羽毛球。和老朋友打了三局，每局都输。打完一起去吃了麻辣烫。她点了不辣的，朋友笑她越来越怂。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_039",
+      "text": "他睡到中午才醒。手机里有十几条工作群消息，他一条没回。起床洗漱，下楼买了两个包子一杯豆浆。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_040",
+      "text": "公司搬家那天他被分配整理打印机。墨盒漏出来沾了一手。他去洗手间洗了半天还是没洗干净，回来同事递过来一片湿巾。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_041",
+      "text": "她妈来看她，带了一袋自家腌的萝卜干。她不爱吃但还是收下了。等她妈走后，她把萝卜干分了一半给隔壁的老太太。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_042",
+      "text": "他在便利店门口抽烟。一个外卖小哥停在旁边等单。两个人都没说话。烟抽完他把烟头扔进垃圾桶就走了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_043",
+      "text": "周三下午她请了半天假去医院做体检。抽血的时候护士说她血管细，扎了两次才扎进去。她全程没看针。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_044",
+      "text": "他爸打电话来问什么时候回家。他说春节回。爸说嗯。他想再说点什么，结果他爸先挂了电话。他握着手机站了一会儿。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_045",
+      "text": "她在小区里散步。物业的师傅在剪树枝，碎屑掉了一地。她绕开走，走到尽头转弯回来时，师傅已经把碎屑扫了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_046",
+      "text": "出门前他犹豫了一下要不要带伞。看了下天气预报说有雨。还是带了。结果一天没下，他拎着伞出门又拎着伞回来。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_047",
+      "text": "我在火车站买票。售票员说没座位了，只剩站票。我说那就站票。从北京站到我家那个小县城，我站了五个多小时。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_048",
+      "text": "他给狗洗澡。狗一进浴室就开始挣扎，水溅了他一脸。洗完拿吹风机吹的时候狗终于安静了，趴在地上闭着眼。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_049",
+      "text": "她做饭烧糊了。锅底一层黑。她蹲在地上刷锅，刷了快半小时。最后还是没刷干净，干脆把锅扔了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_g_050",
+      "text": "周末他带儿子去理发。儿子坐在椅子上不肯抬头，理发师劝了半天。最后理发师说：\"那就这样吧。\" 头发剪得歪了一点，没人在意。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored daily-life prose; not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    }
+  ],
+  "normal_fiction": [
+    {
+      "id": "normal_f_001",
+      "subdomain_tag": "minguo",
+      "text": "他从黄包车上跳下来时，皮鞋已经裂了一道口子。雨水顺着脚踝渗进去，凉得他打了个寒战。门房老周从窗户里探出头：「先生，太太昨儿个就走了，去了天津。」他点头，把硬币塞给老周，转身又上了车。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_002",
+      "subdomain_tag": "minguo",
+      "text": "教堂的钟敲过六下，街上的电灯还没亮。卖报的小孩缩在屋檐下，把最后几份《申报》抱在怀里。一个穿长衫的男人走过来，没看他，把一枚铜板搁在报上，抽走一份就走了。小孩追了两步，没追上。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_003",
+      "subdomain_tag": "minguo",
+      "text": "母亲把那枚镯子塞进我手里时，手在抖。「留着，」她说，「以后没饭吃了，能换两斗米。」我没接。她又塞了一次。我接了。出门时，街口的槐树正在落叶。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_004",
+      "subdomain_tag": "guofeng",
+      "text": "船到岸时已经过了酉时。摆渡的老汉收了船钱，把竹篙搁在船头，蹲下来抽烟。岸上没什么人，只有一个挑担的货郎在收摊。烟雾混着江水的腥气，慢慢散了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_005",
+      "subdomain_tag": "guofeng",
+      "text": "李三娘把门栓推上，转身去厨房添柴。锅里的粥已经熬了两个时辰，米都化开了。她舀了一勺，吹了吹，喂给坐在墙角的小儿子。孩子吃了两口就摇头。她叹了口气，自己把剩下的喝了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_006",
+      "subdomain_tag": "urban",
+      "text": "地铁停在三号线换乘站，门开了又关，没人上下。陈默把背包往腿上挪了挪，盯着车窗里自己的倒影。倒影里他比实际看上去更累。下一站要到了，他才想起来——今天本该去医院取报告的。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_007",
+      "subdomain_tag": "urban",
+      "text": "老板把账单推过来，没说话。我看了眼数字，没说话。我们就这样僵了大概一分钟。最后他先开口：「要不你先走，下个月再补？」我说不用。把卡递过去。POS 机响了一声，过了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_008",
+      "subdomain_tag": "urban",
+      "text": "她在化妆台前坐了很久，没动手。睫毛膏开了盖，干了一半。镜子里的脸比上周又瘦了点。手机震动，是公司群消息——她伸手按掉，没看。屋外有人按响了门铃，按了三次。她没起身。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_009",
+      "subdomain_tag": "urban",
+      "text": "深夜的便利店只有他和店员两个人。他把一盒泡面、一瓶啤酒放到收银台。店员扫码，瞥了一眼时钟。「还要别的吗？」他想了想，又拿了一包烟。出去的时候，玻璃门带起的风吹散了他的头发。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_010",
+      "subdomain_tag": "urban",
+      "text": "电梯里的镜子映出三个人。穿西装的男人盯着手机。穿校服的女孩低头听耳机。我夹在他们中间，研究天花板。十二层到了，男人出去；十六层，女孩出去；十八层，只剩我自己。我突然觉得这电梯比白天大了不止一倍。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_011",
+      "subdomain_tag": "rural",
+      "text": "麦子还有十天就熟了。父亲蹲在田埂上抽烟，眼睛盯着远处那块云。母亲在屋里喊吃饭，他没动。我端着碗走过去，蹲在他旁边。「今年怕是要下雨，」他说。我嗯了一声。麦穗在风里晃，像一片黄色的海。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_012",
+      "subdomain_tag": "rural",
+      "text": "村口那棵老槐树下，张大爷又在下棋。对面是从镇上来的小学老师。两人下了一上午，谁也不吭声。我端着水盆经过，张大爷头也不抬：「丫头，给我也倒一碗。」我倒了。他喝了，把碗推回来，继续下。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_013",
+      "subdomain_tag": "rural",
+      "text": "鸡叫第三遍的时候，奶奶起来了。她摸黑走到灶台前，划了根火柴。火光照亮她半边脸，皱纹一道道，像河道。我装睡，从被窝缝里看着她。她往锅里添水，淘米，动作熟得不用睁眼。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_014",
+      "subdomain_tag": "rural",
+      "text": "他去镇上赶集，回来的时候少了一头牛。爹问他牛呢。他说卖了。爹问卖了多少。他报了个数。爹一巴掌扇过去。他没躲。第二天，他把那笔钱悄悄塞进妹妹的书包，自己背着行李去了广东。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_015",
+      "subdomain_tag": "rural",
+      "text": "山里的雪下了三天三夜。柴火快烧完了。父亲把家里最后一点煤从地窖里搬上来。母亲煮了一锅红薯汤。我们三个人围着炉子坐着，没说话。屋外的风把烟囱吹得呜呜响。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_016",
+      "subdomain_tag": "dialogue",
+      "text": "「你怎么不早说？」她问。「说了你也不会信。」他低头看着杯子。「那现在告诉我有什么用？」她声音很轻，但每个字都很硬。他没回答，喝完最后一口水，把杯子放下。杯子撞在桌面上，发出清脆的声响。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_017",
+      "subdomain_tag": "dialogue",
+      "text": "老周说：「你这个人啊，太较真。」我说：「不较真，怎么活？」他笑了，没接话，点了根烟。烟一根抽完，他把烟头按在桌沿上。「也是，」他说，「你说得对。」然后我们就不再说话了，听着窗外的车声。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_018",
+      "subdomain_tag": "dialogue",
+      "text": "妻子在饭桌上说想离婚。我夹起一块红烧肉，慢慢嚼。她又说了一遍。我把肉咽下去，问她：「为什么？」她说不上来，眼睛红了。我又夹了一块肉。这一顿饭吃了很久，谁也没再开口。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_019",
+      "subdomain_tag": "dialogue",
+      "text": "「妈，我考了第三。」儿子把卷子摊在桌上，眼睛亮亮的。「上次第几？」母亲在切菜，没回头。「第七。」母亲嗯了一声，刀停了一下，又继续切。儿子站了一会儿，自己把卷子收起来，回房间了。当晚她加菜，做了红烧排骨。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_020",
+      "subdomain_tag": "dialogue",
+      "text": "面馆里只剩我们两个客人。「还回去吗？」他问。「不知道。」我说。「我也不知道。」他笑了一下，把面汤喝完。结账时他抢着付了钱，零钱叮当撒了一桌。我帮他捡，他说不用。我们就这么走出了面馆。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_021",
+      "subdomain_tag": "monologue",
+      "text": "我开始怀疑自己的记忆了。比如那年夏天我们去过的海边——她说是青岛，我记得是大连。她说当时下着雨，我记得太阳很好。我们都那么肯定，又那么不一样。也许真相是，我们去的根本不是同一个地方，只是恰好都叫「海边」。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_022",
+      "subdomain_tag": "monologue",
+      "text": "三十岁那年我才明白，所谓长大，就是发现父母也不过是普通人。他们会犯错，会害怕，会在深夜偷偷哭。这个发现让我难受了好几年。后来我自己也成了父母，才知道——他们当初是怎么咬着牙撑下来的。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_023",
+      "subdomain_tag": "monologue",
+      "text": "我喜欢早晨没人的街道。卖菜的车还没出来，环卫工刚扫完一遍。空气里有水雾的味道，路灯还亮着但已经没用了。这种时候我觉得自己拥有这座城市。十分钟以后人多起来，城市又不属于我了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_024",
+      "subdomain_tag": "monologue",
+      "text": "有些事我一直没告诉过任何人。比如十二岁那年，我把弟弟推下了池塘。他没事，我也没被发现。但那一秒钟我看着他扑腾，心里冒出来的不是害怕，是某种别的东西。我不敢命名它。这么多年了，我还是不敢。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_025",
+      "subdomain_tag": "monologue",
+      "text": "母亲走的那天我没在场。我在出差，飞机刚落地。表姐打来电话，第一句是「你别急」，我就知道了。坐在机场的椅子上，我没哭，只是觉得肚子很饿。我去吃了一碗面，加了卤蛋。吃完才打车回家。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_026",
+      "subdomain_tag": "nature",
+      "text": "山顶起雾的时候，我们已经爬了四个小时。视野里只剩下脚下的石头和身边的人。同行的小李喘得说不出话，索性坐在地上不走了。我也坐下。雾里隐约传来鸟叫，听不出方向。这样歇了大概十分钟，雾散了一点，前面的路忽然清楚了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_027",
+      "subdomain_tag": "nature",
+      "text": "湖面上有薄冰，但还没到能踩的程度。父亲扔了一颗石子，冰裂开一道缝，水从下面涌出来。「再过两天就能上去了，」他说。我点头，但其实并不想上去。湖底下太黑，看不见底。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_028",
+      "subdomain_tag": "nature",
+      "text": "西藏的夜晚比我想的冷。睡袋里塞了暖宝宝，还是冷得睡不着。帐篷外有风，吹得篷布啪啪响。同伴翻了个身，呼吸变得均匀。我睁着眼睛看头顶的篷布，突然觉得自己离家很远。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_029",
+      "subdomain_tag": "nature",
+      "text": "暴雨来得很急。我和同事躲进路边一家关门的小卖部屋檐下。雨砸在铁皮顶上，声音震耳。我们隔着雨喊话，听不清，干脆就不说了。看着雨打在地上溅起一层薄雾，我突然想起小时候奶奶院子里的那场雷雨。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_030",
+      "subdomain_tag": "nature",
+      "text": "戈壁滩上没有路。司机师傅靠着 GPS 和直觉开。我们在一处沙包后面停下，他下车撒了泡尿，回来说还有两个小时。我看着窗外的太阳，觉得它已经在那个位置悬了很久。其实只过了十分钟。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_031",
+      "subdomain_tag": "history",
+      "text": "炊烟从战壕后面升起来，弯弯曲曲。班长说今晚有面吃，是上面送来的。我把铁锹搁下，去后边的灶台。锅里的水还没开。老张蹲在那里添柴，脸被火光映得发红。我们谁也不提明天的事。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_032",
+      "subdomain_tag": "history",
+      "text": "他从战场上回来时，左手少了三根手指。妻子第一次见他没认出来——他瘦得脱了形。她哭了一晚上。第二天她什么也没说，给他做了一碗面。他端着碗的样子有点笨拙，但吃得很香。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_033",
+      "subdomain_tag": "history",
+      "text": "雪还在下。我们三个人沿着铁轨往北走。火车早就停运了。粮食只剩半袋，分着吃。我背着，老吴拿着枪，最小的赵把弟弟背在背上。弟弟不到八岁，已经不会哭了，只是偶尔咳嗽。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_034",
+      "subdomain_tag": "marginal",
+      "text": "工地的午休只有一个小时。老李把饭盒打开，里面是早晨剩的饭，加了点榨菜。他蹲在水泥袋上吃。旁边的小张刷着手机，没动饭。「吃啊，」老李说。小张嗯了一声，还是没动。他妻子昨晚发了消息，说要离婚。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_035",
+      "subdomain_tag": "marginal",
+      "text": "凌晨三点，外卖小哥的电瓶车停在写字楼门口。保安让他把车挪走。他说就五分钟。保安说不行。他没争，把车推到马路对面。送完单回来，已经过了点。订单超时，被扣了八块钱。他没说话，骑上车又走了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_036",
+      "subdomain_tag": "marginal",
+      "text": "她在城中村租的屋子有十平米。窗户朝着另一栋楼的墙。每天能看到太阳的时间不超过两个小时。但租金便宜，离工厂近。下班回来她会煮一碗清汤面，加点葱花。这是她一天里最安心的时候。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_037",
+      "subdomain_tag": "family",
+      "text": "父亲住院的第七天，主治医生把我叫到走廊。我已经知道他要说什么了。但他还是说了。我点头，签了字，回到病房，对父亲说没事。父亲看着我，没说话，过了一会儿别过头。我知道他听见了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_038",
+      "subdomain_tag": "family",
+      "text": "女儿把成绩单拍在桌上，转身回了房间，门摔得很响。我看了一眼成绩单，没追上去。妻子从厨房探头：「你说她两句啊。」我说不用。过了一会儿，房间里传出抽泣声。我去敲门。她不开。我就坐在门外，等。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_039",
+      "subdomain_tag": "family",
+      "text": "婚礼那天下了雨。新娘的发型湿了一半。她在化妆间笑出声。「早知道我就不剪头发了。」伴娘说没事，不显。她照了下镜子，自己又笑了。出去时她挽着父亲的手，鞋跟在地毯上发出闷闷的声响。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_040",
+      "subdomain_tag": "campus",
+      "text": "高三的最后一个月，教室后排空了几个座位。请假的，转学的，还有一个谁也不提的。班主任进来时假装没看见。他在黑板上写下当天的数学题，转身让我们做。我们做。粉笔灰落了一地。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_041",
+      "subdomain_tag": "campus",
+      "text": "大学宿舍熄灯以后，四个人开始聊天。聊到三点。聊的什么我现在已经忘了，只记得王浩说他想退学回家。第二天他没退学。一个月后他也没退学。毕业那天他抱着我哭，说当初真该退。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_042",
+      "subdomain_tag": "campus",
+      "text": "图书馆的空调坏了一周。窗户开着，风把书页吹得哗哗响。坐在我对面的女生用一支笔压着书。她抬头看了我一眼，又低下去。我也假装看书。其实我一个字也没看进去。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_043",
+      "subdomain_tag": "office",
+      "text": "项目汇报失败的那天晚上，部门加班到十二点。老总没说什么，让我们改方案。改到凌晨两点，他自己也没走。出去的时候电梯里只有我和他。他突然开口：「我刚毕业那会儿，挨过更狠的骂。」然后再没说话。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_044",
+      "subdomain_tag": "office",
+      "text": "辞职信我写了三遍，每次都觉得不对。最后一遍我什么修饰都没加，只写了「个人原因」四个字。打印出来夹进文件袋，第二天交给主管。主管看了一眼，没问。他那天对我比往常客气。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_045",
+      "subdomain_tag": "office",
+      "text": "出差到上海时正赶上梅雨。下飞机就遇上堵车。客户在电话那头说没事，慢慢来。我说不好意思。挂了电话，我看着窗外的雨刮，发觉自己又开始抠指甲。这毛病一焦虑就犯。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_046",
+      "subdomain_tag": "memory",
+      "text": "我记得外婆家的院子里有一棵枣树。每年夏天枣子熟了，外婆就拿一根竹竿打。我和表弟在地上捡。掉得最多的一年，她让我们装了两大筐。后来枣树老了，结的枣越来越少。再后来外婆走了，枣树也被砍了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_047",
+      "subdomain_tag": "memory",
+      "text": "九岁那年我学骑自行车。摔了不知道多少次。父亲一直在后面扶着。有一次我回头一看，他已经放手了。我吓得歪倒在地上。他跑过来扶我：「你都骑那么远了。」那是我第一次发现，被骗了原来也可以是高兴的。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_048",
+      "subdomain_tag": "memory",
+      "text": "搬家那天，姐姐把她最喜欢的洋娃娃留在了老房子。她不肯说为什么。十年后我问起，她说当时觉得娃娃属于那个家，不属于新家。我没听懂。她也没多解释。我们就那样坐了一会儿，谁也没再开口。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_049",
+      "subdomain_tag": "loss",
+      "text": "猫在我下班前两个小时走了。我到家的时候它已经凉了，蜷在沙发上，姿势和睡着没区别。我蹲下来摸了摸它的头。然后去厨房做饭。等饭做好，我才坐下来哭。哭完吃了饭，把它埋在小区后面的桂花树下。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_f_050",
+      "subdomain_tag": "loss",
+      "text": "母亲的最后一句话是问我吃饭了没有。我说吃了。其实没吃。她点点头，闭上眼。等再睁开就是几个小时以后了，已经认不出人。我那天晚上回家，把冰箱里她做的饺子煮了一半。剩下的一直放着，最后都坏了。",
+      "source_type": "engineer_synthetic",
+      "source_note": "engineer-authored Chinese fiction-style paragraph mimicking serious-literature voice (subdomain in 'subdomain_tag' field); not independently human-written",
+      "accepted_by": "engineer (Claude)",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_001",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "朱自清",
+      "work": "《背影》",
+      "author_death_year": 1948,
+      "pd_in_china_since": 1998,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E8%83%8C%E5%BD%B1",
+      "source_note": "朱自清 《背影》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E8%83%8C%E5%BD%B1; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:23:48.254973+00:00",
+      "_raw_traditional": "我與父親不相見已二年餘了，我最不能忘記的是他的背影。那年冬天，祖母死了，父親的差使也交卸了，正是禍不單行的日子，我從北京到徐州，打算跟着父親奔喪囘家。到徐州見着父親，看見滿院狼藉的東西，又想起祖母，不禁簌簌地流下眼淚。父親說，「事已如此，不必難過，好在天無絕人之路！」",
+      "text": "我与父亲不相见已二年余了，我最不能忘记的是他的背影。那年冬天，祖母死了，父亲的差使也交卸了，正是祸不单行的日子，我从北京到徐州，打算跟着父亲奔丧囘家。到徐州见着父亲，看见满院狼藉的东西，又想起祖母，不禁簌簌地流下眼泪。父亲说，「事已如此，不必难过，好在天无绝人之路！」",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_002",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "朱自清",
+      "work": "《荷塘月色》",
+      "author_death_year": 1948,
+      "pd_in_china_since": 1998,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E8%8D%B7%E5%A1%98%E6%9C%88%E8%89%B2",
+      "source_note": "朱自清 《荷塘月色》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E8%8D%B7%E5%A1%98%E6%9C%88%E8%89%B2; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:23:50.696154+00:00",
+      "_raw_traditional": "這幾天心裏頗不寧靜。今晚在院子裏坐着乘涼，忽然想起日日走過的荷塘，在這滿月的光裏，總該另有一番樣子吧。月亮漸漸地升高了，牆外馬路上孩子們的歡笑，已經聽不見了；妻在屋裏拍着閏兒，迷迷糊糊地哼着眠歌。我悄悄地披了大衫，帶上門出去。",
+      "text": "这几天心里颇不宁静。今晚在院子里坐着乘凉，忽然想起日日走过的荷塘，在这满月的光里，总该另有一番样子吧。月亮渐渐地升高了，墙外马路上孩子们的欢笑，已经听不见了；妻在屋里拍着闰儿，迷迷糊糊地哼着眠歌。我悄悄地披了大衫，带上门出去。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_003",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "朱自清",
+      "work": "《匆匆》",
+      "author_death_year": 1948,
+      "pd_in_china_since": 1998,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E5%8C%86%E5%8C%86",
+      "source_note": "朱自清 《匆匆》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E5%8C%86%E5%8C%86; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:23:53.122710+00:00",
+      "_raw_traditional": "燕子去了，有再來的時候；楊柳枯了，有再靑的時候；桃花謝了，有再開的時候。但是，聰明的，你吿訴我，我們的日子爲什麼一去不復返呢？——是有人偷了他們罷：那是誰？又藏在何處呢？是他們自己逃走了罷：現在又到了那裏呢？",
+      "text": "燕子去了，有再来的时候；杨柳枯了，有再靑的时候；桃花谢了，有再开的时候。但是，聪明的，你吿诉我，我们的日子为什么一去不复返呢？——是有人偷了他们罢：那是谁？又藏在何处呢？是他们自己逃走了罢：现在又到了那里呢？",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_004",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "朱自清",
+      "work": "《春》",
+      "author_death_year": 1948,
+      "pd_in_china_since": 1998,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E6%98%A5_(%E6%9C%B1%E8%87%AA%E6%B8%85)",
+      "source_note": "朱自清 《春》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E6%98%A5_(%E6%9C%B1%E8%87%AA%E6%B8%85); Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:23:55.793018+00:00",
+      "_raw_traditional": "小草偷偷地從土裏鑽出來，嫩嫩的，綠綠的。園子裏，田野裏，瞧去，一大片一大片滿是的。坐着，躺着，打兩個滾，踢幾腳球，賽幾䠀跑，捉幾回迷藏。風輕悄悄的，草軟綿綿的。",
+      "text": "小草偷偷地从土里钻出来，嫩嫩的，绿绿的。园子里，田野里，瞧去，一大片一大片满是的。坐着，躺着，打两个滚，踢几脚球，赛几䠀跑，捉几回迷藏。风轻悄悄的，草软绵绵的。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_005",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "朱自清",
+      "work": "《歌聲》",
+      "author_death_year": 1948,
+      "pd_in_china_since": 1998,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E6%AD%8C%E8%81%B2",
+      "source_note": "朱自清 《歌聲》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E6%AD%8C%E8%81%B2; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:23:59.549363+00:00",
+      "_raw_traditional": "仿佛一個暮春的早晨，霏霏的毛雨默然灑在我臉上，引起潤澤，輕松的感覺。新鮮的微風吹動我的衣袂，像愛人的鼻息吹著我的手一樣。我立的一條白礬石的甬道上，經了那細雨，正如塗了一層薄薄的乳油；踏著只覺越發滑膩可愛了。",
+      "text": "仿佛一个暮春的早晨，霏霏的毛雨默然洒在我脸上，引起润泽，轻松的感觉。新鲜的微风吹动我的衣袂，像爱人的鼻息吹著我的手一样。我立的一条白矾石的甬道上，经了那细雨，正如涂了一层薄薄的乳油；踏著只觉越发滑腻可爱了。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_006",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《故鄉》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E6%95%85%E9%84%89",
+      "source_note": "鲁迅 《故鄉》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E6%95%85%E9%84%89; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:02.944943+00:00",
+      "_raw_traditional": "時候既然是深冬；漸近故鄕時，天氣又陰晦了，冷風吹進船艙中，嗚嗚的響，從篷隙向外一望，蒼黃的天底下，遠近橫着幾個蕭索的荒村，沒有一些活氣。我的心禁不住悲涼起來了。",
+      "text": "时候既然是深冬；渐近故鄕时，天气又阴晦了，冷风吹进船舱中，呜呜的响，从篷隙向外一望，苍黄的天底下，远近横着几个萧索的荒村，没有一些活气。我的心禁不住悲凉起来了。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_007",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《孔乙己》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E5%AD%94%E4%B9%99%E5%B7%B1",
+      "source_note": "鲁迅 《孔乙己》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E5%AD%94%E4%B9%99%E5%B7%B1; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:06.607448+00:00",
+      "_raw_traditional": "魯鎭的酒店的格局，是和別處不同的：都是當街一個曲尺形的大櫃臺，櫃裏面豫備着熱水，可以隨時温酒。做工的人，傍午傍晚散了工，每每花四文銅錢，買一碗酒——這是二十多年前的事，現在每碗要漲到十文，——靠櫃外站着，熱熱的喝了休息；倘肯多花一文，便可以買一碟鹽煑筍，或者茴香豆，做下酒物了，如果出到了十幾文，那就能買一樣葷菜，但這些顧客，多是短衣幫，大抵沒有這樣闊綽。只有穿長衫的，纔踱進店面隔壁的房子裏，要酒要菜，慢慢地坐喝。",
+      "text": "鲁镇的酒店的格局，是和别处不同的：都是当街一个曲尺形的大柜台，柜里面豫备着热水，可以随时温酒。做工的人，傍午傍晚散了工，每每花四文铜钱，买一碗酒——这是二十多年前的事，现在每碗要涨到十文，——靠柜外站着，热热的喝了休息；倘肯多花一文，便可以买一碟盐煑笋，或者茴香豆，做下酒物了，如果出到了十几文，那就能买一样荤菜，但这些顾客，多是短衣帮，大抵没有这样阔绰。只有穿长衫的，才踱进店面隔壁的房子里，要酒要菜，慢慢地坐喝。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_008",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《社戲》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E7%A4%BE%E6%88%B2",
+      "source_note": "鲁迅 《社戲》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E7%A4%BE%E6%88%B2; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:10.001629+00:00",
+      "_raw_traditional": "我在倒數上去的二十年中，只看過兩回中國戲，前十年是絕不看，因爲沒有看戲的意思和機會，那兩回全在後十年，然而都沒有看出什麽來就走了。",
+      "text": "我在倒数上去的二十年中，只看过两回中国戏，前十年是绝不看，因为没有看戏的意思和机会，那两回全在后十年，然而都没有看出什么来就走了。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_009",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《祝福》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E7%A5%9D%E7%A6%8F",
+      "source_note": "鲁迅 《祝福》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E7%A5%9D%E7%A6%8F; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:13.741900+00:00",
+      "_raw_traditional": "況且，一想到昨天遇見祥林嫂的事，也就使我不能安住。那是下午，我到鎮的東頭訪過一個朋友，走出來，就在河邊遇見她；而且見她瞪著的眼睛的視線，就知道明明是向我走來的。我這回在魯鎮所見的人們中，改變之大，可以說無過於她的了：五年前的花白的頭髮，即今已經全白，全不像四十上下的人；臉上瘦削不堪，黃中帶黑，而且消盡了先前悲哀的神色，仿佛是木刻似的；只有那眼珠間或一輪，還可以表示她是一個活物。她一手提著竹籃。內中一個破碗，空的；一手拄著一支比她更長的竹竿，下端開了裂：她分明已經純乎是一個乞丐了。我就站住，預備她來討錢。",
+      "text": "况且，一想到昨天遇见祥林嫂的事，也就使我不能安住。那是下午，我到镇的东头访过一个朋友，走出来，就在河边遇见她；而且见她瞪著的眼睛的视线，就知道明明是向我走来的。我这回在鲁镇所见的人们中，改变之大，可以说无过于她的了：五年前的花白的头发，即今已经全白，全不像四十上下的人；脸上瘦削不堪，黄中带黑，而且消尽了先前悲哀的神色，仿佛是木刻似的；只有那眼珠间或一轮，还可以表示她是一个活物。她一手提著竹篮。内中一个破碗，空的；一手拄著一支比她更长的竹竿，下端开了裂：她分明已经纯乎是一个乞丐了。我就站住，预备她来讨钱。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_010",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《從百草園到三味書屋》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E5%BE%9E%E7%99%BE%E8%8D%89%E5%9C%92%E5%88%B0%E4%B8%89%E5%91%B3%E6%9B%B8%E5%B1%8B",
+      "source_note": "鲁迅 《從百草園到三味書屋》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E5%BE%9E%E7%99%BE%E8%8D%89%E5%9C%92%E5%88%B0%E4%B8%89%E5%91%B3%E6%9B%B8%E5%B1%8B; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:16.211289+00:00",
+      "_raw_traditional": "&#8195;&#8195;我家的後面有一個很大的園，相傳叫作百草園。現在是早已並屋子一起賣給朱文公的子孫了，連那最末次的相見也已經隔了七八年，其中似乎確鑿只有一些野草；但那時卻是我的樂園。",
+      "text": "&#8195;&#8195;我家的后面有一个很大的园，相传叫作百草园。现在是早已并屋子一起卖给朱文公的子孙了，连那最末次的相见也已经隔了七八年，其中似乎确凿只有一些野草；但那时却是我的乐园。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_011",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《藥》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E8%97%A5",
+      "source_note": "鲁迅 《藥》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E8%97%A5; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:18.825485+00:00",
+      "_raw_traditional": "秋天的後半夜，月亮下去了，太陽還沒有出，只剩下一片烏藍的天；除了夜遊的東西，什麽都睡着。華老栓忽然坐起身。擦着火柴，點上遍身油膩的燈盞，茶館的兩間屋子裏，便瀰滿了靑白的光。",
+      "text": "秋天的后半夜，月亮下去了，太阳还没有出，只剩下一片乌蓝的天；除了夜游的东西，什么都睡着。华老栓忽然坐起身。擦着火柴，点上遍身油腻的灯盏，茶馆的两间屋子里，便弥满了靑白的光。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_012",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "胡适",
+      "work": "《差不多先生傳》",
+      "author_death_year": 1962,
+      "pd_in_china_since": 2012,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E5%B7%AE%E4%B8%8D%E5%A4%9A%E5%85%88%E7%94%9F%E5%82%B3",
+      "source_note": "胡适 《差不多先生傳》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E5%B7%AE%E4%B8%8D%E5%A4%9A%E5%85%88%E7%94%9F%E5%82%B3; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:47.497047+00:00",
+      "_raw_traditional": "提起此人，人人皆曉，處處聞名。他姓差，名不多，是各省各縣各村人氏。你一定見過他，一定聽過別人談起他。差不多先生的名字天天掛在大家的口頭，因為他是中國全國人的代表。",
+      "text": "提起此人，人人皆晓，处处闻名。他姓差，名不多，是各省各县各村人氏。你一定见过他，一定听过别人谈起他。差不多先生的名字天天挂在大家的口头，因为他是中国全国人的代表。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_013",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "林徽因",
+      "work": "《九十九度中》",
+      "author_death_year": 1955,
+      "pd_in_china_since": 2005,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E4%B9%9D%E5%8D%81%E4%B9%9D%E5%BA%A6%E4%B8%AD",
+      "source_note": "林徽因 《九十九度中》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E4%B9%9D%E5%8D%81%E4%B9%9D%E5%BA%A6%E4%B8%AD; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:50.709850+00:00",
+      "_raw_traditional": "三個人肩上各挑著黃色，有「美豐樓」字號大圓簍的，用著六個滿是泥濘凝結的布鞋，走完一條被太陽曬得滾燙的馬路之後，轉彎進了一個胡同裡去。",
+      "text": "三个人肩上各挑著黄色，有「美丰楼」字号大圆篓的，用著六个满是泥泞凝结的布鞋，走完一条被太阳晒得滚烫的马路之后，转弯进了一个胡同里去。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_014",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "蔡元培",
+      "work": "《就任北京大學校長之演說》",
+      "author_death_year": 1940,
+      "pd_in_china_since": 1990,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E5%B0%B1%E4%BB%BB%E5%8C%97%E4%BA%AC%E5%A4%A7%E5%AD%B8%E6%A0%A1%E9%95%B7%E4%B9%8B%E6%BC%94%E8%AA%AA",
+      "source_note": "蔡元培 《就任北京大學校長之演說》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E5%B0%B1%E4%BB%BB%E5%8C%97%E4%BA%AC%E5%A4%A7%E5%AD%B8%E6%A0%A1%E9%95%B7%E4%B9%8B%E6%BC%94%E8%AA%AA; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:53.583237+00:00",
+      "_raw_traditional": "五年前，嚴幾道先生爲本校校長時，予擔任教授，開學日，曾有所貢獻於同校。諸君多自預科畢業而來，想必聞知，士別三日，刮目相見，況時閱數載，諸君較昔，當必爲長足之進步矣。予今長斯校，請更以三事爲諸君告。",
+      "text": "五年前，严几道先生为本校校长时，予担任教授，开学日，曾有所贡献于同校。诸君多自预科毕业而来，想必闻知，士别三日，刮目相见，况时阅数载，诸君较昔，当必为长足之进步矣。予今长斯校，请更以三事为诸君告。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_015",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《狂人日記》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E7%8B%82%E4%BA%BA%E6%97%A5%E8%A8%98",
+      "source_note": "鲁迅 《狂人日記》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E7%8B%82%E4%BA%BA%E6%97%A5%E8%A8%98; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:21.779894+00:00",
+      "_raw_traditional": "我不見他，已是三十多年；今天見了，精神分外爽快。纔知道以前的三十多年，全是發昏；然而須十分小心。不然，那趙家的狗，何以看我兩眼呢？",
+      "text": "我不见他，已是三十多年；今天见了，精神分外爽快。才知道以前的三十多年，全是发昏；然而须十分小心。不然，那赵家的狗，何以看我两眼呢？",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_016",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《阿長與山海經》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E9%98%BF%E9%95%B7%E8%88%87%E5%B1%B1%E6%B5%B7%E7%B6%93",
+      "source_note": "鲁迅 《阿長與山海經》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E9%98%BF%E9%95%B7%E8%88%87%E5%B1%B1%E6%B5%B7%E7%B6%93; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:24.957036+00:00",
+      "_raw_traditional": "長媽媽，已經說過，是一個一向帶領著我的女工，說得闊氣一點，就是我的保姆。我的母親和許多別的人都這樣稱呼她，似乎略帶些客氣的意思。只有祖母叫她阿長。我平時叫她“阿媽”，連“長”字也不帶；但到憎惡她的時候，——例如知道了謀死我那隱鼠的卻是她的時候，就叫她阿長。",
+      "text": "长妈妈，已经说过，是一个一向带领著我的女工，说得阔气一点，就是我的保姆。我的母亲和许多别的人都这样称呼她，似乎略带些客气的意思。只有祖母叫她阿长。我平时叫她“阿妈”，连“长”字也不带；但到憎恶她的时候，——例如知道了谋死我那隐鼠的却是她的时候，就叫她阿长。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_017",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《風箏》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E9%A2%A8%E7%AD%9D",
+      "source_note": "鲁迅 《風箏》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E9%A2%A8%E7%AD%9D; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:29.067722+00:00",
+      "_raw_traditional": "北京的冬季，地上還有積雪，灰黑色的禿樹枝丫叉于晴朗的天空中，而遠處有一二風箏浮動，在我是一種驚異和悲哀。",
+      "text": "北京的冬季，地上还有积雪，灰黑色的秃树枝丫叉于晴朗的天空中，而远处有一二风筝浮动，在我是一种惊异和悲哀。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_018",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《雪》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E9%9B%AA_(%E9%AD%AF%E8%BF%85)",
+      "source_note": "鲁迅 《雪》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E9%9B%AA_(%E9%AD%AF%E8%BF%85); Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:35.089903+00:00",
+      "_raw_traditional": "暖國的雨，向來沒有變過冰冷的堅硬的燦爛的雪花。博識的人們覺得他單調，他自己也以爲不幸否耶？江南的雪，可是滋潤美豔之至了；那是還在隱約着的靑春的消息，是極壯健的處子的皮膚。雪野中有血紅的寶珠山茶，白中隱靑的單瓣梅花，深黃的磬口的蠟梅花，雪下面還有冷綠的雜草。胡蝶確乎沒有；蜜蜂是否來采山茶花和梅花的蜜；我可記不眞切了。但我的眼前仿佛看見冬花開在雪野中，有許多蜜蜂們忙碌地飛着，也聽得他們嗡嗡地鬧着。",
+      "text": "暖国的雨，向来没有变过冰冷的坚硬的灿烂的雪花。博识的人们觉得他单调，他自己也以为不幸否耶？江南的雪，可是滋润美艳之至了；那是还在隐约着的靑春的消息，是极壮健的处子的皮肤。雪野中有血红的宝珠山茶，白中隐靑的单瓣梅花，深黄的磬口的蜡梅花，雪下面还有冷绿的杂草。胡蝶确乎没有；蜜蜂是否来采山茶花和梅花的蜜；我可记不真切了。但我的眼前仿佛看见冬花开在雪野中，有许多蜜蜂们忙碌地飞着，也听得他们嗡嗡地闹着。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_019",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《一件小事》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E4%B8%80%E4%BB%B6%E5%B0%8F%E4%BA%8B",
+      "source_note": "鲁迅 《一件小事》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E4%B8%80%E4%BB%B6%E5%B0%8F%E4%BA%8B; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:38.330182+00:00",
+      "_raw_traditional": "我從鄕下跑到京城裏，一轉眼已經六年了。其間耳聞目覩的所謂國家大事，算起來也很不少；但在我心裏，都不留什麽痕迹，倘要我尋出這些事的影響來說，便只是增長了我的壞脾氣，——老實說，便是教我一天比一天的看不起人。",
+      "text": "我从鄕下跑到京城里，一转眼已经六年了。其间耳闻目覩的所谓国家大事，算起来也很不少；但在我心里，都不留什么痕迹，倘要我寻出这些事的影响来说，便只是增长了我的坏脾气，——老实说，便是教我一天比一天的看不起人。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_020",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《傷逝》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E5%82%B7%E9%80%9D",
+      "source_note": "鲁迅 《傷逝》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E5%82%B7%E9%80%9D; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:41.690074+00:00",
+      "_raw_traditional": "會館里的被遺忘在偏僻里的破屋是這樣地寂靜和空虛。時光過得真快，我愛子君，仗著她逃出這寂靜和空虛，已經滿一年了。事情又這麼不湊巧，我重來時，偏偏空著的又只有這一間屋。依然是這樣的破窗，這樣的窗外的半枯的槐樹和老紫藤，這樣的窗前的方桌，這樣的敗壁，這樣的靠壁的板床。深夜中獨自躺在床上，就如我未曾和子君同居以前一般，過去一年中的時光全被消滅，全未有過，我並沒有曾經從這破屋子搬出，在吉兆衚衕創立了滿懷希望的小小的家庭。",
+      "text": "会馆里的被遗忘在偏僻里的破屋是这样地寂静和空虚。时光过得真快，我爱子君，仗著她逃出这寂静和空虚，已经满一年了。事情又这么不凑巧，我重来时，偏偏空著的又只有这一间屋。依然是这样的破窗，这样的窗外的半枯的槐树和老紫藤，这样的窗前的方桌，这样的败壁，这样的靠壁的板床。深夜中独自躺在床上，就如我未曾和子君同居以前一般，过去一年中的时光全被消灭，全未有过，我并没有曾经从这破屋子搬出，在吉兆胡同创立了满怀希望的小小的家庭。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    },
+    {
+      "id": "normal_pd_021",
+      "subdomain_tag": "minguo_canonical_wikisource",
+      "author": "鲁迅",
+      "work": "《好的故事》",
+      "author_death_year": 1936,
+      "pd_in_china_since": 1986,
+      "source_type": "public_domain_excerpt",
+      "verification_status": "wikisource_html_extracted_and_trad2simp_converted",
+      "source_url": "https://zh.wikisource.org/wiki/%E5%A5%BD%E7%9A%84%E6%95%85%E4%BA%8B",
+      "source_note": "鲁迅 《好的故事》; verbatim first eligible <p> from https://zh.wikisource.org/wiki/%E5%A5%BD%E7%9A%84%E6%95%85%E4%BA%8B; Traditional→Simplified via opencc t2s; supervisor can re-verify by visiting URL and inspecting the article's first prose paragraph.",
+      "fetch_at": "2026-04-27T14:24:44.528882+00:00",
+      "_raw_traditional": "燈火漸漸地縮小了，在預吿石油的已經不多；石油又不是老牌，早熏得燈罩很昏暗。鞭爆的繁響在四近，煙草的煙霧在身邊：是昏沈的夜。",
+      "text": "灯火渐渐地缩小了，在预吿石油的已经不多；石油又不是老牌，早熏得灯罩很昏暗。鞭爆的繁响在四近，烟草的烟雾在身边：是昏沈的夜。",
+      "accepted_by": "engineer (Claude); fetched via urllib.request from zh.wikisource.org; trad→simp via opencc t2s",
+      "accepted_at": "2026-04-27"
+    }
+  ]
+}

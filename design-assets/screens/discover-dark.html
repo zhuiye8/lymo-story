@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-primary-fixed-variant": "#713700",
+                        "on-background": "#e5e2e1",
+                        "secondary-fixed": "#f8d8ff",
+                        "on-tertiary-container": "#84827d",
+                        "surface-container-low": "#1c1b1b",
+                        "on-tertiary": "#31312c",
+                        "secondary-fixed-dim": "#ecb2ff",
+                        "tertiary-fixed-dim": "#c9c6c0",
+                        "background": "#131313",
+                        "secondary": "#ecb2ff",
+                        "on-primary-container": "#ca6804",
+                        "on-error": "#690005",
+                        "on-secondary-container": "#e59dff",
+                        "inverse-primary": "#944a00",
+                        "surface-container-high": "#2a2a2a",
+                        "on-secondary": "#520071",
+                        "tertiary-container": "#1a1a16",
+                        "on-primary-fixed": "#301400",
+                        "error-container": "#93000a",
+                        "primary-fixed-dim": "#ffb783",
+                        "on-surface-variant": "#c4c7c7",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#131313",
+                        "surface-tint": "#ffb783",
+                        "surface-container-highest": "#353534",
+                        "on-secondary-fixed-variant": "#6c228c",
+                        "on-secondary-fixed": "#320047",
+                        "surface": "#131313",
+                        "outline-variant": "#444748",
+                        "error": "#ffb4ab",
+                        "primary": "#ffb783",
+                        "inverse-on-surface": "#313030",
+                        "tertiary-fixed": "#e5e2db",
+                        "on-surface": "#e5e2e1",
+                        "secondary-container": "#6f258e",
+                        "inverse-surface": "#e5e2e1",
+                        "tertiary": "#c9c6c0",
+                        "on-primary": "#4f2500",
+                        "on-tertiary-fixed": "#1c1c18",
+                        "on-tertiary-fixed-variant": "#474742",
+                        "primary-container": "#2e1300",
+                        "surface-bright": "#393939",
+                        "primary-fixed": "#ffdcc5",
+                        "outline": "#8e9192",
+                        "surface-variant": "#353534",
+                        "surface-container": "#201f1f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC"],
+                        "body": ["Noto Serif SC"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #131313;
+            font-family: 'Noto Serif SC', serif;
+            color: #e5e2e1;
+        }
+        .chinese-indent { text-indent: 2em; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 transition-all duration-400 ease-in-out bg-[#131313]/80 backdrop-blur-lg flex justify-between items-center px-6 py-4 w-full bg-gradient-to-b from-[#1c1b1b] to-transparent shadow-none">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#ffb783]" data-icon="menu">menu</span>
+<h1 class="text-2xl font-serif font-bold text-[#ffb783] tracking-tighter">狸梦小说</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#ffb783]" data-icon="search">search</span>
+</div>
+</header>
+<main class="pt-20 px-6 space-y-12">
+<!-- Featured Section -->
+<section class="relative group">
+<div class="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-surface-container shadow-2xl">
+<img alt="" class="w-full h-full object-cover opacity-60 mix-blend-lighten" data-alt="Mystical ethereal mountain peak emerging from thick ink-style fog at twilight with orange glowing embers in the air" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtHrMzot2gLb80YC3d6VgNQoglW_38Lq5Q0c4m0gTZYQud9JaYk2Gc5i5cM5sKpJBkPk-vWO-z9R4XVMVccGhLnOX0uaBv4jppfCHhWHvAag1eqbQKKhZGBgqHltCQF2sWVlZvhKMoQh9f4fapuBp3gWiDjXilCy72fSnKyyeuMGkKKupWi5fUriGrc03ZNXaNzjA6-8I6mkAzUDMU_1OcrzcO8A421dQNeC1LD7git-MKeMcupztMPk-iUxpByoWCydFAYzY-J9o"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/40 to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-8 space-y-4">
+<div class="flex items-center gap-2">
+<div class="w-1 h-8 bg-primary"></div>
+<span class="font-label text-primary-fixed tracking-widest text-xs uppercase">本日精选</span>
+</div>
+<h2 class="text-4xl font-headline font-black text-on-surface leading-tight tracking-tighter">
+                        梦入<br/>大荒
+                    </h2>
+<p class="text-on-surface-variant font-body text-sm max-w-[240px] leading-relaxed opacity-80">
+                        纵使万劫不复，我也要在这碎裂的梦境中，寻回失落的黎明。
+                    </p>
+<button class="bg-primary text-on-primary px-8 py-3 rounded-full font-label font-bold text-sm flex items-center gap-2 hover:scale-105 transition-transform">
+                        入梦阅读
+                        <span class="material-symbols-outlined text-sm" data-icon="auto_stories">auto_stories</span>
+</button>
+</div>
+</div>
+<!-- Decorative Glow -->
+<div class="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 blur-[100px] rounded-full"></div>
+</section>
+<!-- Categories Section -->
+<section class="space-y-6">
+<div class="flex justify-between items-end">
+<h3 class="text-xl font-headline font-bold text-on-surface">题材分类</h3>
+<span class="text-xs font-label text-primary opacity-60">全部分类</span>
+</div>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-2 -mx-6 px-6">
+<div class="flex-shrink-0 px-6 py-2.5 rounded-full bg-surface-container-high border border-outline-variant/10 flex items-center gap-2">
+<span class="text-sm font-headline tracking-widest">玄幻</span>
+<div class="w-1 h-1 rounded-full bg-primary/40"></div>
+</div>
+<div class="flex-shrink-0 px-6 py-2.5 rounded-full bg-surface-container-low border border-outline-variant/10 text-on-surface-variant">
+<span class="text-sm font-headline tracking-widest">都市</span>
+</div>
+<div class="flex-shrink-0 px-6 py-2.5 rounded-full bg-surface-container-low border border-outline-variant/10 text-on-surface-variant">
+<span class="text-sm font-headline tracking-widest">悬疑</span>
+</div>
+<div class="flex-shrink-0 px-6 py-2.5 rounded-full bg-surface-container-low border border-outline-variant/10 text-on-surface-variant">
+<span class="text-sm font-headline tracking-widest">科幻</span>
+</div>
+<div class="flex-shrink-0 px-6 py-2.5 rounded-full bg-surface-container-low border border-outline-variant/10 text-on-surface-variant">
+<span class="text-sm font-headline tracking-widest">言情</span>
+</div>
+<div class="flex-shrink-0 px-6 py-2.5 rounded-full bg-surface-container-low border border-outline-variant/10 text-on-surface-variant">
+<span class="text-sm font-headline tracking-widest">武侠</span>
+</div>
+</div>
+</section>
+<!-- Trending Section -->
+<section class="space-y-8">
+<h3 class="text-xl font-headline font-bold text-on-surface">近期热门</h3>
+<div class="space-y-6">
+<!-- Trending Card 1 -->
+<div class="relative flex gap-5 group">
+<div class="w-24 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container shadow-lg relative">
+<div class="absolute left-0 top-0 bottom-0 w-0.5 bg-primary"></div>
+<img alt="" class="w-full h-full object-cover" data-alt="Old leather book cover with mystical golden embossed patterns on a dark wood background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWsOivIwrNPDqRmBOgX5OxKTonxCGzbVAJZ8U4EKcPLOmdMH8KLy1bGSsh02JOvGoEsZbkNoDAmToodGjC34h8rRjfCUYcI1d4WtHHU5d4XxNURBCe_3y6HHOp9UbVLrwQhsyNp3pzGWNulOBp-pSpPmyI9QpAH969qjtSQypXVS0ah5X3eNKO8NLdsCEh813AFB86XlJlRmMT2Xv6eALSVjBG0wPXAUwNGzdVX_tT4oxK-E32XzI5OJEpgGjIY2gM7Qj3-bU4S6o"/>
+</div>
+<div class="flex flex-col justify-center flex-1 space-y-2">
+<div class="flex justify-between items-start">
+<h4 class="text-lg font-headline font-bold text-on-surface group-hover:text-primary transition-colors">青铜树下的密语</h4>
+<span class="text-[10px] font-label px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container">悬疑</span>
+</div>
+<p class="text-xs font-body text-on-surface-variant line-clamp-2 leading-relaxed opacity-70">
+                            当沉睡千年的古铜重新焕发光芒，整个城市的影子都开始在月光下跳舞...
+                        </p>
+<div class="flex items-center gap-4 pt-1">
+<span class="text-[10px] font-label text-on-surface-variant/60">34.2万字</span>
+<span class="text-[10px] font-label text-on-surface-variant/60 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]" data-icon="trending_up">trending_up</span> 9.8 评分
+                            </span>
+</div>
+</div>
+</div>
+<!-- Trending Card 2 -->
+<div class="relative flex gap-5 group">
+<div class="w-24 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container shadow-lg relative">
+<img alt="" class="w-full h-full object-cover" data-alt="Abstract deep purple and blue nebula swirling like ink in water with sparse bright stars" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADwRgYi0rRIVkyALNRRew9GZfy5iVv7zqF5ZowNRPNJnlqlL0UQ6Oi9Sz9kAkuWhIsBarMU7ZYTOKpVIboqGr-G0wXFGdjkHm0t8BUl5T23YMKpouYZpO_HmiH-wnJfPrPsMXK8LDiJZS1TBFUKxHq-I6MF-3SZCSnNP07Qq5MLUl9Bf3uoYAppm1zU9KuFcyogbYAKkbbh_BpVCX4j7g2E8DknmOGSDExTiIUAXxy1my5eHkcZC_ggG3fPCOzJLtXIGIiIroG_-k"/>
+</div>
+<div class="flex flex-col justify-center flex-1 space-y-2">
+<div class="flex justify-between items-start">
+<h4 class="text-lg font-headline font-bold text-on-surface group-hover:text-primary transition-colors">星河长明夜</h4>
+<span class="text-[10px] font-label px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant">科幻</span>
+</div>
+<p class="text-xs font-body text-on-surface-variant line-clamp-2 leading-relaxed opacity-70">
+                            在光年之外的尽头，那束永不凋谢的光，是文明最后的遗言。
+                        </p>
+<div class="flex items-center gap-4 pt-1">
+<span class="text-[10px] font-label text-on-surface-variant/60">128万字</span>
+<span class="text-[10px] font-label text-on-surface-variant/60 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]" data-icon="trending_up">trending_up</span> 9.6 评分
+                            </span>
+</div>
+</div>
+</div>
+<!-- Trending Card 3 -->
+<div class="relative flex gap-5 group">
+<div class="w-24 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container shadow-lg relative">
+<img alt="" class="w-full h-full object-cover" data-alt="Zen ink painting of a single curved bamboo branch with minimalist black strokes on rice paper" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUCCqml9pGv8TA97Pr_LIyPylMVNKMoF9Y-RCiLepodFwvsZY8Q2tgmSIYzoN_fPsyb1HyJeo8nij6pXUbHa-j3EEj4gbYtn1YE8NDqu67E7MtHDwVnlgnK9Qwxl6L9XkCoL6O7GWWN39YZcSUTQ-q_xjraxX0XVhAqBbYOhDaOWudj4Pu-whB43SnYCOZIYDdTy_w2AMZKLGMUJJFnTP7Fnl3LmvqimDUSUUqMsVWNC8qrUk-Ahm5DncTz0NLWngNeyQK48DMANY"/>
+</div>
+<div class="flex flex-col justify-center flex-1 space-y-2">
+<div class="flex justify-between items-start">
+<h4 class="text-lg font-headline font-bold text-on-surface group-hover:text-primary transition-colors">墨染江湖</h4>
+<span class="text-[10px] font-label px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant">武侠</span>
+</div>
+<p class="text-xs font-body text-on-surface-variant line-clamp-2 leading-relaxed opacity-70">
+                            剑尖的一点墨，杀人于无形，亦能救人于水火。
+                        </p>
+<div class="flex items-center gap-4 pt-1">
+<span class="text-[10px] font-label text-on-surface-variant/60">56.1万字</span>
+<span class="text-[10px] font-label text-on-surface-variant/60 flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]" data-icon="trending_up">trending_up</span> 9.4 评分
+                            </span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Lymo Mascot Banner -->
+<section class="pb-12">
+<div class="w-full p-6 rounded-xl bg-surface-container-low border border-primary/10 flex items-center justify-between relative overflow-hidden group">
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="space-y-1 relative z-10">
+<p class="font-headline font-bold text-primary italic">狸灵寄语</p>
+<p class="text-on-surface-variant text-sm font-body">今日宜入梦，愿君遇良书</p>
+</div>
+<div class="relative z-10 flex flex-col items-center">
+<!-- Placeholder for Lymo Mascot Mascot (Fox heart gesture) -->
+<div class="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center border-2 border-primary/20">
+<span class="material-symbols-outlined text-primary text-4xl" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<span class="text-[10px] font-label text-primary/60 mt-1">Lymo狐</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-3 pb-safe bg-[#131313]/90 backdrop-blur-2xl rounded-t-[0.75rem] shadow-[0_-4px_40px_rgba(0,0,0,0.3)]">
+<a class="flex flex-col items-center justify-center text-stone-500 opacity-60 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-serif text-[12px] tracking-widest mt-1">书架</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#ffb783] scale-110 transition-all duration-400 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="explore" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="font-serif text-[12px] tracking-widest mt-1 font-bold">发现</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 opacity-60 hover:opacity-100 transition-opacity" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-serif text-[12px] tracking-widest mt-1">我的</span>
+</a>
+</nav>
+</body></html>

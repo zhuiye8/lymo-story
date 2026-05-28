@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700;900&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#c9c6c0",
+                        "inverse-primary": "#944a00",
+                        "inverse-on-surface": "#313030",
+                        "primary-container": "#2e1300",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-primary-container": "#ca6804",
+                        "secondary": "#ecb2ff",
+                        "tertiary-container": "#1a1a16",
+                        "on-secondary": "#520071",
+                        "error-container": "#93000a",
+                        "surface-variant": "#353534",
+                        "on-tertiary": "#31312c",
+                        "on-secondary-fixed-variant": "#6c228c",
+                        "on-secondary-fixed": "#320047",
+                        "on-error": "#690005",
+                        "surface-dim": "#131313",
+                        "on-secondary-container": "#e59dff",
+                        "on-background": "#e5e2e1",
+                        "outline": "#8e9192",
+                        "on-primary-fixed": "#301400",
+                        "background": "#131313",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#2a2a2a",
+                        "primary-fixed": "#ffdcc5",
+                        "primary-fixed-dim": "#ffb783",
+                        "surface-container-highest": "#353534",
+                        "on-primary-fixed-variant": "#713700",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#474742",
+                        "secondary-fixed-dim": "#ecb2ff",
+                        "surface": "#131313",
+                        "secondary-fixed": "#f8d8ff",
+                        "tertiary-fixed": "#e5e2db",
+                        "primary": "#ffb783",
+                        "on-primary": "#4f2500",
+                        "secondary-container": "#6f258e",
+                        "on-tertiary-container": "#84827d",
+                        "on-tertiary-fixed": "#1c1c18",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#c4c7c7",
+                        "inverse-surface": "#e5e2e1",
+                        "outline-variant": "#444748",
+                        "surface-tint": "#ffb783",
+                        "surface-bright": "#393939",
+                        "surface-container": "#201f1f",
+                        "tertiary": "#c9c6c0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC"],
+                        "body": ["Noto Serif SC"],
+                        "label": ["Inter"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Genre Specific Textures */
+        .texture-urban {
+            background-image: radial-gradient(circle at 0% 0%, rgba(255,183,131,0.08) 0%, transparent 40%),
+                              linear-gradient(135deg, rgba(111,37,142,0.1) 0%, transparent 50%);
+            mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+        }
+        .texture-fantasy {
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10 Q 50 0 90 10 Q 100 50 90 90 Q 50 100 10 90 Q 0 50 10 10' fill='none' stroke='%23ecb2ff' stroke-opacity='0.05' stroke-width='0.5'/%3E%3C/svg%3E");
+            background-size: 60px 60px;
+        }
+        .texture-scifi {
+            background-image: radial-gradient(#84827d 0.5px, transparent 0.5px);
+            background-size: 6px 6px;
+            opacity: 0.15;
+        }
+
+        /* Ink Bleed / Glowing Ember Border Effect */
+        .glow-ember {
+            box-shadow: 0 0 15px -3px rgba(255, 183, 131, 0.15), 
+                        inset 0 0 4px rgba(255, 183, 131, 0.1);
+            border: 1px solid rgba(255, 183, 131, 0.2);
+        }
+        
+        .ink-bleed {
+            filter: drop-shadow(0 0 2px rgba(111, 37, 142, 0.2));
+        }
+
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-primary">
+<!-- TopAppBar Section -->
+<header class="bg-[#131313] sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto bg-gradient-to-b from-[#1c1b1b] to-transparent">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#ffb783]" data-icon="menu_book">menu_book</span>
+<h1 class="font-headline text-2xl font-bold italic tracking-tight text-[#ffb783] drop-shadow-[0_0_8px_rgba(255,183,131,0.15)]">狸梦小说 (Lymo Story)</h1>
+</div>
+<p class="text-[10px] font-label uppercase tracking-[0.2em] text-outline ml-8">AI编织的梦境故事</p>
+</div>
+<div class="flex gap-4">
+<button class="hover:text-[#ffb783] transition-colors duration-400 active:scale-95 opacity-80">
+<span class="material-symbols-outlined text-[#ffb783]" data-icon="search">search</span>
+</button>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-6 pt-8 pb-32">
+<!-- Hero Section / Title -->
+<div class="mb-12">
+<h2 class="text-4xl font-headline font-bold mb-3 text-on-surface tracking-tight">书架</h2>
+<div class="h-1 w-12 bg-primary rounded-full opacity-80"></div>
+</div>
+<!-- Novel Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Novel Card 1 (Urban - Active State) -->
+<div class="group relative bg-surface-container-low rounded-xl overflow-hidden glow-ember transition-all duration-500 hover:-translate-y-2 cursor-pointer">
+<div class="absolute inset-0 texture-urban pointer-events-none"></div>
+<div class="flex p-6 gap-6 relative z-10">
+<!-- Cover -->
+<div class="w-32 h-44 flex-shrink-0 bg-surface-container-highest rounded-lg flex flex-col justify-between p-4 border-l-[3px] border-primary relative overflow-hidden shadow-lg">
+<div class="absolute inset-0 opacity-20 bg-gradient-to-br from-primary via-transparent to-transparent"></div>
+<span class="text-[9px] font-label text-primary-fixed-dim uppercase tracking-widest font-bold">AI 特别版</span>
+<h3 class="text-lg font-headline font-bold leading-tight break-words text-on-surface">雾都夜行者</h3>
+<span class="material-symbols-outlined text-primary-fixed-dim/40 self-end text-xl" data-icon="auto_stories">auto_stories</span>
+</div>
+<!-- Content -->
+<div class="flex flex-col justify-between py-1 flex-1">
+<div>
+<span class="px-2.5 py-1 bg-secondary-container/20 text-on-secondary-container text-[10px] font-label font-semibold rounded-md uppercase tracking-wider">都市</span>
+<h3 class="text-2xl font-headline font-bold mt-3 text-on-surface group-hover:text-primary transition-colors leading-tight">雾都夜行者</h3>
+<p class="text-sm text-outline-variant mt-3 line-clamp-2 leading-relaxed opacity-80">在永不熄灭的霓虹灯下，旧时代的残党正试图唤醒沉睡在齿轮间的神明。</p>
+</div>
+<div class="flex items-center gap-5 text-[11px] font-label text-outline font-medium tracking-tight">
+<div class="flex flex-col">
+<span class="text-on-surface/90 text-sm font-semibold">124</span>
+<span class="uppercase text-[9px] opacity-60">章</span>
+</div>
+<div class="w-px h-6 bg-outline-variant/30"></div>
+<div class="flex flex-col">
+<span class="text-on-surface/90 text-sm font-semibold">42.8万</span>
+<span class="uppercase text-[9px] opacity-60">字</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Novel Card 2 (Fantasy) -->
+<div class="group relative bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/10 shadow-xl transition-all duration-500 hover:-translate-y-2 cursor-pointer">
+<div class="absolute inset-0 texture-fantasy pointer-events-none"></div>
+<div class="flex p-6 gap-6 relative z-10">
+<div class="w-32 h-44 flex-shrink-0 bg-surface-container-highest rounded-lg flex flex-col justify-between p-4 border-l-[3px] border-secondary relative overflow-hidden shadow-lg">
+<div class="absolute inset-0 opacity-15" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #ecb2ff 10px, #ecb2ff 11px);"></div>
+<span class="text-[9px] font-label text-secondary uppercase tracking-widest font-bold">精选推荐</span>
+<h3 class="text-lg font-headline font-bold leading-tight text-on-surface">剑起苍澜</h3>
+<span class="material-symbols-outlined text-secondary/40 self-end text-xl" data-icon="tempest">storm</span>
+</div>
+<div class="flex flex-col justify-between py-1 flex-1">
+<div>
+<span class="px-2.5 py-1 bg-primary-container/20 text-on-primary-container text-[10px] font-label font-semibold rounded-md uppercase tracking-wider">玄幻</span>
+<h3 class="text-2xl font-headline font-bold mt-3 text-on-surface group-hover:text-primary transition-colors leading-tight">剑起苍澜</h3>
+<p class="text-sm text-outline-variant mt-3 line-clamp-2 leading-relaxed opacity-80">一剑动九霄，万古枯骨寒。且看少年如何踏破这虚伪的仙道法则。</p>
+</div>
+<div class="flex items-center gap-5 text-[11px] font-label text-outline font-medium tracking-tight">
+<div class="flex flex-col">
+<span class="text-on-surface/90 text-sm font-semibold">89</span>
+<span class="uppercase text-[9px] opacity-60">章</span>
+</div>
+<div class="w-px h-6 bg-outline-variant/30"></div>
+<div class="flex flex-col">
+<span class="text-on-surface/90 text-sm font-semibold">21.5万</span>
+<span class="uppercase text-[9px] opacity-60">字</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Novel Card 3 (Sci-Fi) -->
+<div class="group relative bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/10 shadow-xl transition-all duration-500 hover:-translate-y-2 cursor-pointer">
+<div class="absolute inset-0 texture-scifi pointer-events-none"></div>
+<div class="flex p-6 gap-6 relative z-10">
+<div class="w-32 h-44 flex-shrink-0 bg-surface-container-highest rounded-lg flex flex-col justify-center items-center p-4 border-l-[3px] border-on-tertiary-container relative overflow-hidden shadow-lg text-center">
+<h3 class="text-lg font-headline font-bold leading-tight z-10 text-on-surface">虚空之城</h3>
+<div class="mt-3 w-6 h-0.5 bg-primary/40"></div>
+</div>
+<div class="flex flex-col justify-between py-1 flex-1">
+<div>
+<span class="px-2.5 py-1 bg-surface-container-highest text-on-surface-variant text-[10px] font-label font-semibold rounded-md uppercase tracking-wider">科幻</span>
+<h3 class="text-22 font-headline font-bold mt-3 text-on-surface group-hover:text-primary transition-colors leading-tight">虚空之城</h3>
+<p class="text-sm text-outline-variant mt-3 line-clamp-2 leading-relaxed opacity-80">当意识被上传至公共云端，死亡是否还有其存在的终极意义？</p>
+</div>
+<div class="flex items-center gap-5 text-[11px] font-label text-outline font-medium tracking-tight">
+<div class="flex flex-col">
+<span class="text-on-surface/90 text-sm font-semibold">256</span>
+<span class="uppercase text-[9px] opacity-60">章</span>
+</div>
+<div class="w-px h-6 bg-outline-variant/30"></div>
+<div class="flex flex-col">
+<span class="text-on-surface/90 text-sm font-semibold">120万</span>
+<span class="uppercase text-[9px] opacity-60">字</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Empty State -->
+<div class="mt-24 flex flex-col items-center justify-center text-center py-16 border-t border-outline-variant/10">
+<div class="relative mb-8">
+<div class="absolute -inset-6 bg-primary/5 blur-3xl rounded-full"></div>
+<span class="material-symbols-outlined text-6xl text-primary/20" data-icon="pets">pets</span>
+</div>
+<h4 class="text-xl font-headline font-bold text-on-surface-variant mb-3">你的书架空空如也，快去寻梦吧</h4>
+<p class="text-sm font-label text-outline max-w-xs mx-auto leading-relaxed opacity-70">灵感源自虚空，故事隐于笔尖。下一段传奇，正在等你开启。</p>
+<button class="mt-8 px-10 py-3 bg-primary text-on-primary rounded-full font-label text-sm font-bold hover:opacity-90 transition-all active:scale-95 shadow-xl shadow-primary/20">
+            前往发现
+        </button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-[#131313]/80 backdrop-blur-2xl shadow-[0_-15px_50px_rgba(0,0,0,0.4)] rounded-t-[2.5rem]">
+<!-- Bookshelf - Active -->
+<a class="flex flex-col items-center justify-center text-[#ffb783] bg-[#2e1300]/40 rounded-full px-6 py-1.5 active:scale-90 transition-all duration-400 ease-in-out" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="auto_stories" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+<span class="font-label text-[10px] uppercase font-bold tracking-widest mt-1">书架</span>
+</a>
+<!-- Discover - Inactive -->
+<a class="flex flex-col items-center justify-center text-[#8e9192] hover:text-[#ffb783] transition-colors active:scale-90 duration-400" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="explore">explore</span>
+<span class="font-label text-[10px] uppercase font-bold tracking-widest mt-1">发现</span>
+</a>
+<!-- My - Inactive -->
+<a class="flex flex-col items-center justify-center text-[#8e9192] hover:text-[#ffb783] transition-colors active:scale-90 duration-400" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="person_2">person_2</span>
+<span class="font-label text-[10px] uppercase font-bold tracking-widest mt-1">我的</span>
+</a>
+</nav>
+<!-- Aesthetic Decorative Element: Grain Overly -->
+<div class="fixed inset-0 pointer-events-none opacity-[0.04] mix-blend-overlay">
+<svg height="100%" width="100%" xmlns="http://www.w3.org/2000/svg">
+<filter id="noise">
+<feturbulence basefrequency="0.75" numoctaves="4" stitchtiles="stitch" type="fractalNoise"></feturbulence>
+</filter>
+<rect filter="url(#noise)" height="100%" width="100%"></rect>
+</svg>
+</div>
+</body></html>

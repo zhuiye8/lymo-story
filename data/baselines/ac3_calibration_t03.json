@@ -1,0 +1,93 @@
+{
+  "samples_path": "data/baselines/slop_samples_zh.json",
+  "threshold": 0.3,
+  "n_slop": 100,
+  "n_normal": 50,
+  "tp": 96,
+  "fn": 4,
+  "fp": 0,
+  "tn": 50,
+  "recall": 0.96,
+  "precision": 1.0,
+  "accuracy": 0.9733,
+  "f1": 0.9796,
+  "per_category": {
+    "tier1_banned": {
+      "slop_detected": 40,
+      "normal_falsep": 0
+    },
+    "structural": {
+      "slop_detected": 14,
+      "normal_falsep": 0
+    },
+    "tier2_cluster": {
+      "slop_detected": 17,
+      "normal_falsep": 0
+    },
+    "fiction_tell": {
+      "slop_detected": 23,
+      "normal_falsep": 0
+    },
+    "show_vs_tell": {
+      "slop_detected": 11,
+      "normal_falsep": 0
+    },
+    "em_dash_density": {
+      "slop_detected": 7,
+      "normal_falsep": 0
+    },
+    "transition_ratio": {
+      "slop_detected": 6,
+      "normal_falsep": 0
+    },
+    "sentence_cv": {
+      "slop_detected": 6,
+      "normal_falsep": 0
+    }
+  },
+  "misclassified_slop": [
+    {
+      "id": "slop_002",
+      "text": "苏雨感到非常愤怒，她紧紧攥着拳头，心脏漏跳了一拍。嘴角微微勾起一抹冰冷的笑意，眼神变得复杂而深邃。",
+      "penalty": 0,
+      "categories": []
+    },
+    {
+      "id": "slop_059",
+      "text": "这件事不仅仅关乎他个人，更关乎整个家族的存亡。沉默已经持续了太久，而是该有人打破它。",
+      "penalty": 0,
+      "categories": []
+    },
+    {
+      "id": "slop_063",
+      "text": "他的瞳孔骤然紧缩。心脏猛了一跳。嘴角微微勾起一抹冷笑。眼神变得锐利如刀。",
+      "penalty": 0.3,
+      "categories": [
+        "fiction_tell"
+      ]
+    },
+    {
+      "id": "slop_079",
+      "text": "他难过地说了一声。她紧张地咬着嘴唇。两个人都觉得十分失望。这场争吵让他们感到非常紧张。",
+      "penalty": 0.3,
+      "categories": [
+        "show_vs_tell"
+      ]
+    }
+  ],
+  "misclassified_normal": [],
+  "score_distribution": {
+    "slop": {
+      "mean": 1.732,
+      "min": 0,
+      "max": 3.0
+    },
+    "normal": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    }
+  },
+  "ac3_pass": true,
+  "ac3_fail_threshold": false
+}

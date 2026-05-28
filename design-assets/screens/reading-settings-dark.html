@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#e59dff",
+                    "surface-variant": "#353534",
+                    "on-tertiary-fixed": "#1c1c18",
+                    "tertiary-fixed-dim": "#c9c6c0",
+                    "surface": "#131313",
+                    "secondary-container": "#6f258e",
+                    "on-tertiary": "#31312c",
+                    "on-error": "#690005",
+                    "on-secondary-fixed": "#320047",
+                    "surface-container-lowest": "#0e0e0e",
+                    "outline": "#8e9192",
+                    "on-tertiary-container": "#84827d",
+                    "inverse-primary": "#944a00",
+                    "primary": "#ffb783",
+                    "surface-dim": "#131313",
+                    "tertiary-container": "#1a1a16",
+                    "primary-fixed": "#ffdcc5",
+                    "on-primary-fixed": "#301400",
+                    "surface-container-highest": "#353534",
+                    "on-primary": "#4f2500",
+                    "primary-container": "#2e1300",
+                    "secondary": "#ecb2ff",
+                    "outline-variant": "#444748",
+                    "tertiary-fixed": "#e5e2db",
+                    "secondary-fixed": "#f8d8ff",
+                    "error-container": "#93000a",
+                    "tertiary": "#c9c6c0",
+                    "inverse-on-surface": "#313030",
+                    "background": "#131313",
+                    "on-surface-variant": "#c4c7c7",
+                    "on-primary-fixed-variant": "#713700",
+                    "primary-fixed-dim": "#ffb783",
+                    "surface-container": "#201f1f",
+                    "error": "#ffb4ab",
+                    "surface-tint": "#ffb783",
+                    "surface-container-low": "#1c1b1b",
+                    "secondary-fixed-dim": "#ecb2ff",
+                    "on-tertiary-fixed-variant": "#474742",
+                    "on-background": "#e5e2e1",
+                    "on-primary-container": "#ca6804",
+                    "on-secondary-fixed-variant": "#6c228c",
+                    "surface-container-high": "#2a2a2a",
+                    "inverse-surface": "#e5e2e1",
+                    "on-surface": "#e5e2e1",
+                    "on-secondary": "#520071",
+                    "on-error-container": "#ffdad6",
+                    "surface-bright": "#393939"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif SC"],
+                    "body": ["Noto Serif SC"],
+                    "label": ["Inter"]
+            }
+          },
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .indent-custom { text-indent: 2em; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body overflow-hidden">
+<!-- Background Content: The Reading Canvas -->
+<main class="h-screen w-full px-8 pt-24 pb-48 overflow-y-auto max-w-2xl mx-auto selection:bg-primary/30">
+<article class="space-y-8 opacity-40">
+<h1 class="text-4xl font-bold font-headline tracking-tighter leading-relaxed">第一章：深渊的回响</h1>
+<p class="text-lg leading-[2.0] indent-custom">
+                在那个被永恒雾霭笼罩的午后，林墨独自站在旧书店的阴影里。书架上的每一卷古籍都像是沉睡的生灵，吞噬着从彩色玻璃窗漏进来的最后一丝光线。他感觉到空气中流动着一种不安的震颤，那是墨水与纸张在数个世纪的沉淀后发出的细语。
+            </p>
+<p class="text-lg leading-[2.0] indent-custom">
+                “你寻找的不是故事，”一个沙哑的声音从柜台后面传来，“而是真相的碎片。”林墨转过身，看见那个独眼的老者正低头擦拭着一个黄铜司南。司南的指针并不指向北方，而是疯狂地旋转着，指向脚下那片仿佛无底的黑暗。
+            </p>
+<p class="text-lg leading-[2.0] indent-custom">
+                墙上的挂钟早已停摆，但滴答声依然在耳边回荡。他伸出手，指尖触碰到了那本封面漆黑如墨的《幽冥录》。就在触碰的一瞬间，整座城市的灯火似乎都同时熄灭了。
+            </p>
+</article>
+</main>
+<!-- Top AppBar (from JSON guidance) -->
+<header class="fixed top-0 left-0 w-full z-40">
+<div class="flex justify-between items-center px-6 h-16 w-full bg-[#131313] bg-gradient-to-b from-[#1c1b1b] to-transparent">
+<button class="text-[#ffb783] hover:text-[#ffb783] transition-colors duration-400 active:scale-95 transition-transform duration-400 ease-out">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h2 class="font-serif text-2xl tracking-tight text-[#ffb783]">Reading Settings</h2>
+<div class="w-6"></div> <!-- Spacer for center alignment -->
+</div>
+</header>
+<!-- Reading Settings Panel: Bottom Drawer Overlay -->
+<div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end">
+<div class="w-full bg-[#131313]/95 backdrop-blur-xl rounded-t-[2rem] p-8 shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-white/5 max-w-3xl mx-auto">
+<!-- Handle Decorator -->
+<div class="flex justify-center mb-6">
+<div class="w-12 h-1.5 bg-surface-container-highest rounded-full opacity-30"></div>
+</div>
+<div class="flex justify-between items-center mb-10">
+<h3 class="text-2xl font-headline font-bold text-primary tracking-tight">阅读设置</h3>
+<span class="text-xs font-label uppercase tracking-widest text-on-surface-variant/40">Lymo Story • Editorial v1</span>
+</div>
+<!-- Bento Grid Settings Layout -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Brightness & Font Size Block -->
+<div class="space-y-8 bg-surface-container-low p-6 rounded-2xl">
+<!-- Brightness Slider -->
+<div class="flex items-center space-x-4">
+<span class="material-symbols-outlined text-white/40" data-icon="light_mode">light_mode</span>
+<div class="relative w-full h-1.5 bg-surface-container-highest rounded-full">
+<div class="absolute left-0 top-0 h-full w-2/3 bg-primary rounded-full"></div>
+<div class="absolute left-2/3 top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-on-primary ring-4 ring-primary rounded-full shadow-lg"></div>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="brightness_high">brightness_high</span>
+</div>
+<!-- Font Size Selection -->
+<div class="flex items-center justify-between">
+<span class="text-sm font-label text-white/50">字体大小</span>
+<div class="flex items-center bg-surface-container-lowest rounded-full p-1">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface hover:bg-surface-container-highest rounded-full transition-colors">
+<span class="font-serif text-sm">Aa-</span>
+</button>
+<div class="h-4 w-[1px] bg-white/10 mx-1"></div>
+<button class="px-4 text-primary font-bold">18</button>
+<div class="h-4 w-[1px] bg-white/10 mx-1"></div>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface hover:bg-surface-container-highest rounded-full transition-colors">
+<span class="font-serif text-lg">Aa+</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Theme Selection Block -->
+<div class="bg-surface-container-low p-6 rounded-2xl">
+<p class="text-sm font-label text-white/50 mb-4">背景主题</p>
+<div class="flex justify-between">
+<!-- Dark -->
+<div class="group cursor-pointer flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest border-2 border-primary ring-offset-4 ring-offset-surface-container-low ring-1 ring-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="check">check</span>
+</div>
+<span class="text-[10px] font-label uppercase tracking-widest text-primary">极夜</span>
+</div>
+<!-- Parchment -->
+<div class="group cursor-pointer flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-[#F4F1EA] border-2 border-transparent hover:border-white/20 transition-all"></div>
+<span class="text-[10px] font-label uppercase tracking-widest text-white/40">羊皮纸</span>
+</div>
+<!-- Mint -->
+<div class="group cursor-pointer flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-[#E3EDCD] border-2 border-transparent hover:border-white/20 transition-all"></div>
+<span class="text-[10px] font-label uppercase tracking-widest text-white/40">青冥</span>
+</div>
+<!-- Soft Blue (Extra) -->
+<div class="group cursor-pointer flex flex-col items-center gap-2">
+<div class="w-12 h-12 rounded-full bg-[#CEDEE7] border-2 border-transparent hover:border-white/20 transition-all"></div>
+<span class="text-[10px] font-label uppercase tracking-widest text-white/40">远山</span>
+</div>
+</div>
+</div>
+<!-- Font & Turn Mode Block -->
+<div class="bg-surface-container-low p-6 rounded-2xl flex flex-col justify-between">
+<p class="text-sm font-label text-white/50 mb-4">字体选择</p>
+<div class="grid grid-cols-2 gap-3">
+<button class="bg-primary text-on-primary py-3 rounded-xl flex items-center justify-center gap-2 font-headline font-bold">
+                            宋体
+                        </button>
+<button class="bg-surface-container-highest text-on-surface py-3 rounded-xl flex items-center justify-center gap-2 font-label">
+                            黑体
+                        </button>
+</div>
+</div>
+<!-- Page Turn Mode -->
+<div class="bg-surface-container-low p-6 rounded-2xl flex flex-col justify-between">
+<p class="text-sm font-label text-white/50 mb-4">翻页模式</p>
+<div class="flex bg-surface-container-lowest p-1 rounded-xl">
+<button class="flex-1 py-2 text-xs font-label text-white/40 hover:text-on-surface transition-colors">平铺</button>
+<button class="flex-1 py-2 text-xs font-label bg-surface-container-highest text-primary rounded-lg shadow-sm">滚动</button>
+<button class="flex-1 py-2 text-xs font-label text-white/40 hover:text-on-surface transition-colors">无</button>
+</div>
+</div>
+</div>
+<!-- Footer Interaction -->
+<div class="mt-10 pt-6 border-t border-white/5 flex justify-between items-center">
+<button class="text-primary-fixed-dim text-sm font-label hover:opacity-80 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="settings">settings</span>
+                    更多设置
+                </button>
+<button class="bg-primary-container text-on-primary-container px-10 py-3 rounded-full font-label font-semibold text-sm hover:brightness-110 active:scale-95 transition-all">
+                    完成
+                </button>
+</div>
+</div>
+</div>
+<!-- Bottom Nav Bar (from JSON guidance) -->
+<nav class="fixed bottom-0 left-0 w-full z-50">
+<div class="fixed bottom-0 left-0 w-full flex justify-around items-center px-8 pb-6 pt-4 bg-[#131313]/70 backdrop-blur-xl rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.3)]">
+<button class="flex flex-col items-center justify-center text-white/40 p-3 hover:text-[#ffb783] transition-all duration-400 active:scale-90 ease-in-out">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+</button>
+<button class="flex flex-col items-center justify-center text-white/40 p-3 hover:text-[#ffb783] transition-all duration-400 active:scale-90 ease-in-out">
+<span class="material-symbols-outlined" data-icon="vertical_align_center">vertical_align_center</span>
+</button>
+<button class="flex flex-col items-center justify-center text-white/40 p-3 hover:text-[#ffb783] transition-all duration-400 active:scale-90 ease-in-out">
+<span class="material-symbols-outlined" data-icon="format_size">format_size</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#ffb783] bg-[#ffb783]/10 rounded-full p-3 active:scale-90 transition-all duration-400 ease-in-out">
+<span class="material-symbols-outlined" data-icon="settings_brightness">settings_brightness</span>
+</button>
+</div>
+</nav>
+</body></html>

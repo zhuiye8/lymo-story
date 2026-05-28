@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>狸梦小说 (Lymo Story) - 阅读体验</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Noto+Serif+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#c9c6c0",
+                        "inverse-primary": "#944a00",
+                        "inverse-on-surface": "#313030",
+                        "primary-container": "#2e1300",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-primary-container": "#ca6804",
+                        "secondary": "#ecb2ff",
+                        "tertiary-container": "#1a1a16",
+                        "on-secondary": "#520071",
+                        "error-container": "#93000a",
+                        "surface-variant": "#353534",
+                        "on-tertiary": "#31312c",
+                        "on-secondary-fixed-variant": "#6c228c",
+                        "on-secondary-fixed": "#320047",
+                        "on-error": "#690005",
+                        "surface-dim": "#131313",
+                        "on-secondary-container": "#e59dff",
+                        "on-background": "#e5e2e1",
+                        "outline": "#8e9192",
+                        "on-primary-fixed": "#301400",
+                        "background": "#131313",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#2a2a2a",
+                        "primary-fixed": "#ffdcc5",
+                        "primary-fixed-dim": "#ffb783",
+                        "surface-container-highest": "#353534",
+                        "on-primary-fixed-variant": "#713700",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#474742",
+                        "secondary-fixed-dim": "#ecb2ff",
+                        "surface": "#131313",
+                        "secondary-fixed": "#f8d8ff",
+                        "tertiary-fixed": "#e5e2db",
+                        "primary": "#ffb783",
+                        "on-primary": "#4f2500",
+                        "secondary-container": "#6f258e",
+                        "on-tertiary-container": "#84827d",
+                        "on-tertiary-fixed": "#1c1c18",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#c4c7c7",
+                        "inverse-surface": "#e5e2e1",
+                        "outline-variant": "#444748",
+                        "surface-tint": "#ffb783",
+                        "surface-bright": "#393939",
+                        "surface-container": "#201f1f",
+                        "tertiary": "#c9c6c0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC"],
+                        "body": ["Noto Serif SC"],
+                        "label": ["Inter"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        .reading-content {
+            text-align: justify;
+            line-height: 1.8;
+            width: 100%;
+        }
+        .reading-content p {
+            text-indent: 2em;
+            margin-bottom: 1.5rem;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #131313;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+            border-radius: 10px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-primary overflow-x-hidden custom-scrollbar">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-2 bg-[#131313]/70 backdrop-blur-xl floating rounded-full mx-4 mt-2 shadow-2xl transition-all duration-400">
+<div class="flex items-center">
+<button class="flex items-center justify-center p-2 text-[#ffb783] active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="arrow_back_ios_new">arrow_back_ios_new</span>
+</button>
+</div>
+<div class="flex flex-col items-center">
+<h1 class="font-['Noto_Serif_SC'] text-lg font-medium text-[#ffb783] italic">第一章</h1>
+<span class="text-[10px] font-label tracking-widest text-outline uppercase opacity-60">狸梦小说 (Lymo Story)</span>
+</div>
+<div class="flex items-center">
+<button class="flex items-center justify-center p-2 text-[#ffb783] active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+</button>
+</div>
+</header>
+<!-- Reading Canvas -->
+<main class="relative min-h-screen pt-24 pb-32 px-4 sm:px-6 md:px-8 max-w-2xl mx-auto flex flex-col items-center">
+<!-- Chapter Header Decoration -->
+<div class="w-full mb-12 flex flex-col items-center text-center">
+<div class="w-12 h-0.5 bg-primary-container mb-6"></div>
+<h2 class="text-3xl md:text-4xl font-headline font-bold text-on-surface mb-2">雾林之隐</h2>
+<p class="text-sm font-label tracking-[0.2em] text-outline uppercase">第一章：雾林之隐</p>
+</div>
+<!-- Atmospheric Background Element -->
+<div class="fixed inset-0 pointer-events-none z-[-1] opacity-20">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-primary-container/20 via-transparent to-transparent"></div>
+</div>
+<!-- Content Area -->
+<article class="reading-content text-on-surface-variant text-lg md:text-xl font-body w-full">
+<p>在那片被永恒迷雾笼罩的森林深处，时间的流动似乎变得迟缓且粘稠。树木的枝干扭曲成不可名状的形状，像是无数在黑暗中挣扎的灵魂，试图捕捉那一丝从重重迷雾中漏下的、惨淡的微光。</p>
+<p>陆铭独自走在落满腐叶的小径上。每一声枯枝断裂的脆响，在寂静的林间都显得格外刺耳。空气中弥漫着一种潮湿的泥土气味，夹杂着某种陈旧的、被岁月腐蚀的檀木香。这种味道让他想起祖父那间满斯灰尘的书房，以及那些泛黄的、记载着禁忌传说的卷轴。</p>
+<p>他能感觉到那双眼睛。自打进入这片林子，那种如影随形的窥视感就从未消失。那不是野兽的饥渴，而是一种更深层、更具审判性的注视，仿佛森林本身正通过每一个树瘤、每一片叶脉，静静地审视着这位不请自来的访客。</p>
+<!-- Stylish Separator -->
+<div class="flex justify-center items-center py-12 gap-4">
+<span class="text-primary-container select-none">✦</span>
+<span class="text-primary-container select-none opacity-40">***</span>
+<span class="text-primary-container select-none">✦</span>
+</div>
+<p>忽然，雾气变得稀薄了一些。在前方不远处的空地上，矗立着一座早已荒废的石亭。石柱上刻满了诡异的符文，尽管经受了数百年的风雨侵蚀，那些线条依然清晰可辨，隐隐流动着暗淡的红光。</p>
+<p>陆铭停下脚步，握紧了怀中的那个古铜圆盘。圆盘此时微微发热，仿佛在回应着森林深处的某种召唤。他知道，自己已经无法回头了。这里的每一寸土地都铭刻着古老的契约，而他，正是那个被选定来履行最后条款的人。</p>
+<p>风吹过树梢，发出的声音不像沙沙声，倒更像是某种悠长的、跨越千年的低语。他在低语中听到了自己的名字，那声音如此清晰，又如此遥远，像是从梦境最深处传来的呼唤。</p>
+<p>林中的狐影一闪而过，那是他见过最灵动的生物。它的皮毛闪烁着如同泼墨画般的色泽，尾尖却带着一抹惊心动魄的橘红，宛如在宣纸上滴落的一点朱砂。灵狐回过头，金色的瞳孔中倒映着陆铭惊愕的面容，随后轻盈一跃，没入了更浓厚的雾霭之中。</p>
+</article>
+<!-- Watermark -->
+<footer class="mt-24 mb-12 flex flex-col items-center">
+<div class="w-8 h-[1px] bg-outline-variant opacity-30 mb-4"></div>
+<p class="text-[10px] font-label text-outline tracking-widest uppercase opacity-40">本章由 狸梦小说 (Lymo Story) AI 创作</p>
+</footer>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-[#131313]/70 backdrop-blur-xl rounded-t-[2rem] shadow-[0_-10px_40px_rgba(0,0,0,0.3)] transition-transform duration-400">
+<!-- Previous Chapter -->
+<div class="flex flex-col items-center justify-center text-[#8e9192] hover:text-[#ffb783] transition-all cursor-pointer group active:scale-90 duration-400">
+<span class="material-symbols-outlined text-2xl mb-1 group-hover:scale-110" data-icon="navigate_before">navigate_before</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest">上一章</span>
+</div>
+<!-- Controls / Center Actions -->
+<div class="flex items-center gap-6 px-6 py-2 bg-surface-container-low rounded-full">
+<button class="text-[#8e9192] hover:text-[#ffb783] active:scale-95">
+<span class="material-symbols-outlined text-xl" data-icon="format_size">format_size</span>
+</button>
+<div class="w-[1px] h-4 bg-outline-variant opacity-20"></div>
+<button class="text-[#8e9192] hover:text-[#ffb783] active:scale-95">
+<span class="material-symbols-outlined text-xl" data-icon="dark_mode">dark_mode</span>
+</button>
+<div class="w-[1px] h-4 bg-outline-variant opacity-20"></div>
+<button class="text-[#8e9192] hover:text-[#ffb783] active:scale-95">
+<span class="material-symbols-outlined text-xl" data-icon="menu">menu</span>
+</button>
+</div>
+<!-- Next Chapter -->
+<div class="flex flex-col items-center justify-center text-[#ffb783] bg-[#2e1300]/30 rounded-full px-5 py-1 active:scale-90 transition-transform duration-400 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="navigate_next" style="font-variation-settings: 'FILL' 1;">navigate_next</span>
+<span class="font-['Inter'] text-[10px] uppercase tracking-widest">下一章</span>
+</div>
+</nav>
+<!-- Reading Progress Indicator -->
+<div class="fixed left-0 bottom-0 h-1 bg-primary/20 w-full z-50">
+<div class="h-full bg-primary shadow-[0_0_8px_rgba(255,183,131,0.5)] w-[32%]"></div>
+</div>
+<!-- Floating Decoration Element -->
+<div class="fixed -right-24 top-1/3 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="fixed -left-24 bottom-1/4 w-64 h-64 bg-secondary/5 rounded-full blur-[100px] pointer-events-none"></div>
+</body></html>

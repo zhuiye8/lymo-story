@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700;900&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-fixed-dim": "#c9c6c0",
+                        "inverse-primary": "#944a00",
+                        "inverse-on-surface": "#313030",
+                        "primary-container": "#2e1300",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-primary-container": "#ca6804",
+                        "secondary": "#ecb2ff",
+                        "tertiary-container": "#1a1a16",
+                        "on-secondary": "#520071",
+                        "error-container": "#93000a",
+                        "surface-variant": "#353534",
+                        "on-tertiary": "#31312c",
+                        "on-secondary-fixed-variant": "#6c228c",
+                        "on-secondary-fixed": "#320047",
+                        "on-error": "#690005",
+                        "surface-dim": "#131313",
+                        "on-secondary-container": "#e59dff",
+                        "on-background": "#e5e2e1",
+                        "outline": "#8e9192",
+                        "on-primary-fixed": "#301400",
+                        "background": "#131313",
+                        "error": "#ffb4ab",
+                        "surface-container-high": "#2a2a2a",
+                        "primary-fixed": "#ffdcc5",
+                        "primary-fixed-dim": "#ffb783",
+                        "surface-container-highest": "#353534",
+                        "on-primary-fixed-variant": "#713700",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#474742",
+                        "secondary-fixed-dim": "#ecb2ff",
+                        "surface": "#131313",
+                        "secondary-fixed": "#f8d8ff",
+                        "tertiary-fixed": "#e5e2db",
+                        "primary": "#ffb783",
+                        "on-primary": "#4f2500",
+                        "secondary-container": "#6f258e",
+                        "on-tertiary-container": "#84827d",
+                        "on-tertiary-fixed": "#1c1c18",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#c4c7c7",
+                        "inverse-surface": "#e5e2e1",
+                        "outline-variant": "#444748",
+                        "surface-tint": "#ffb783",
+                        "surface-bright": "#393939",
+                        "surface-container": "#201f1f",
+                        "tertiary": "#c9c6c0"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "headline": ["Noto Serif SC"],
+                        "body": ["Noto Serif SC"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #131313;
+            font-family: 'Noto Serif SC', serif;
+            color: #e5e2e1;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-2 bg-[#131313]/70 backdrop-blur-xl floating rounded-full mx-4 mt-2 shadow-2xl">
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center w-10 h-10 text-[#ffb783] hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<h1 class="font-['Noto_Serif_SC'] text-lg font-medium text-[#ffb783]">第一章</h1>
+</div>
+<div class="flex items-center gap-2">
+<span class="hidden sm:block text-xs font-label text-on-surface-variant/60">狸梦小说 (Lymo Story)</span>
+<button class="flex items-center justify-center w-10 h-10 text-[#ffb783] hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</header>
+<main class="pt-24 pb-32 max-w-2xl mx-auto px-6">
+<!-- Hero Section -->
+<section class="mb-12 relative">
+<div class="absolute -top-20 -left-20 w-64 h-64 bg-primary/10 blur-[100px] rounded-full"></div>
+<div class="relative z-10">
+<div class="flex justify-between items-end mb-4">
+<span class="font-label text-xs tracking-widest text-on-surface-variant/50 uppercase">精选小说</span>
+<span class="font-label text-xs text-primary bg-primary-container/30 px-3 py-1 rounded-full">842,400 字</span>
+</div>
+<h2 class="text-5xl font-black italic tracking-tighter text-on-surface mb-6 leading-tight">
+                    荒野之狐的<br/><span class="text-primary drop-shadow-[0_0_15px_rgba(255,183,131,0.2)]">最后祷告</span>
+</h2>
+<div class="flex gap-3 overflow-x-auto no-scrollbar">
+<span class="px-4 py-1.5 rounded-full border border-outline-variant/20 text-sm font-label text-on-tertiary-container bg-surface-container-low">东方暗黑</span>
+<span class="px-4 py-1.5 rounded-full border border-outline-variant/20 text-sm font-label text-on-tertiary-container bg-surface-container-low">悬疑</span>
+<span class="px-4 py-1.5 rounded-full border border-outline-variant/20 text-sm font-label text-on-tertiary-container bg-surface-container-low">民俗</span>
+</div>
+</div>
+</section>
+<!-- Worldview Section -->
+<section class="mb-16">
+<div class="flex items-center gap-4 mb-6">
+<h3 class="text-xl font-bold italic text-primary-fixed-dim">世界观/简介</h3>
+<div class="h-px flex-1 bg-gradient-to-r from-outline-variant/30 to-transparent"></div>
+</div>
+<div class="space-y-6 text-lg leading-[2] text-on-surface-variant font-medium">
+<p class="indent-[2em]">
+                    在被永夜笼罩的极北之境，墨色的群山如沉睡的巨兽盘踞在地平线上。这里是神明遗忘的缝隙，也是“狐”之血脉最后的寄居所。当第一场含硫的雪落下，古老的契约开始产生裂痕。
+                </p>
+<p class="indent-[2em]">
+                    少年阿玄，带着一枚能够窥见真相的残破铜镜，在充满了谎言与诡计的霓虹都市与原始荒野之间游走。这不仅是一场关于生存的博弈，更是一曲关于宿命、牺牲与重生的墨色挽歌。
+                </p>
+</div>
+</section>
+<!-- Characters Section -->
+<section class="mb-16">
+<div class="flex items-center gap-4 mb-8">
+<h3 class="text-xl font-bold italic text-primary-fixed-dim">登场人物</h3>
+<div class="h-px flex-1 bg-gradient-to-r from-outline-variant/30 to-transparent"></div>
+</div>
+<div class="flex gap-6 overflow-x-auto no-scrollbar pb-4 -mx-6 px-6">
+<!-- Character Card 1 -->
+<div class="min-w-[160px] group">
+<div class="relative mb-3 aspect-[3/4] overflow-hidden rounded-xl bg-surface-container-highest">
+<img alt="人物 阿玄" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale" data-alt="dramatic portrait of a mysterious young man in a dark traditional eastern robe, moody lighting, dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSOEbalEHcMvpuQm5Z0uOfuf0CW1FIitMoa-B44fdLBPRAn1JNwxDq57fONQSBo6dVS_z7ifbUhRrU8AOefQJmpNrtLSInw9zBuKoL4dD_TMccllLcsXKG4q75dvs5kVQ-aKRYBY0pqFaBUObrDQnKWGDE1s1WgicsN6df53F6SlSaytQhz2rbfS9Kcqxy1lZuNaz4LiUaR5QWZNaBRA7luWwLWk70ngybt8QJ05mOLxlGa3qduEeyNBtZ2_32ag6nJNeKGHEqS0M"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest to-transparent opacity-60"></div>
+<div class="absolute left-0 top-4 h-8 w-[2px] bg-primary"></div>
+</div>
+<div class="text-center">
+<p class="font-bold text-on-surface">阿玄</p>
+<p class="text-xs font-label text-primary/70 tracking-widest uppercase mt-1">主角</p>
+</div>
+</div>
+<!-- Character Card 2 -->
+<div class="min-w-[160px] group">
+<div class="relative mb-3 aspect-[3/4] overflow-hidden rounded-xl bg-surface-container-highest">
+<img alt="人物 凛" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale" data-alt="enigmatic woman with sharp features in a formal dark coat, foggy background, cold aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfPZq3UcNP6jk_YcwtjfLsu44Kzx3iGoMww9x7deO0V5Av84lKQMW0yQdz31Wrvnix8iPS3TetkVL3CtiZSctwdwAgeJJa3p3MHgI0MkiV1KUuOh9xYu7IAzmycaCgq-AKw5XU2uZWlX_CT40NGTbB1qU0EOjgGe2-CRvfGuQoDPIHLWjD0DlJEqfnsSamptJ7EQgi23ajw0DBSWl_uVkc0Oxd3Le0kG08i4QJ_uCneOtxa2NubQqIlWBLhtU9AzkJSdhDNvbLLZQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest to-transparent opacity-60"></div>
+</div>
+<div class="text-center">
+<p class="font-bold text-on-surface">凛</p>
+<p class="text-xs font-label text-on-surface-variant/50 tracking-widest uppercase mt-1">反派</p>
+</div>
+</div>
+<!-- Character Card 3 -->
+<div class="min-w-[160px] group">
+<div class="relative mb-3 aspect-[3/4] overflow-hidden rounded-xl bg-surface-container-highest">
+<img alt="人物 祭司" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale" data-alt="elderly person with deeply lined face in dim candlelight, cinematic moody atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBKAI6PRdaIutVWMpT2iUzpeCbEwPP84s0dL83XQyvAc2Mki4BojsfOVFn8NlhdJEwRIR0RN6mDnn4eDrmaelh-0T9qyRjjAT1sXHtCmXnc8RtjugMExtdia4pn_Tk-z8P0SlollECejFBrrjTyneGc8D-uXKTwh3KZQQUJh09Xb1PWYXlEey-V20RMyMYoN57ENxYhZeoRqagZ_2-aIG1pvoMQop_GnupI5PzpAHhG3Dvc1r3lBw5lcJsU5jnvjy52ynvU8dQgTU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest to-transparent opacity-60"></div>
+</div>
+<div class="text-center">
+<p class="font-bold text-on-surface">老祭司</p>
+<p class="text-xs font-label text-on-surface-variant/50 tracking-widest uppercase mt-1">配角</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Chapters Section -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-4 flex-1">
+<h3 class="text-xl font-bold italic text-primary-fixed-dim">章节目录</h3>
+<div class="h-px flex-1 bg-gradient-to-r from-outline-variant/30 to-transparent"></div>
+</div>
+<div class="ml-4 flex items-center gap-1 text-xs font-label text-on-surface-variant/50">
+<span>倒序</span>
+<span class="material-symbols-outlined text-sm">swap_vert</span>
+</div>
+</div>
+<div class="space-y-4">
+<!-- Chapter Item 1 -->
+<div class="group p-4 bg-surface-container-low rounded-xl transition-all duration-300 hover:bg-surface-container-high border-l-2 border-transparent hover:border-primary">
+<div class="flex justify-between items-start">
+<div>
+<span class="text-[10px] font-label tracking-[0.2em] text-on-surface-variant/40 uppercase block mb-1">第 01 章</span>
+<h4 class="text-lg font-bold text-on-surface group-hover:text-primary transition-colors">残破的黄昏之镜</h4>
+</div>
+<div class="text-right">
+<span class="text-xs font-label text-on-surface-variant/60 block">视角: 阿玄</span>
+<span class="text-[10px] font-label text-on-surface-variant/30 mt-1 block">4,210 字</span>
+</div>
+</div>
+</div>
+<!-- Chapter Item 2 -->
+<div class="group p-4 bg-surface-container-low rounded-xl transition-all duration-300 hover:bg-surface-container-high border-l-2 border-transparent hover:border-primary">
+<div class="flex justify-between items-start">
+<div>
+<span class="text-[10px] font-label tracking-[0.2em] text-on-surface-variant/40 uppercase block mb-1">第 02 章</span>
+<h4 class="text-lg font-bold text-on-surface group-hover:text-primary transition-colors">霓虹缝隙里的低语</h4>
+</div>
+<div class="text-right">
+<span class="text-xs font-label text-on-surface-variant/60 block">视角: 阿玄</span>
+<span class="text-[10px] font-label text-on-surface-variant/30 mt-1 block">3,850 字</span>
+</div>
+</div>
+</div>
+<!-- Chapter Item 3 -->
+<div class="group p-4 bg-surface-container-low rounded-xl transition-all duration-300 hover:bg-surface-container-high border-l-2 border-transparent hover:border-primary">
+<div class="flex justify-between items-start">
+<div>
+<span class="text-[10px] font-label tracking-[0.2em] text-on-surface-variant/40 uppercase block mb-1">第 03 章</span>
+<h4 class="text-lg font-bold text-on-surface group-hover:text-primary transition-colors">第一场含硫的雪</h4>
+</div>
+<div class="text-right">
+<span class="text-xs font-label text-on-surface-variant/60 block">视角: 凛</span>
+<span class="text-[10px] font-label text-on-surface-variant/30 mt-1 block">5,100 字</span>
+</div>
+</div>
+</div>
+<!-- Chapter Item 4 -->
+<div class="group p-4 bg-surface-container-low rounded-xl transition-all duration-300 hover:bg-surface-container-high border-l-2 border-transparent hover:border-primary">
+<div class="flex justify-between items-start">
+<div>
+<span class="text-[10px] font-label tracking-[0.2em] text-on-surface-variant/40 uppercase block mb-1">第 04 章</span>
+<h4 class="text-lg font-bold text-on-surface group-hover:text-primary transition-colors">狐之血脉的悸动</h4>
+</div>
+<div class="text-right">
+<span class="text-xs font-label text-on-surface-variant/60 block">视角: 阿玄</span>
+<span class="text-[10px] font-label text-on-surface-variant/30 mt-1 block">4,600 字</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Fixed Action Anchor -->
+<div class="fixed bottom-0 left-0 right-0 p-6 pointer-events-none">
+<div class="max-w-2xl mx-auto flex justify-center pointer-events-auto">
+<button class="relative group flex items-center justify-center w-full py-5 px-10 rounded-full bg-primary text-on-primary font-bold text-xl tracking-widest shadow-[0_20px_50px_rgba(255,183,131,0.2)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_60px_rgba(255,183,131,0.4)] active:scale-95">
+<span class="relative z-10">开始阅读</span>
+<div class="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-[#ff8c37] opacity-100"></div>
+<!-- Subtle Glow effect -->
+<div class="absolute -inset-1 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</button>
+</div>
+</div>
+</body></html>

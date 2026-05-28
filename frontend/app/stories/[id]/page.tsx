@@ -16,6 +16,10 @@ import {
   Loader2,
   Feather,
   Square,
+  MoreHorizontal,
+  GitFork,
+  Wand2,
+  Eraser,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,18 +28,24 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { ScoreRing } from "@/components/lymo/score-ring";
 import { CharacterAvatar } from "@/components/lymo/character-avatar";
 import {
   cancelGeneration,
+  cloneStoryOutline,
+  deleteChaptersFrom,
   deleteStory,
   getStory,
   getStoryBible,
   listChapters,
   getStatus,
   getProgress,
+  regenerateOutline,
   triggerGeneration,
   publishStory,
   publishChapter,
@@ -108,6 +118,18 @@ export default function StoryDashboard({
   const [wordCount, setWordCount] = useState(3000);
   const [genDialogOpen, setGenDialogOpen] = useState(false);
 
+  // Outline / fork / delete actions
+  const [regenOutlineOpen, setRegenOutlineOpen] = useState(false);
+  const [regenInstructions, setRegenInstructions] = useState("");
+  const [regenSubmitting, setRegenSubmitting] = useState(false);
+
+  const [cloneOpen, setCloneOpen] = useState(false);
+  const [cloneSuffix, setCloneSuffix] = useState("（分支）");
+  const [cloneSubmitting, setCloneSubmitting] = useState(false);
+
+  const [deleteChaptersOpen, setDeleteChaptersOpen] = useState(false);
+  const [deleteChaptersSubmitting, setDeleteChaptersSubmitting] = useState(false);
+
   const refresh = useCallback(async () => {
     try {
       const [s, chs, st] = await Promise.all([
@@ -177,6 +199,64 @@ export default function StoryDashboard({
     } catch (e) {
       toast.error(`停止失败：${(e as Error).message}`);
       setIsCancelling(false);
+    }
+  };
+
+  const handleRegenOutline = async () => {
+    setRegenSubmitting(true);
+    try {
+      const res = await regenerateOutline(storyId, regenInstructions.trim());
+      toast.success(`${res.message}（${res.volumes_count} 卷）`);
+      setRegenOutlineOpen(false);
+      setRegenInstructions("");
+      refresh();
+    } catch (e) {
+      toast.error(`失败：${(e as Error).message}`);
+    } finally {
+      setRegenSubmitting(false);
+    }
+  };
+
+  const handleClone = async () => {
+    setCloneSubmitting(true);
+    try {
+      const res = await cloneStoryOutline(storyId, cloneSuffix.trim() || "（分支）");
+      toast.success(`${res.message}：《${res.new_title}》`);
+      setCloneOpen(false);
+      router.push(`/stories/${res.new_story_id}`);
+    } catch (e) {
+      toast.error(`失败：${(e as Error).message}`);
+    } finally {
+      setCloneSubmitting(false);
+    }
+  };
+
+  const handleDeleteChaptersFrom = async () => {
+    // UI only supports full reset (N=1). Backend rejects N>1 anyway.
+    if (chapters.length === 0) {
+      toast.error("没有章节可删除");
+      return;
+    }
+    if (
+      !confirm(
+        `确认删除全部 ${chapters.length} 个章节？\n` +
+        `会清除所有正文、版本、记忆、关系、角色状态等。\n` +
+        `世界观/角色/大纲会保留，可重新生成第 1 章。\n` +
+        `此操作不可撤销。`
+      )
+    ) {
+      return;
+    }
+    setDeleteChaptersSubmitting(true);
+    try {
+      const res = await deleteChaptersFrom(storyId, 1);  // forced full reset
+      toast.success(res.message);
+      setDeleteChaptersOpen(false);
+      refresh();
+    } catch (e) {
+      toast.error(`失败：${(e as Error).message}`);
+    } finally {
+      setDeleteChaptersSubmitting(false);
     }
   };
 
@@ -257,9 +337,38 @@ export default function StoryDashboard({
                 </>
               )}
             </Button>
-            <Button variant="ghost" size="sm" onClick={handleDelete}>
-              <Trash2 className="size-3.5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" aria-label="更多操作">
+                  <MoreHorizontal className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem onClick={() => setRegenOutlineOpen(true)}>
+                  <Wand2 className="size-3.5 text-lymo-gold-400" />
+                  重新规划大纲
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCloneOpen(true)}>
+                  <GitFork className="size-3.5 text-lymo-stellar-400" />
+                  克隆大纲到新小说
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setDeleteChaptersOpen(true)}
+                  disabled={chapters.length === 0}
+                >
+                  <Eraser className="size-3.5 text-lymo-vermilion-400" />
+                  删除全部章节（保留大纲）
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleDelete}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="size-3.5" />
+                  删除整本小说
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -554,6 +663,185 @@ export default function StoryDashboard({
           )}
         </div>
       </div>
+
+      {/* Regenerate outline dialog */}
+      <Dialog open={regenOutlineOpen} onOpenChange={setRegenOutlineOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif flex items-center gap-2">
+              <Wand2 className="size-5 text-lymo-gold-400" />
+              AI 重新规划大纲
+            </DialogTitle>
+            <DialogDescription>
+              基于现有大纲 + 你的调整意图，重新规划所有分卷。
+              <span className="block mt-1 text-[11px] text-lymo-gold-400">
+                注意：只会替换 volumes / planned_arc / initial_conflicts，角色和世界观不动。
+                旧大纲会保留在历史记录中。
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="mb-2 block">调整意图（可选）</Label>
+              <Textarea
+                value={regenInstructions}
+                onChange={(e) => setRegenInstructions(e.target.value)}
+                rows={5}
+                placeholder={
+                  "例：\n" +
+                  "- 把反派设计得更复杂，有人性矛盾\n" +
+                  "- 第二卷节奏加快，多一些冲突\n" +
+                  "- 主角的成长弧线要更明显"
+                }
+                disabled={regenSubmitting}
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                留空则让 AI 自由发挥，只做优化式重规划。
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setRegenOutlineOpen(false)}
+              disabled={regenSubmitting}
+            >
+              取消
+            </Button>
+            <Button
+              variant="default"
+              onClick={handleRegenOutline}
+              disabled={regenSubmitting}
+            >
+              {regenSubmitting ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  重新规划中...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="size-4" />
+                  开始重新规划
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clone to new story dialog */}
+      <Dialog open={cloneOpen} onOpenChange={setCloneOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif flex items-center gap-2">
+              <GitFork className="size-5 text-lymo-stellar-400" />
+              克隆大纲到新小说
+            </DialogTitle>
+            <DialogDescription>
+              保留当前世界观/角色/大纲，创建一本章节数为 0 的新小说，从头开始生成。
+              原小说不受影响。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="mb-2 block">新小说书名后缀</Label>
+              <Input
+                value={cloneSuffix}
+                onChange={(e) => setCloneSuffix(e.target.value)}
+                placeholder="（分支）"
+                disabled={cloneSubmitting}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                新小说书名 = 原书名 + 此后缀。例：《{story.title || story.theme}》→ 《
+                {(story.title || story.theme) + (cloneSuffix || "（分支）")}》
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCloneOpen(false)}
+              disabled={cloneSubmitting}
+            >
+              取消
+            </Button>
+            <Button
+              variant="stellar"
+              onClick={handleClone}
+              disabled={cloneSubmitting}
+            >
+              {cloneSubmitting ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  克隆中...
+                </>
+              ) : (
+                <>
+                  <GitFork className="size-4" />
+                  创建并跳转
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete all chapters dialog (full reset only) */}
+      <Dialog open={deleteChaptersOpen} onOpenChange={setDeleteChaptersOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-serif flex items-center gap-2 text-lymo-vermilion-300">
+              <Eraser className="size-5" />
+              删除全部章节（保留大纲）
+            </DialogTitle>
+            <DialogDescription>
+              清空本小说的全部 {chapters.length} 个章节，回到 bible_ready 初始状态。
+              <span className="block mt-1 text-[11px] text-lymo-vermilion-300">
+                会清除：所有章节正文、版本历史、角色记忆、关系三元组、角色状态、弧线、章节摘要、场景、依赖关系；事件图和世界状态也会重置。不可恢复。
+              </span>
+              <span className="block mt-1 text-[11px] text-muted-foreground">
+                世界观/角色/大纲/角色卡 保留，可以从第 1 章重新开始生成。
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="p-3 rounded border border-lymo-vermilion-500/40 bg-lymo-vermilion-500/5 text-sm text-lymo-vermilion-300">
+              ⚠️ 将删除全部 <span className="font-bold">{chapters.length}</span> 个章节及相关记忆。此操作不可撤销。
+            </div>
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium">提示</span>：仅希望删除部分尾部章节？
+              请改用「章节版本」面板恢复旧版本（每章右侧的「版本与重写」），无需删章。
+              安全 rewind（删除从第 N 章起，N&gt;1）已禁用，将作为独立功能后续提供。
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteChaptersOpen(false)}
+              disabled={deleteChaptersSubmitting}
+            >
+              取消
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteChaptersFrom}
+              disabled={deleteChaptersSubmitting}
+            >
+              {deleteChaptersSubmitting ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" />
+                  删除中...
+                </>
+              ) : (
+                <>
+                  <Eraser className="size-4" />
+                  确认删除
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

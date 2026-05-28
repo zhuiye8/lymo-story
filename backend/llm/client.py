@@ -7,6 +7,7 @@ import litellm
 from backend.config import Settings
 from backend.llm.logger import LLMLogger
 from backend.llm.model_registry import ModelRegistry
+from backend.llm.providers import build_extra_body
 
 logger = logging.getLogger(__name__)
 
@@ -42,19 +43,34 @@ class LLMClient:
         self.llm_logger = llm_logger
 
     async def _resolve_model(self, agent_name: str) -> dict:
-        """Resolve model config for an agent. Returns dict with model, api_key, api_base, temperature, max_tokens."""
+        """Resolve model config for an agent.
+
+        Returns dict with: model, api_key, api_base, temperature, max_tokens,
+        cost fields, provider, and provider_options (for extra_body like
+        DeepSeek thinking mode).
+        """
         if self.registry and agent_name != "unknown":
             config = await self.registry.get_model_for_agent(agent_name)
             if config:
                 api_base = config.get("api_base") or self.default_api_base
+                # provider_options may come as a JSON string (from DB) or dict
+                options = config.get("provider_options") or {}
+                if isinstance(options, str):
+                    try:
+                        options = json.loads(options)
+                    except Exception:
+                        options = {}
                 return {
                     "model": normalize_litellm_model(config["litellm_model"], api_base),
                     "api_key": config["api_key"] or self.default_api_key,
                     "api_base": api_base,
                     "model_config_id": config["id"],
                     "cost_per_million_input": config.get("cost_per_million_input", 0),
+                    "cost_per_million_input_cached": config.get("cost_per_million_input_cached", 0),
                     "cost_per_million_output": config.get("cost_per_million_output", 0),
                     "currency": config.get("currency", "CNY"),
+                    "provider": config.get("provider") or "generic",
+                    "provider_options": options,
                 }
         default_base = self.default_api_base
         return {
@@ -63,8 +79,11 @@ class LLMClient:
             "api_base": default_base,
             "model_config_id": "default",
             "cost_per_million_input": 0,
+            "cost_per_million_input_cached": 0,
             "cost_per_million_output": 0,
             "currency": "CNY",
+            "provider": "generic",
+            "provider_options": {},
         }
 
     async def complete(
@@ -96,11 +115,18 @@ class LLMClient:
         if response_format:
             kwargs["response_format"] = response_format
 
+        # Provider-specific extra_body (e.g. DeepSeek thinking mode)
+        extra = build_extra_body(resolved.get("provider"), resolved.get("provider_options"))
+        if extra:
+            kwargs["extra_body"] = extra
+
         start_time = time.time()
         status = "success"
         error_msg = None
         content = ""
         input_tokens = output_tokens = total_tokens = 0
+
+        cached_tokens = 0
 
         try:
             response = await litellm.acompletion(**kwargs)
@@ -112,6 +138,10 @@ class LLMClient:
                 input_tokens = getattr(usage, "prompt_tokens", 0) or 0
                 output_tokens = getattr(usage, "completion_tokens", 0) or 0
                 total_tokens = getattr(usage, "total_tokens", 0) or 0
+                # DeepSeek / OpenAI return prompt_tokens_details.cached_tokens
+                details = getattr(usage, "prompt_tokens_details", None)
+                if details:
+                    cached_tokens = getattr(details, "cached_tokens", 0) or 0
         except Exception as e:
             status = "error"
             error_msg = str(e)[:500]
@@ -119,9 +149,12 @@ class LLMClient:
         finally:
             latency_ms = int((time.time() - start_time) * 1000)
 
-            # Calculate cost (per million tokens)
+            # Calculate cost with cache-aware pricing
+            cached_cost_rate = resolved.get("cost_per_million_input_cached", 0) or 0
+            uncached_input = max(0, input_tokens - cached_tokens)
             cost = (
-                input_tokens / 1_000_000 * resolved["cost_per_million_input"]
+                uncached_input / 1_000_000 * resolved["cost_per_million_input"]
+                + cached_tokens / 1_000_000 * cached_cost_rate
                 + output_tokens / 1_000_000 * resolved["cost_per_million_output"]
             )
             currency = resolved.get("currency", "CNY")

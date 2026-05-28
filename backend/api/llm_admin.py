@@ -6,6 +6,8 @@ from backend.deps import get_llm_logger, get_model_registry, get_settings
 from backend.llm.client import normalize_litellm_model
 from backend.llm.logger import LLMLogger
 from backend.llm.model_registry import ModelRegistry
+from backend.llm.providers import all_presets
+from backend.llm.providers import deepseek as deepseek_provider
 
 router = APIRouter()
 
@@ -38,9 +40,22 @@ class ModelConfigRequest(BaseModel):
     max_tokens: int = 4096
     default_temperature: float = 0.7
     cost_per_million_input: float = 0.0
+    cost_per_million_input_cached: float = 0.0
     cost_per_million_output: float = 0.0
     currency: str = "CNY"
     is_active: bool = True
+    provider: str = "generic"
+    provider_options: dict = {}
+
+
+class DeepSeekSeedRequest(BaseModel):
+    api_key: str
+    apply_tier_bindings: bool = True
+
+
+class BulkBindRequest(BaseModel):
+    # {model_id: [agent_name, ...]}
+    bindings: dict[str, list[str]]
 
 
 class BindAgentRequest(BaseModel):
@@ -156,6 +171,104 @@ async def test_model(
             "message": f"连接失败：{str(e)[:200]}",
             "error": str(e)[:300],
         }
+
+
+# --- Presets & DeepSeek one-click setup ---
+
+@router.get("/presets")
+async def list_presets():
+    """List all provider presets for UI quick-fill."""
+    return {"presets": all_presets()}
+
+
+@router.get("/providers/deepseek/tier-bindings")
+async def get_deepseek_tier_bindings():
+    """Return the recommended Tier 1/2/3 binding plan for DeepSeek."""
+    # Flip {model_id: [agents]} → [{model_id, tier, agents}]
+    tier_info = {
+        "deepseek-v4-pro-thinking":     {"tier": 1, "label": "Tier 1 · 一次性高杠杆", "desc": "init 管线 / 大纲解析 — 不计成本"},
+        "deepseek-v4-flash-thinking":   {"tier": 2, "label": "Tier 2 · 主力创作",     "desc": "场景写作 — 思考模式提升 1 档质量"},
+        "deepseek-v4-flash-fast":       {"tier": 3, "label": "Tier 3 · 辅助/校验",    "desc": "所有其他任务 — 快+便宜"},
+    }
+    result = []
+    for model_id, agents in deepseek_provider.TIER_BINDINGS.items():
+        info = tier_info.get(model_id, {})
+        result.append({
+            "model_id": model_id,
+            "tier": info.get("tier"),
+            "label": info.get("label", model_id),
+            "desc": info.get("desc", ""),
+            "agents": agents,
+        })
+    return {"tier_bindings": sorted(result, key=lambda x: x["tier"] or 99)}
+
+
+@router.post("/providers/deepseek/seed")
+async def seed_deepseek(
+    req: DeepSeekSeedRequest,
+    registry: ModelRegistry = Depends(get_model_registry),
+):
+    """One-click seed all DeepSeek presets with a user-supplied API key.
+
+    Optionally applies the Tier 1/2/3 agent bindings.
+    Existing models are preserved (only api_key is filled if empty).
+    """
+    if not req.api_key:
+        raise HTTPException(400, "api_key is required")
+
+    created = 0
+    updated = 0
+    unchanged = 0
+    seeded = []
+    for preset in deepseek_provider.PRESETS:
+        cfg = await registry.seed_preset(preset, api_key=req.api_key)
+        if cfg.get("_created"):
+            created += 1
+        elif cfg.get("_updated"):
+            updated += 1
+        else:
+            unchanged += 1
+        seeded.append({"id": cfg["id"], "display_name": cfg["display_name"]})
+
+    bound_count = 0
+    if req.apply_tier_bindings:
+        bound_count = await registry.bind_many(deepseek_provider.TIER_BINDINGS)
+
+    parts = []
+    if created:
+        parts.append(f"新建 {created} 个模型")
+    if updated:
+        parts.append(f"更新 {updated} 个 API Key")
+    if unchanged:
+        parts.append(f"{unchanged} 个已同步")
+    if req.apply_tier_bindings:
+        parts.append(f"绑定 {bound_count} 个 Agent")
+
+    return {
+        "message": "完成：" + "，".join(parts) if parts else "无变化",
+        "seeded_models": seeded,
+        "bindings_applied": bound_count,
+        "created": created,
+        "updated": updated,
+    }
+
+
+@router.post("/bindings/bulk")
+async def bulk_bind(
+    req: BulkBindRequest,
+    registry: ModelRegistry = Depends(get_model_registry),
+):
+    """Apply multiple agent bindings at once."""
+    # Validate agents
+    invalid = []
+    for agents in req.bindings.values():
+        for a in agents:
+            if a not in VALID_AGENTS:
+                invalid.append(a)
+    if invalid:
+        raise HTTPException(400, f"Invalid agents: {invalid}")
+    count = await registry.bind_many(req.bindings)
+    return {"message": f"已绑定 {count} 个 Agent", "count": count}
 
 
 # --- Agent Binding Endpoints ---

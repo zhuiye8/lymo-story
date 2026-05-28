@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e5e2da",
+                        "inverse-on-surface": "#f4f1e8",
+                        "on-surface-variant": "#52443b",
+                        "outline": "#84746a",
+                        "surface-container-highest": "#e5e2da",
+                        "tertiary-fixed": "#a9edff",
+                        "primary-fixed-dim": "#ffb783",
+                        "on-tertiary-fixed": "#001f26",
+                        "surface-dim": "#dddad1",
+                        "tertiary-container": "#8bd1e3",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#8bd1e3",
+                        "on-primary-fixed": "#301400",
+                        "outline-variant": "#d7c3b7",
+                        "secondary-container": "#fddab2",
+                        "secondary": "#735a3a",
+                        "on-secondary-fixed-variant": "#594325",
+                        "primary-container": "#ffb783",
+                        "on-secondary-fixed": "#291801",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#fcf9f0",
+                        "primary": "#875126",
+                        "surface": "#fcf9f0",
+                        "inverse-surface": "#31312b",
+                        "surface-tint": "#875126",
+                        "surface-container-low": "#f6f3ea",
+                        "on-primary-container": "#79461c",
+                        "surface-container": "#f1eee5",
+                        "on-surface": "#1c1c17",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#ffb783",
+                        "secondary-fixed-dim": "#e2c19b",
+                        "background": "#fcf9f0",
+                        "secondary-fixed": "#ffddb6",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#1c1c17",
+                        "on-primary-fixed-variant": "#6b3a11",
+                        "surface-container-high": "#ebe8df",
+                        "primary-fixed": "#ffdcc5",
+                        "on-tertiary-fixed-variant": "#004e5c",
+                        "on-tertiary-container": "#005b6a",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#156777",
+                        "on-secondary-container": "#785e3e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC", "serif"],
+                        "body": ["Noto Serif SC", "serif"],
+                        "label": ["Public Sans", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ink-wash {
+            background: radial-gradient(circle at 70% 30%, rgba(28, 28, 23, 0.05) 0%, transparent 50%),
+                        linear-gradient(135deg, #f1eee5 0%, #e5e2da 100%);
+            position: relative;
+        }
+        .ink-wash::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3BaseFilter id='filter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/baseFilter%3E%3Crect width='100%25' height='100%25' filter='url(%23filter)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+        .paper-grain {
+            background-color: #f6f3ea;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.1'/%3E%3C/svg%3E");
+        }
+        .geometric-accent {
+            background: linear-gradient(45deg, #fcf9f0 25%, transparent 25%) -10px 0,
+                        linear-gradient(-45deg, #fcf9f0 25%, transparent 25%) -10px 0,
+                        linear-gradient(45deg, transparent 75%, #fcf9f0 75%) -10px 0,
+                        linear-gradient(-45deg, transparent 75%, #fcf9f0 75%) -10px 0;
+            background-size: 20px 20px;
+            background-color: #ebe8df;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-[#FCF9F0]/80 dark:bg-stone-900/80 backdrop-blur-xl">
+<div class="flex items-center gap-4">
+<button class="p-2 text-[#875126] dark:text-[#FFB783] hover:bg-[#E5E2DA] dark:hover:bg-stone-800 transition-colors rounded-lg active:opacity-70 active:scale-95 duration-150">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="flex flex-col">
+<span class="font-serif text-2xl italic tracking-tighter text-[#875126] dark:text-[#FFB783]">狸梦小说</span>
+<span class="font-label text-[10px] tracking-[0.2em] text-primary opacity-70 uppercase">Lymo Story</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-[#875126] dark:text-[#FFB783] hover:bg-[#E5E2DA] dark:hover:bg-stone-800 transition-colors rounded-lg active:opacity-70 active:scale-95 duration-150">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="pt-24 pb-32 px-6 max-w-7xl mx-auto">
+<!-- Brand Slogan / Header Section -->
+<header class="mb-12 border-l-4 border-primary pl-6">
+<h1 class="text-4xl font-black font-headline tracking-tight mb-2">我的书架</h1>
+<p class="text-on-surface-variant font-label tracking-wide text-sm opacity-80">沉浸于文字的温度，在纸墨间构筑梦境。</p>
+</header>
+<!-- Bookshelf Grid: Bento Style -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Book Card 1: Ink Wash Style -->
+<div class="group relative flex flex-col justify-between p-8 rounded-lg ink-wash overflow-hidden min-h-[320px] transition-all hover:translate-y-[-4px]">
+<div class="absolute top-0 right-0 p-4">
+<span class="bg-primary-container/30 text-on-primary-container font-label text-[10px] px-3 py-1 rounded-full uppercase tracking-widest">玄幻 · 连载</span>
+</div>
+<div>
+<h2 class="text-3xl font-black font-headline leading-tight mb-4 group-hover:text-primary transition-colors">青墨山海志</h2>
+<p class="text-on-surface-variant text-sm leading-relaxed line-clamp-3 mb-6">
+                        在破碎的古画卷中，少年提笔勾勒出消失的万象生灵。这是一场关于墨迹与真实的旷世博弈，书写那些被岁月掩埋的荒诞。
+                    </p>
+</div>
+<div class="flex items-center justify-between border-t border-on-surface/5 pt-6">
+<div class="flex gap-4">
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-on-surface/40 uppercase tracking-tighter">章节</span>
+<span class="font-headline font-bold text-lg">128</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-on-surface/40 uppercase tracking-tighter">字数</span>
+<span class="font-headline font-bold text-lg">45.2万</span>
+</div>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label text-xs font-semibold tracking-widest hover:bg-on-primary-fixed-variant transition-colors">
+                        继续阅读
+                    </button>
+</div>
+</div>
+<!-- Book Card 2: Paper Grain Style -->
+<div class="group relative flex flex-col justify-between p-8 rounded-lg paper-grain overflow-hidden min-h-[320px] transition-all hover:translate-y-[-4px]">
+<div class="absolute top-0 right-0 p-4">
+<span class="bg-primary-container/30 text-on-primary-container font-label text-[10px] px-3 py-1 rounded-full uppercase tracking-widest">悬疑 · 完结</span>
+</div>
+<div>
+<h2 class="text-3xl font-black font-headline leading-tight mb-4 group-hover:text-primary transition-colors">午夜的纸月亮</h2>
+<p class="text-on-surface-variant text-sm leading-relaxed line-clamp-3 mb-6">
+                        小镇上所有的钟表在同一时刻停止，唯有那个剪纸艺人的窗前，挂着一轮永不落下的明月。
+                    </p>
+</div>
+<div class="flex items-center justify-between border-t border-on-surface/5 pt-6">
+<div class="flex gap-4">
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-on-surface/40 uppercase tracking-tighter">章节</span>
+<span class="font-headline font-bold text-lg">84</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-on-surface/40 uppercase tracking-tighter">字数</span>
+<span class="font-headline font-bold text-lg">21.8万</span>
+</div>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label text-xs font-semibold tracking-widest hover:bg-on-primary-fixed-variant transition-colors">
+                        重读一遍
+                    </button>
+</div>
+</div>
+<!-- Empty State / Add New Placeholder: Geometric Style -->
+<div class="group flex flex-col items-center justify-center p-8 rounded-lg geometric-accent border-2 border-dashed border-outline-variant/30 min-h-[320px] transition-all hover:bg-surface-container-high cursor-pointer">
+<div class="w-32 h-32 mb-6 opacity-40 group-hover:opacity-60 transition-opacity">
+<!-- Tanuki Silhouette -->
+<svg class="text-primary" fill="currentColor" viewbox="0 0 100 100">
+<path d="M50 15c-15 0-25 10-25 25 0 8 3 15 8 20-5 5-10 12-10 20 0 3 2 5 5 5h44c3 0 5-2 5-5 0-8-5-15-10-20 5-5 8-12 8-20 0-15-10-25-25-25zm-12 18c2 0 4 2 4 4s-2 4-4 4-4-2-4-4 2-4 4-4zm24 0c2 0 4 2 4 4s-2 4-4 4-4-2-4-4 2-4 4-4zm-12 30c-5 0-9-4-9-9s4-9 9-9 9 4 9 9-4 9-9 9z"></path>
+</svg>
+</div>
+<p class="text-on-surface/60 font-headline font-bold text-lg mb-2">书架空空如也</p>
+<p class="text-on-surface/40 font-label text-xs tracking-widest uppercase">去寻找新的梦境吧</p>
+</div>
+<!-- Book Card 3: Minimalist Parchment -->
+<div class="group relative flex flex-col justify-between p-8 rounded-lg bg-surface-container border-l-8 border-primary-container overflow-hidden min-h-[320px] transition-all hover:translate-y-[-4px]">
+<div class="absolute top-0 right-0 p-4">
+<span class="bg-primary-container/30 text-on-primary-container font-label text-[10px] px-3 py-1 rounded-full uppercase tracking-widest">古言 · 连载</span>
+</div>
+<div>
+<h2 class="text-3xl font-black font-headline leading-tight mb-4 group-hover:text-primary transition-colors">长安锦瑟</h2>
+<p class="text-on-surface-variant text-sm leading-relaxed line-clamp-3 mb-6">
+                        一曲锦瑟引出的百年宫廷秘闻，在繁华尽头的长安城，谁才是那个拨动弦丝的人？
+                    </p>
+</div>
+<div class="flex items-center justify-between border-t border-on-surface/5 pt-6">
+<div class="flex gap-4">
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-on-surface/40 uppercase tracking-tighter">章节</span>
+<span class="font-headline font-bold text-lg">312</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label text-[10px] text-on-surface/40 uppercase tracking-tighter">字数</span>
+<span class="font-headline font-bold text-lg">89.4万</span>
+</div>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label text-xs font-semibold tracking-widest hover:bg-on-primary-fixed-variant transition-colors">
+                        继续阅读
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-[#FCF9F0] dark:bg-stone-900 shadow-[0_-4px_24px_rgba(135,81,38,0.06)] rounded-t-lg">
+<!-- Active Item: Bookshelf -->
+<a class="flex flex-col items-center justify-center text-[#875126] dark:text-[#FFB783] bg-[#FFB783]/20 rounded-xl px-4 py-1 transition-all active:scale-90 duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest mt-1">Bookshelf</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#1C1C17]/50 dark:text-stone-500 hover:text-[#875126] dark:hover:text-stone-200 transition-all active:scale-90 duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest mt-1">Discover</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#1C1C17]/50 dark:text-stone-500 hover:text-[#875126] dark:hover:text-stone-200 transition-all active:scale-90 duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest mt-1">My</span>
+</a>
+</nav>
+</body></html>

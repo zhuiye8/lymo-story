@@ -70,6 +70,38 @@ export async function deleteStory(storyId: string): Promise<void> {
   await fetchJson(`${API_BASE}/stories/${storyId}`, { method: "DELETE" });
 }
 
+export async function regenerateOutline(
+  storyId: string,
+  userInstructions: string = ""
+): Promise<{ message: string; volumes_count: number; history_count: number }> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/outline/regenerate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_instructions: userInstructions }),
+  });
+}
+
+export async function cloneStoryOutline(
+  storyId: string,
+  titleSuffix: string = "（分支）"
+): Promise<{ message: string; new_story_id: string; new_title: string }> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/clone-outline`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title_suffix: titleSuffix }),
+  });
+}
+
+export async function deleteChaptersFrom(
+  storyId: string,
+  fromChapter: number
+): Promise<{ message: string; deleted_count: number; from_chapter: number }> {
+  return fetchJson(
+    `${API_BASE}/stories/${storyId}/chapters/from/${fromChapter}`,
+    { method: "DELETE" }
+  );
+}
+
 export async function getStoryBible(storyId: string): Promise<StoryBibleV2> {
   return fetchJson(`${API_BASE}/stories/${storyId}/bible`);
 }

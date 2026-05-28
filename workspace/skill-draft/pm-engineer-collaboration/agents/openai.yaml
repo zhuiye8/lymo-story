@@ -1,0 +1,4 @@
+interface:
+  display_name: "PM Engineer Collaboration"
+  short_description: "Structure PM/engineer handoffs"
+  default_prompt: "Use the PM Engineer Collaboration skill to structure this handoff, decision, review, or phase plan."

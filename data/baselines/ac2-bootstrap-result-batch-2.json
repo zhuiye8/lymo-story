@@ -1,0 +1,306 @@
+{
+  "schema_version": "ac2-bootstrap-result-v1",
+  "batch_id": 2,
+  "n_chapters": 5,
+  "n_dimensions": 8,
+  "chapters": [
+    {
+      "story_id": "bc910038",
+      "chapter_num": 3
+    },
+    {
+      "story_id": "61513478",
+      "chapter_num": 2
+    },
+    {
+      "story_id": "61513478",
+      "chapter_num": 8
+    },
+    {
+      "story_id": "bc910038",
+      "chapter_num": 7
+    },
+    {
+      "story_id": "61513478",
+      "chapter_num": 4
+    }
+  ],
+  "per_dimension_spearman": {
+    "fluency": {
+      "rho": 0.6124,
+      "engineer_mean": 7.2,
+      "llm_mean": 7.2,
+      "engineer_values": [
+        7,
+        7,
+        7,
+        7,
+        8
+      ],
+      "llm_values": [
+        7.0,
+        7.0,
+        7.5,
+        7.0,
+        7.5
+      ]
+    },
+    "dialogue_distinct": {
+      "rho": 0.7255,
+      "engineer_mean": 4.2,
+      "llm_mean": 5.1,
+      "engineer_values": [
+        5,
+        3,
+        3,
+        6,
+        4
+      ],
+      "llm_values": [
+        5.0,
+        5.0,
+        5.0,
+        5.5,
+        5.0
+      ]
+    },
+    "character_consistency": {
+      "rho": 0.1521,
+      "engineer_mean": 7.4,
+      "llm_mean": 7.4,
+      "engineer_values": [
+        7,
+        7,
+        8,
+        7,
+        8
+      ],
+      "llm_values": [
+        7.0,
+        7.5,
+        7.0,
+        7.5,
+        8.0
+      ]
+    },
+    "scene_drama": {
+      "rho": 0.825,
+      "engineer_mean": 6.8,
+      "llm_mean": 5.8,
+      "engineer_values": [
+        6,
+        7,
+        7,
+        6,
+        8
+      ],
+      "llm_values": [
+        4.5,
+        6.0,
+        6.0,
+        6.0,
+        6.5
+      ]
+    },
+    "sensory_detail": {
+      "rho": 0.3227,
+      "engineer_mean": 6.6,
+      "llm_mean": 6.2,
+      "engineer_values": [
+        6,
+        7,
+        7,
+        6,
+        7
+      ],
+      "llm_values": [
+        5.5,
+        6.5,
+        6.5,
+        6.5,
+        6.0
+      ]
+    },
+    "rhetoric_quality": {
+      "rho": -0.1622,
+      "engineer_mean": 5.6,
+      "llm_mean": 5.6,
+      "engineer_values": [
+        4,
+        6,
+        6,
+        5,
+        7
+      ],
+      "llm_values": [
+        6.0,
+        5.5,
+        6.0,
+        5.0,
+        5.5
+      ]
+    },
+    "continuity": {
+      "rho": 0.3043,
+      "engineer_mean": 7.2,
+      "llm_mean": 7.7,
+      "engineer_values": [
+        6,
+        7,
+        8,
+        7,
+        8
+      ],
+      "llm_values": [
+        7.5,
+        7.5,
+        7.5,
+        8.0,
+        8.0
+      ]
+    },
+    "overall_readability": {
+      "rho": 0.825,
+      "engineer_mean": 6.8,
+      "llm_mean": 6.5,
+      "engineer_values": [
+        6,
+        7,
+        7,
+        6,
+        8
+      ],
+      "llm_values": [
+        6.0,
+        6.5,
+        6.5,
+        6.5,
+        7.0
+      ]
+    }
+  },
+  "mean_spearman_rho": 0.4506,
+  "interpretation": "ρ > 0.7: strong agreement; 0.4-0.7: moderate; 0.0-0.4: weak; < 0: inverse — judge rubric likely misaligned with engineer intuition. n=5 makes ρ noisy (one swap drastically changes rank correlation); treat as direction-of-agreement signal, not a precise metric.",
+  "raw_chapters": [
+    {
+      "story_id": "bc910038",
+      "chapter_num": 3,
+      "engineer_scores": {
+        "fluency": 7,
+        "dialogue_distinct": 5,
+        "character_consistency": 7,
+        "scene_drama": 6,
+        "sensory_detail": 6,
+        "rhetoric_quality": 4,
+        "continuity": 6,
+        "overall_readability": 6
+      },
+      "llm_scores": {
+        "fluency": 7.0,
+        "dialogue_distinct": 5.0,
+        "character_consistency": 7.0,
+        "scene_drama": 4.5,
+        "sensory_detail": 5.5,
+        "rhetoric_quality": 6.0,
+        "continuity": 7.5,
+        "overall_readability": 6.0
+      }
+    },
+    {
+      "story_id": "61513478",
+      "chapter_num": 2,
+      "engineer_scores": {
+        "fluency": 7,
+        "dialogue_distinct": 3,
+        "character_consistency": 7,
+        "scene_drama": 7,
+        "sensory_detail": 7,
+        "rhetoric_quality": 6,
+        "continuity": 7,
+        "overall_readability": 7
+      },
+      "llm_scores": {
+        "fluency": 7.0,
+        "dialogue_distinct": 5.0,
+        "character_consistency": 7.5,
+        "scene_drama": 6.0,
+        "sensory_detail": 6.5,
+        "rhetoric_quality": 5.5,
+        "continuity": 7.5,
+        "overall_readability": 6.5
+      }
+    },
+    {
+      "story_id": "61513478",
+      "chapter_num": 8,
+      "engineer_scores": {
+        "fluency": 7,
+        "dialogue_distinct": 3,
+        "character_consistency": 8,
+        "scene_drama": 7,
+        "sensory_detail": 7,
+        "rhetoric_quality": 6,
+        "continuity": 8,
+        "overall_readability": 7
+      },
+      "llm_scores": {
+        "fluency": 7.5,
+        "dialogue_distinct": 5.0,
+        "character_consistency": 7.0,
+        "scene_drama": 6.0,
+        "sensory_detail": 6.5,
+        "rhetoric_quality": 6.0,
+        "continuity": 7.5,
+        "overall_readability": 6.5
+      }
+    },
+    {
+      "story_id": "bc910038",
+      "chapter_num": 7,
+      "engineer_scores": {
+        "fluency": 7,
+        "dialogue_distinct": 6,
+        "character_consistency": 7,
+        "scene_drama": 6,
+        "sensory_detail": 6,
+        "rhetoric_quality": 5,
+        "continuity": 7,
+        "overall_readability": 6
+      },
+      "llm_scores": {
+        "fluency": 7.0,
+        "dialogue_distinct": 5.5,
+        "character_consistency": 7.5,
+        "scene_drama": 6.0,
+        "sensory_detail": 6.5,
+        "rhetoric_quality": 5.0,
+        "continuity": 8.0,
+        "overall_readability": 6.5
+      }
+    },
+    {
+      "story_id": "61513478",
+      "chapter_num": 4,
+      "engineer_scores": {
+        "fluency": 8,
+        "dialogue_distinct": 4,
+        "character_consistency": 8,
+        "scene_drama": 8,
+        "sensory_detail": 7,
+        "rhetoric_quality": 7,
+        "continuity": 8,
+        "overall_readability": 8
+      },
+      "llm_scores": {
+        "fluency": 7.5,
+        "dialogue_distinct": 5.0,
+        "character_consistency": 8.0,
+        "scene_drama": 6.5,
+        "sensory_detail": 6.0,
+        "rhetoric_quality": 5.5,
+        "continuity": 8.0,
+        "overall_readability": 7.0
+      }
+    }
+  ]
+}

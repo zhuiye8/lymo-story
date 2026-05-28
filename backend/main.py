@@ -5,7 +5,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api import chapters, control, llm_admin, public, stories
+from backend.api import chapters, control, llm_admin, public, quality_admin, stories
 from backend.config import Settings
 from backend.llm.client import LLMClient
 from backend.llm.logger import LLMLogger
@@ -87,6 +87,7 @@ app.include_router(stories.router, prefix="/api/stories", tags=["stories"])
 app.include_router(chapters.router, prefix="/api/stories/{story_id}/chapters", tags=["chapters"])
 app.include_router(control.router, prefix="/api/stories/{story_id}/control", tags=["control"])
 app.include_router(llm_admin.router, prefix="/api/admin", tags=["admin"])
+app.include_router(quality_admin.router, prefix="/api/admin/quality", tags=["quality"])
 app.include_router(public.router, prefix="/api/public", tags=["public"])
 
 

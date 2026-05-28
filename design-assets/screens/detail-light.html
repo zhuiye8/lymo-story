@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&amp;family=Public+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e5e2da",
+                        "inverse-on-surface": "#f4f1e8",
+                        "on-surface-variant": "#52443b",
+                        "outline": "#84746a",
+                        "surface-container-highest": "#e5e2da",
+                        "tertiary-fixed": "#a9edff",
+                        "primary-fixed-dim": "#ffb783",
+                        "on-tertiary-fixed": "#001f26",
+                        "surface-dim": "#dddad1",
+                        "tertiary-container": "#8bd1e3",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#8bd1e3",
+                        "on-primary-fixed": "#301400",
+                        "outline-variant": "#d7c3b7",
+                        "secondary-container": "#fddab2",
+                        "secondary": "#735a3a",
+                        "on-secondary-fixed-variant": "#594325",
+                        "primary-container": "#ffb783",
+                        "on-secondary-fixed": "#291801",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#fcf9f0",
+                        "primary": "#875126",
+                        "surface": "#fcf9f0",
+                        "inverse-surface": "#31312b",
+                        "surface-tint": "#875126",
+                        "surface-container-low": "#f6f3ea",
+                        "on-primary-container": "#79461c",
+                        "surface-container": "#f1eee5",
+                        "on-surface": "#1c1c17",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#ffb783",
+                        "secondary-fixed-dim": "#e2c19b",
+                        "background": "#fcf9f0",
+                        "secondary-fixed": "#ffddb6",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#1c1c17",
+                        "on-primary-fixed-variant": "#6b3a11",
+                        "surface-container-high": "#ebe8df",
+                        "primary-fixed": "#ffdcc5",
+                        "on-tertiary-fixed-variant": "#004e5c",
+                        "on-tertiary-container": "#005b6a",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#156777",
+                        "on-secondary-container": "#785e3e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC", "serif"],
+                        "body": ["Noto Serif SC", "serif"],
+                        "label": ["Public Sans", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Noto Serif SC', serif; }
+        .ui-font { font-family: 'Public Sans', sans-serif; }
+        .stipple-bg {
+            background-image: radial-gradient(#875126 0.5px, transparent 0.5px);
+            background-size: 16px 16px;
+            opacity: 0.03;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-[#FCF9F0]/80 backdrop-blur-xl transition-colors">
+<div class="flex items-center gap-4">
+<button class="hover:bg-[#E5E2DA] transition-colors p-2 rounded-lg active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[#875126]">arrow_back</span>
+</button>
+<h1 class="font-serif text-lg tracking-tight font-bold text-[#875126]">长夜将至：旧都残响</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="hover:bg-[#E5E2DA] transition-colors p-2 rounded-lg active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[#875126]">bookmark</span>
+</button>
+<button class="hover:bg-[#E5E2DA] transition-colors p-2 rounded-lg active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[#875126]">share</span>
+</button>
+</div>
+</header>
+<main class="pt-16 pb-32 max-w-4xl mx-auto px-6 relative">
+<div class="absolute inset-0 stipple-bg pointer-events-none"></div>
+<!-- 1. Novel Header Section -->
+<section class="py-12 flex flex-col md:flex-row gap-10 items-start border-b border-outline-variant/15">
+<div class="relative group mx-auto md:mx-0">
+<div class="w-48 h-64 bg-surface-container-low shadow-2xl relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Dark dramatic book cover with ancient Chinese architecture silhouette against a rising orange moon and swirling ink clouds" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-mpm-b3wdi8OtQNeujh8zE_39LhCccn7wFn47rMu0imQryikYDHIdKAALs7BX43OMfJ3HGjrEo72zH7SLjHyMyw3unTwhqS43b9QBZTxsUVdVSL3sL99SR5Vy1eKtxabBml31m-0zXHtKpEVZP9yLmfeOkA6mHcgrMtDfVYvDVH5OdPJG9hC1amAe28MMiAxtKn5BOr1WSceN6JOGCfNIzms7N8MYMDQLWBeVGv7FgG5IvKQGWfwJlCW3pua-zTHxgXEfBzJ79rA"/>
+<div class="absolute inset-0 shadow-[inset_0_0_0_2px_rgba(255,255,255,0.1)]"></div>
+</div>
+<div class="absolute -bottom-2 -right-2 w-full h-full border border-primary/10 -z-10 bg-surface-container translate-x-2 translate-y-2"></div>
+</div>
+<div class="flex-1 space-y-6">
+<div>
+<div class="flex flex-wrap gap-2 mb-4">
+<span class="bg-surface-variant px-3 py-0.5 rounded-full ui-font text-[10px] uppercase tracking-widest font-medium text-secondary">玄幻</span>
+<span class="bg-surface-variant px-3 py-0.5 rounded-full ui-font text-[10px] uppercase tracking-widest font-medium text-secondary">都市奇幻</span>
+<span class="bg-primary-container/20 px-3 py-0.5 rounded-full ui-font text-[10px] uppercase tracking-widest font-medium text-primary">连载中</span>
+</div>
+<h2 class="text-4xl md:text-5xl font-black tracking-tight mb-2 text-on-surface leading-tight">长夜将至：旧都残响</h2>
+<p class="text-primary font-medium ui-font tracking-wide">作者：墨染青衣</p>
+</div>
+<div class="grid grid-cols-3 gap-4 ui-font text-center py-4 border-y border-outline-variant/10">
+<div>
+<p class="text-xs text-on-surface-variant uppercase tracking-tighter">字数</p>
+<p class="font-bold text-lg">124.8万</p>
+</div>
+<div>
+<p class="text-xs text-on-surface-variant uppercase tracking-tighter">收藏</p>
+<p class="font-bold text-lg">45,201</p>
+</div>
+<div>
+<p class="text-xs text-on-surface-variant uppercase tracking-tighter">评分</p>
+<p class="font-bold text-lg">9.8</p>
+</div>
+</div>
+<button class="w-full md:w-auto bg-gradient-to-r from-primary to-primary-container px-12 py-4 rounded-lg text-on-primary font-bold ui-font tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+                    开始阅读
+                </button>
+</div>
+</section>
+<!-- 2. Worldview/Intro Section -->
+<section class="py-12">
+<h3 class="ui-font text-xs font-bold uppercase tracking-[0.3em] text-on-surface-variant/60 mb-8 flex items-center gap-4">
+<span>世界观与简介</span>
+<div class="h-px bg-outline-variant/20 flex-1"></div>
+</h3>
+<div class="space-y-6 text-lg leading-relaxed text-on-surface/90 text-justify">
+<p>当旧都最后一盏霓虹熄灭，深渊中的低语便会在潮湿的巷弄间回响。这是一座被遗忘的机械之城，也是诸神黄昏后的唯一余烬。</p>
+<p>徐子安在充满铁锈味的诊所中醒来，手中紧握着一枚不属于这个时代的齿轮。他的记忆如破碎的镜片，每一块都映射出不同的末日。在禁忌的炼金术与冰冷的赛博科技交织的阴影里，他必须在黎明到来前，找回那个被称为“残响”的灵魂碎片。</p>
+<blockquote class="pl-6 border-l-4 border-primary/30 italic text-on-surface-variant">
+                    “如果光不能指引方向，那就让火焰焚烧黑暗，直到看见骨骼里的光芒。”
+                </blockquote>
+</div>
+</section>
+<!-- 3. Character List -->
+<section class="py-12">
+<h3 class="ui-font text-xs font-bold uppercase tracking-[0.3em] text-on-surface-variant/60 mb-8 flex items-center gap-4">
+<span>登场人物</span>
+<div class="h-px bg-outline-variant/20 flex-1"></div>
+</h3>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Character 1 -->
+<div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl hover:bg-surface-container transition-colors">
+<div class="w-14 h-14 rounded-full overflow-hidden border-2 border-primary-container/30 shrink-0 shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Portrait of a young man with sharp eyes and messy black hair, wearing a high-collared techwear jacket, digital art style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6F6TKBcEwM5PNcQYNvvmjHci_JqRha7h_4IRjc9hH3H2yMR2F9zYs4TFVxEpZqPoGAQqdxJZ7_8MdTg6TE_E4a-P4_-45jLsz39WmP83w9UZ6PrwpmvZkpltVOpIPLiZxV_IeBh9MT9L08qKd82PJGJdZDcVqeUFisZ7b6H9O3GJwb6093mikTTe0yPcEfKrvQjfuKTjKgPcd7R-dwJWRl6Z3_OBzjb7TVxPUyP1u449xcD9dC-HgirqsgvDzJiWALfTgX8Y8Hn8"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">徐子安</h4>
+<p class="ui-font text-xs text-primary font-semibold tracking-wider">主角 · 提灯人</p>
+</div>
+</div>
+<!-- Character 2 -->
+<div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl hover:bg-surface-container transition-colors">
+<div class="w-14 h-14 rounded-full overflow-hidden border-2 border-outline-variant/30 shrink-0 shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Close up face of a mysterious woman with silver hair and cold blue eyes, wearing elegant traditional silk accessories, cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9ZIk5YljjVUXJ7tWrIMSzgQ6pruaV6EKLz7DoEnbE7bgg5UsmTjLxS46HDrokXkVItPXija9a-kYf8mRazQCftiMrOgvUpp-qkaUeJim8680al-IsENW5IIuSTz5_hkM9m_Jdm5gbywmFXcj4T1a8ym0z0FF1OoK6B4S_-H85XTjGN6VVn3Z7_5i0Z-p_bgokB2s9jcq8bJ414jikqTWR9jUGVCt3a4A_sbSyMEtcnpFBI3bIExz6AaJjO8rU7NrBi4lCp4X0RXc"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">陆晚妆</h4>
+<p class="ui-font text-xs text-on-surface-variant uppercase tracking-wider">主要角色 · 旧都圣女</p>
+</div>
+</div>
+<!-- Character 3 -->
+<div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl hover:bg-surface-container transition-colors">
+<div class="w-14 h-14 rounded-full overflow-hidden border-2 border-error/20 shrink-0 shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Sinister figure in the shadows with glowing red eyes, metallic prosthetic arm showing intricate gears, moody atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3q_Pvz4h5l3isNgcQNAE3mdHchnVtUEASkJlrRUGkHkdFVMv34JrIiRPN2rq0Bq7M0pZAYuCZ6qO2r68xBaTlYvN3nL7jaBoXdMX-8gfesVIVl3Oq7-yLY9L1-QWnJiHp0BAniS7yaDqE_fs0reQzUCCrV4GylpRULsLJe_zPH3q_FlDRLR61q9ciRtYwvly8UtkOOWIVrrOCDv-onMqkhecnf2obCt3VCi-PxwfYYj9x4lT3EeNw3a-dfIEkhC6TPGFMscU0Zrg"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">零号观测者</h4>
+<p class="ui-font text-xs text-error font-semibold tracking-wider">反派 · 机械真理</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. Table of Contents -->
+<section class="py-12 mb-20">
+<div class="flex items-center justify-between mb-8">
+<h3 class="ui-font text-xs font-bold uppercase tracking-[0.3em] text-on-surface-variant/60 flex items-center gap-4 flex-1">
+<span>正文目录</span>
+<div class="h-px bg-outline-variant/20 flex-1"></div>
+</h3>
+<button class="flex items-center gap-1 ui-font text-xs font-bold text-primary ml-4 hover:opacity-70">
+<span class="material-symbols-outlined text-sm">sort</span>
+                    正序
+                </button>
+</div>
+<div class="bg-surface-container-low rounded-2xl overflow-hidden shadow-sm">
+<!-- Chapter Item 1 -->
+<div class="grid grid-cols-12 items-center p-5 hover:bg-surface-container-high transition-colors cursor-pointer border-b border-outline-variant/5">
+<div class="col-span-1 ui-font text-xs text-on-surface-variant font-medium">001</div>
+<div class="col-span-6 font-bold text-on-surface pr-4 truncate">第一章：旧都的铁锈与晨曦</div>
+<div class="col-span-3 ui-font text-[10px] text-on-surface-variant/60 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">person</span>
+                        徐子安
+                    </div>
+<div class="col-span-2 ui-font text-[10px] text-right text-on-surface-variant/60">3,421 字</div>
+</div>
+<!-- Chapter Item 2 -->
+<div class="grid grid-cols-12 items-center p-5 hover:bg-surface-container-high transition-colors cursor-pointer border-b border-outline-variant/5">
+<div class="col-span-1 ui-font text-xs text-on-surface-variant font-medium">002</div>
+<div class="col-span-6 font-bold text-on-surface pr-4 truncate">第二章：被遗忘的齿轮工厂</div>
+<div class="col-span-3 ui-font text-[10px] text-on-surface-variant/60 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">person</span>
+                        徐子安
+                    </div>
+<div class="col-span-2 ui-font text-[10px] text-right text-on-surface-variant/60">4,102 字</div>
+</div>
+<!-- Chapter Item 3 -->
+<div class="grid grid-cols-12 items-center p-5 hover:bg-surface-container-high transition-colors cursor-pointer border-b border-outline-variant/5">
+<div class="col-span-1 ui-font text-xs text-on-surface-variant font-medium">003</div>
+<div class="col-span-6 font-bold text-on-surface pr-4 truncate">第三章：深巷中的禁忌交易</div>
+<div class="col-span-3 ui-font text-[10px] text-on-surface-variant/60 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">person</span>
+                        陆晚妆
+                    </div>
+<div class="col-span-2 ui-font text-[10px] text-right text-on-surface-variant/60">2,890 字</div>
+</div>
+<!-- Chapter Item 4 -->
+<div class="grid grid-cols-12 items-center p-5 hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="col-span-1 ui-font text-xs text-on-surface-variant font-medium">004</div>
+<div class="col-span-6 font-bold text-on-surface pr-4 truncate">第四章：残响初现</div>
+<div class="col-span-3 ui-font text-[10px] text-on-surface-variant/60 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">person</span>
+                        徐子安
+                    </div>
+<div class="col-span-2 ui-font text-[10px] text-right text-on-surface-variant/60">5,011 字</div>
+</div>
+</div>
+<button class="w-full mt-6 py-4 ui-font text-xs font-bold text-on-surface-variant hover:text-primary transition-colors border border-outline-variant/20 rounded-xl hover:bg-surface-container-high">
+                查看全部 452 章节
+            </button>
+</section>
+</main>
+<!-- Bottom Action Bar (Contextual) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-[#FCF9F0] shadow-[0_-4px_24px_rgba(135,81,38,0.06)] rounded-t-lg">
+<div class="flex flex-col items-center justify-center text-[#1C1C17]/50 transition-all hover:text-[#875126]">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest mt-1">Bookshelf</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#1C1C17]/50 transition-all hover:text-[#875126]">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest mt-1">Discover</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#875126] bg-[#FFB783]/20 rounded-xl px-4 py-1">
+<span class="material-symbols-outlined">person</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest mt-1">My</span>
+</div>
+</nav>
+</body></html>

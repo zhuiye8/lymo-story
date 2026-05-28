@@ -1,0 +1,4 @@
+interface:
+  display_name: "Novel Rearchitecture Supervisor"
+  short_description: "Supervise AI novel rewrites"
+  default_prompt: "Use this skill to review an AI novel-platform rewrite plan, phase report, or decision request and keep it aligned with an editorial-office architecture."

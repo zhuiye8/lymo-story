@@ -49,9 +49,12 @@ class SQLiteStore:
                     max_tokens INT DEFAULT 4096,
                     default_temperature REAL DEFAULT 0.7,
                     cost_per_million_input REAL DEFAULT 0,
+                    cost_per_million_input_cached REAL DEFAULT 0,
                     cost_per_million_output REAL DEFAULT 0,
                     currency TEXT DEFAULT 'CNY',
                     is_active BOOLEAN DEFAULT 1,
+                    provider TEXT DEFAULT 'generic',
+                    provider_options_json TEXT DEFAULT '{}',
                     created_at TEXT NOT NULL
                 );
                 CREATE TABLE IF NOT EXISTS agent_model_bindings (
@@ -213,6 +216,106 @@ class SQLiteStore:
                 );
                 CREATE INDEX IF NOT EXISTS idx_world_book_story
                     ON world_book_entries(story_id, entry_type);
+
+                -- Phase 0: SEQR v0 quality evaluation (5 tables, batch-isolated)
+
+                -- (0) evaluation batches — every "run a baseline" creates one row
+                CREATE TABLE IF NOT EXISTS evaluation_batches (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    batch_label TEXT NOT NULL UNIQUE,
+                    rubric_version TEXT NOT NULL,
+                    judge_model TEXT NOT NULL,
+                    judge_options_json TEXT,
+                    -- detector_version: NO DEFAULT (Report #4 review correction).
+                    -- Caller must pass the live DETECTOR_VERSION constant from
+                    -- backend.quality.slop_detector. A stale literal default
+                    -- caused the v1 split-brain audit pollution risk.
+                    detector_version TEXT NOT NULL,
+                    description TEXT,
+                    scope_story_ids TEXT NOT NULL,
+                    scope_chapter_count INTEGER NOT NULL,
+                    started_at TEXT NOT NULL,
+                    finished_at TEXT,
+                    status TEXT DEFAULT 'running'
+                );
+
+                -- (1) per-dimension scores
+                CREATE TABLE IF NOT EXISTS chapter_quality_scores (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    evaluation_batch_id INTEGER NOT NULL,
+                    story_id TEXT NOT NULL,
+                    chapter_num INTEGER NOT NULL,
+                    source_version_id INTEGER,
+                    dimension TEXT NOT NULL,
+                    score REAL NOT NULL,
+                    evidence TEXT,
+                    judge_run_id INTEGER NOT NULL,
+                    judged_at TEXT NOT NULL,
+                    rubric_version TEXT NOT NULL DEFAULT 'SEQR-v0',
+                    UNIQUE (evaluation_batch_id, story_id, chapter_num, dimension)
+                );
+                CREATE INDEX IF NOT EXISTS idx_quality_batch
+                    ON chapter_quality_scores(evaluation_batch_id, story_id, chapter_num);
+                CREATE INDEX IF NOT EXISTS idx_quality_dim
+                    ON chapter_quality_scores(dimension);
+
+                -- (2) chapter-level aggregate
+                CREATE TABLE IF NOT EXISTS chapter_quality_evaluations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    evaluation_batch_id INTEGER NOT NULL,
+                    story_id TEXT NOT NULL,
+                    chapter_num INTEGER NOT NULL,
+                    source_version_id INTEGER,
+                    rubric_version TEXT NOT NULL DEFAULT 'SEQR-v0',
+                    judge_run_id INTEGER NOT NULL,
+                    composite_score REAL NOT NULL,
+                    mean_quality REAL NOT NULL,
+                    slop_penalty REAL NOT NULL,
+                    word_count INTEGER NOT NULL,
+                    judged_at TEXT NOT NULL,
+                    UNIQUE (evaluation_batch_id, story_id, chapter_num)
+                );
+                CREATE INDEX IF NOT EXISTS idx_eval_batch
+                    ON chapter_quality_evaluations(evaluation_batch_id, story_id, chapter_num);
+
+                -- (3) slop findings (mechanical detector output)
+                CREATE TABLE IF NOT EXISTS slop_findings (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    evaluation_batch_id INTEGER NOT NULL,
+                    story_id TEXT NOT NULL,
+                    chapter_num INTEGER NOT NULL,
+                    source_version_id INTEGER,
+                    category TEXT NOT NULL,
+                    hits_json TEXT NOT NULL DEFAULT '[]',
+                    raw_score REAL NOT NULL,
+                    weighted_penalty REAL NOT NULL,
+                    detected_at TEXT NOT NULL,
+                    -- detector_version: NO DEFAULT (see evaluation_batches above).
+                    detector_version TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_slop_batch
+                    ON slop_findings(evaluation_batch_id, story_id, chapter_num);
+
+                -- (4) judge runs (cost + model audit)
+                CREATE TABLE IF NOT EXISTS judge_runs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    evaluation_batch_id INTEGER NOT NULL,
+                    story_id TEXT NOT NULL,
+                    chapter_num INTEGER NOT NULL,
+                    judge_model TEXT NOT NULL,
+                    judge_options_json TEXT,
+                    rubric_version TEXT NOT NULL DEFAULT 'SEQR-v0',
+                    total_input_tokens INTEGER DEFAULT 0,
+                    total_output_tokens INTEGER DEFAULT 0,
+                    total_cost_cny REAL DEFAULT 0,
+                    latency_ms INTEGER DEFAULT 0,
+                    status TEXT DEFAULT 'success',
+                    error_message TEXT,
+                    started_at TEXT NOT NULL,
+                    finished_at TEXT
+                );
+                CREATE INDEX IF NOT EXISTS idx_judge_batch
+                    ON judge_runs(evaluation_batch_id);
             """)
             # Back-compat migrations for pre-existing columns
             for table, col, definition in [
@@ -225,6 +328,10 @@ class SQLiteStore:
                 ("character_arcs", "source_version_id", "INTEGER"),
                 ("character_arcs", "is_active", "INTEGER NOT NULL DEFAULT 1"),
                 ("chapter_versions", "is_live", "INTEGER NOT NULL DEFAULT 0"),
+                # Provider-specific fields for model_configs
+                ("model_configs", "provider", "TEXT DEFAULT 'generic'"),
+                ("model_configs", "provider_options_json", "TEXT DEFAULT '{}'"),
+                ("model_configs", "cost_per_million_input_cached", "REAL DEFAULT 0"),
             ]:
                 try:
                     await db.execute(f"ALTER TABLE {table} ADD COLUMN {col} {definition}")

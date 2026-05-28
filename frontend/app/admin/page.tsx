@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import ModelConfigPanel from "@/components/ModelConfigPanel";
 import UsageDashboard from "@/components/UsageDashboard";
+import DeepSeekSetupPanel from "@/components/DeepSeekSetupPanel";
 import {
   listModels, createModel, updateModel, deleteModel,
   getBindings, bindAgent, unbindAgent,
@@ -74,6 +75,9 @@ export default function AdminPage() {
           <p className="text-gray-500 text-sm">模型配置、Agent绑定、用量监控</p>
         </div>
         <div className="flex gap-3">
+          <Link href="/admin/quality" className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">
+            质量仪表盘
+          </Link>
           <Link href="/admin/logs" className="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">
             请求日志
           </Link>
@@ -84,6 +88,9 @@ export default function AdminPage() {
       </div>
 
       <div className="space-y-8">
+        {/* DeepSeek one-click setup */}
+        <DeepSeekSetupPanel onApplied={refresh} />
+
         {/* Model Configuration */}
         <section className="border rounded-lg p-6">
           <ModelConfigPanel

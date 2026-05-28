@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lymo Story - Reading Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&amp;family=Public+Sans:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#f6f3ea",
+                        "surface-tint": "#875126",
+                        "on-primary-container": "#79461c",
+                        "secondary-fixed-dim": "#e2c19b",
+                        "on-tertiary-fixed-variant": "#004e5c",
+                        "on-background": "#1c1c17",
+                        "surface-container-high": "#ebe8df",
+                        "inverse-surface": "#31312b",
+                        "on-secondary-fixed-variant": "#594325",
+                        "surface-bright": "#fcf9f0",
+                        "on-surface": "#1c1c17",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#ffb783",
+                        "tertiary": "#156777",
+                        "inverse-on-surface": "#f4f1e8",
+                        "background": "#fcf9f0",
+                        "on-surface-variant": "#52443b",
+                        "on-primary-fixed-variant": "#6b3a11",
+                        "surface-container": "#f1eee5",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#dddad1",
+                        "tertiary-container": "#8bd1e3",
+                        "primary-fixed": "#ffdcc5",
+                        "primary": "#875126",
+                        "primary-container": "#ffb783",
+                        "on-primary-fixed": "#301400",
+                        "surface-container-highest": "#e5e2da",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#d7c3b7",
+                        "secondary": "#735a3a",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#a9edff",
+                        "secondary-fixed": "#ffddb6",
+                        "on-secondary-container": "#785e3e",
+                        "on-tertiary-fixed": "#001f26",
+                        "tertiary-fixed-dim": "#8bd1e3",
+                        "surface": "#fcf9f0",
+                        "secondary-container": "#fddab2",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e5e2da",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#291801",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#84746a",
+                        "on-tertiary-container": "#005b6a",
+                        "inverse-primary": "#ffb783"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif SC"],
+                        "body": ["Noto Serif SC"],
+                        "label": ["Public Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+body {
+    font-family: "Noto Serif SC", serif
+    }
+.ui-label {
+    font-family: "Public Sans", sans-serif
+    }
+.parchment-texture {
+    background-color: #fcf9f0;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDZN1iV2rgY11yhefCq_m1xsTewJfzyy_rE49Eyw1g66GT_L4yjc0jqjUbULuZURWFzH94tfiSCh9vfb7ihRQ0oTpolPzetqfsQH9WFfKn9gG2gp4dHNMNVe4aG5y6-C9CKwVDigFTnRnIoXM5FH6J1pg4uIXHT0oMGNZAtEEoMcTlwGO7RieC8o7xiSAA3tvoin5ESRuhxMpcdroxX1BH3OAAM4FBKjg5Qzr6z2XoopKmSJdXAMskciK672fs-DIonyleXquJ0K-8)
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface overflow-hidden h-screen flex flex-col items-center justify-start">
+<!-- Top Navigation Anchor -->
+<nav class="bg-[#131313] text-[#ffb783] font-serif text-2xl tracking-tight flex justify-between items-center px-6 h-16 w-full fixed top-0 z-40 bg-gradient-to-b from-[#1c1b1b] to-transparent">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined cursor-pointer hover:text-[#ffb783] transition-colors duration-400">arrow_back</span>
+<span class="font-serif italic text-[#ffb783]">Reading Settings</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined cursor-pointer hover:text-[#ffb783] transition-colors duration-400">bookmark</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-[#ffb783] transition-colors duration-400">share</span>
+</div>
+</nav>
+<!-- Main Content Simulation (Reading View) -->
+<main class="w-full max-w-2xl px-8 pt-24 pb-96 overflow-y-auto parchment-texture min-h-screen">
+<article class="space-y-8 text-on-surface">
+<header class="mb-12 border-b-2 border-primary/10 pb-6">
+<h1 class="text-4xl font-bold leading-tight mb-2">第一章：墨色深处</h1>
+<p class="text-primary font-label text-sm uppercase tracking-widest">Lymo Story · 第123页</p>
+</header>
+<p class="text-lg leading-relaxed text-justify">
+                在这片被遗忘的图书馆里，空气中弥漫着陈年纸张的香气，像是一种跨越世纪的低语。每一本书都是一个宇宙，静候着那个能敲开它封印的人。这里的灯光永远维持在一种如同夕阳坠落前的温暖色调，将长长的书架影子投射在打磨得发亮的木地板上。
+            </p>
+<p class="text-lg leading-relaxed text-justify">
+                林墨伸手抚过那些粗糙的布面装帧，指尖传来的触感像是历史的脉动。他寻找的不是真相，而是一种共鸣，一种能让他在这个喧嚣世界中寻得片刻宁静的节奏。
+            </p>
+<p class="text-lg leading-relaxed text-justify">
+                “墨水不会撒谎，”他轻声对自己说，手中的墨水瓶发出微弱的蓝光，映射在斑驳的墙壁上。
+            </p>
+<div class="py-12 flex justify-center">
+<div class="w-24 h-px bg-primary/20"></div>
+</div>
+<p class="text-lg leading-relaxed text-justify">
+                窗外的月光透过彩绘玻璃，在大厅中央洒下一片迷离。那些色彩斑斓的光影随着云层的移动而缓缓变幻，仿佛一张无形的地图。林墨翻开那本沉重的古籍，纸页翻动的声音在空旷的室内回荡。
+            </p>
+</article>
+</main>
+<!-- Settings Panel Drawer Overlay -->
+<section class="fixed bottom-0 left-0 w-full z-50 transform transition-transform duration-500 ease-out">
+<!-- Backdrop Blur and Container -->
+<div class="bg-surface-container-lowest/95 backdrop-blur-2xl rounded-t-[2.5rem] shadow-[0_-20px_60px_rgba(0,0,0,0.1)] p-8 md:px-24">
+<!-- Handle -->
+<div class="flex justify-center mb-8">
+<div class="w-12 h-1 bg-outline-variant/30 rounded-full"></div>
+</div>
+<!-- Title -->
+<div class="mb-8 flex justify-between items-center">
+<h2 class="text-2xl font-serif font-bold text-on-surface">阅读设置</h2>
+<span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform">close</span>
+</div>
+<div class="space-y-10">
+<!-- Brightness Slider -->
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-outline">light_mode</span>
+<div class="relative flex-1 h-12 flex items-center">
+<div class="absolute w-full h-1.5 bg-surface-variant rounded-full"></div>
+<div class="absolute w-2/3 h-1.5 bg-primary-container rounded-full"></div>
+<div class="absolute left-2/3 w-6 h-6 bg-primary-container rounded-full shadow-lg -translate-x-1/2 border-4 border-surface-container-lowest"></div>
+</div>
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">light_mode</span>
+</div>
+<!-- Font Size and Style Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+<!-- Font Size Selection -->
+<div class="space-y-4">
+<p class="ui-label text-xs uppercase tracking-widest text-outline font-semibold">字号调节</p>
+<div class="flex items-center justify-between bg-surface-container-low p-2 rounded-xl">
+<button class="flex-1 py-3 flex justify-center items-center hover:bg-surface-container-highest transition-colors rounded-lg group">
+<span class="ui-label text-sm text-on-surface group-active:scale-90 transition-transform">Aa</span>
+</button>
+<div class="w-px h-6 bg-outline-variant/20"></div>
+<span class="px-8 text-xl font-serif font-bold text-primary">24</span>
+<div class="w-px h-6 bg-outline-variant/20"></div>
+<button class="flex-1 py-3 flex justify-center items-center hover:bg-surface-container-highest transition-colors rounded-lg group">
+<span class="ui-label text-2xl text-on-surface group-active:scale-90 transition-transform">Aa</span>
+</button>
+</div>
+</div>
+<!-- Font Type Toggle -->
+<div class="space-y-4">
+<p class="ui-label text-xs uppercase tracking-widest text-outline font-semibold">字体选择</p>
+<div class="flex p-1 bg-surface-container-low rounded-xl">
+<button class="flex-1 py-3 px-4 bg-primary-container text-on-primary-container rounded-lg font-serif font-bold shadow-sm transition-all duration-300">
+                                衬线体 (Serif)
+                            </button>
+<button class="flex-1 py-3 px-4 text-on-surface-variant font-label font-medium rounded-lg hover:bg-surface-container-high transition-all duration-300">
+                                无衬线 (Sans)
+                            </button>
+</div>
+</div>
+</div>
+<!-- Background Theme Selection -->
+<div class="space-y-4">
+<p class="ui-label text-xs uppercase tracking-widest text-outline font-semibold">阅读背景</p>
+<div class="flex flex-wrap gap-6">
+<!-- Parchment (Active) -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-[#fcf9f0] border-4 border-primary-container ring-4 ring-primary-container/10 flex items-center justify-center relative overflow-hidden">
+<div class="absolute inset-0 opacity-20" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCKIPqi92hmh5UEAhQH7DBF3Hi2HnuC7MP2lfOYiRlgWz-CXLTbTZ26e5EOBVnEMHNR_uAX4qSoGP6BuwV8WEEJCEwRUE_v-pdp-lssgg47_unvDuhTm6QjBuyrjgxRqKQg9EDRdYBJez6EJ7-ba9fvoOj9VQfHmz_Ark7tC7QdJxpkmPfCmMNym3P40YMAAhj176F-T5Ylw8J311s1gLjJYd0_N5lOda8UQPsI_H8QbOP0owRHrP6bhnBV7eEofjFqeREuRK7FqzA')"></div>
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<span class="ui-label text-xs font-semibold text-primary">羊皮纸</span>
+</div>
+<!-- White -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-white border border-outline-variant hover:border-primary transition-colors"></div>
+<span class="ui-label text-xs text-outline group-hover:text-on-surface transition-colors">纯白</span>
+</div>
+<!-- Pink (Peach) -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-[#fae3e3] border border-outline-variant hover:border-primary transition-colors"></div>
+<span class="ui-label text-xs text-outline group-hover:text-on-surface transition-colors">柔粉</span>
+</div>
+<!-- Dark -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-[#1c1c17] border border-outline-variant hover:border-primary transition-colors"></div>
+<span class="ui-label text-xs text-outline group-hover:text-on-surface transition-colors">深夜</span>
+</div>
+<!-- Green -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-[#e8f5e9] border border-outline-variant hover:border-primary transition-colors"></div>
+<span class="ui-label text-xs text-outline group-hover:text-on-surface transition-colors">护眼</span>
+</div>
+</div>
+</div>
+<!-- Interaction Mode -->
+<div class="space-y-4 pb-12">
+<p class="ui-label text-xs uppercase tracking-widest text-outline font-semibold">翻页模式</p>
+<div class="grid grid-cols-3 gap-4">
+<button class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-container-low border-2 border-transparent hover:border-primary-container transition-all group">
+<span class="material-symbols-outlined text-primary/60 group-hover:text-primary">swap_horiz</span>
+<span class="ui-label text-xs font-medium text-on-surface">左右翻页</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-primary-container/20 border-2 border-primary-container transition-all group">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">vertical_align_center</span>
+<span class="ui-label text-xs font-bold text-on-primary-container">连续滚动</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-container-low border-2 border-transparent hover:border-primary-container transition-all group">
+<span class="material-symbols-outlined text-primary/60 group-hover:text-primary">block</span>
+<span class="ui-label text-xs font-medium text-on-surface">无动画</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Navigation Component Anchor -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-8 pb-6 pt-4 bg-[#131313]/70 backdrop-blur-xl z-50 rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.3)] pointer-events-auto">
+<div class="flex flex-col items-center justify-center text-white/40 p-3 hover:text-[#ffb783] transition-all duration-400 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-sans text-[10px] uppercase tracking-widest mt-1">目录</span>
+</div>
+<div class="flex flex-col items-center justify-center text-white/40 p-3 hover:text-[#ffb783] transition-all duration-400 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined">vertical_align_center</span>
+<span class="font-sans text-[10px] uppercase tracking-widest mt-1">进度</span>
+</div>
+<div class="flex flex-col items-center justify-center text-white/40 p-3 hover:text-[#ffb783] transition-all duration-400 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined">format_size</span>
+<span class="font-sans text-[10px] uppercase tracking-widest mt-1">日夜</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#ffb783] bg-[#ffb783]/10 rounded-full p-3 active:scale-90 cursor-pointer">
+<span class="material-symbols-outlined">settings_brightness</span>
+<span class="font-sans text-[10px] uppercase tracking-widest mt-1">设置</span>
+</div>
+</nav>
+<!-- Floating Action Button (FAB) suppression on focused settings page -->
+<!-- The FAB is suppressed per the Shell Visibility & Relevance instructions as we are in a sub-settings view -->
+</body></html>

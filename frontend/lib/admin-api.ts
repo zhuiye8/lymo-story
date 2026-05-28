@@ -20,9 +20,12 @@ export interface ModelConfig {
   max_tokens: number;
   default_temperature: number;
   cost_per_million_input: number;
+  cost_per_million_input_cached?: number;
   cost_per_million_output: number;
   currency: string;
   is_active: boolean;
+  provider?: string;
+  provider_options?: Record<string, string | number | boolean>;
 }
 
 export async function listModels(): Promise<ModelConfig[]> {
@@ -64,6 +67,31 @@ export interface ModelTestResult {
 export async function testModel(modelId: string): Promise<ModelTestResult> {
   return fetchJson(`${API_BASE}/admin/models/${modelId}/test`, {
     method: "POST",
+  });
+}
+
+// --- DeepSeek one-click setup ---
+
+export interface DeepSeekTierBinding {
+  model_id: string;
+  tier: number;
+  label: string;
+  desc: string;
+  agents: string[];
+}
+
+export async function getDeepSeekTierBindings(): Promise<{ tier_bindings: DeepSeekTierBinding[] }> {
+  return fetchJson(`${API_BASE}/admin/providers/deepseek/tier-bindings`);
+}
+
+export async function seedDeepSeek(
+  apiKey: string,
+  applyTierBindings: boolean = true
+): Promise<{ message: string; seeded_models: { id: string; display_name: string }[]; bindings_applied: number }> {
+  return fetchJson(`${API_BASE}/admin/providers/deepseek/seed`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ api_key: apiKey, apply_tier_bindings: applyTierBindings }),
   });
 }
 
@@ -205,4 +233,138 @@ export async function updateGenerationSettings(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(settings),
   });
+}
+
+// --- Quality Dashboard (AC5, Phase 0) ---
+
+export interface QualityResponseEnvelope<T> {
+  batch_id: number;
+  rubric_version: string;
+  detector_version: string;
+  judge_model: string;
+  generated_at: string;
+  data_ready: boolean;
+  reason?: string | null;
+  data: T | null;
+}
+
+export interface BatchSummary {
+  id: number;
+  batch_label: string;
+  rubric_version: string;
+  detector_version: string;
+  judge_model: string;
+  scope_chapter_count: number;
+  status: string;
+  started_at: string;
+  finished_at?: string | null;
+}
+
+export interface StatBlock {
+  mean: number;
+  variance: number;
+  stdev: number;
+  min: number;
+  max: number;
+}
+
+export interface CompositeStatBlock extends StatBlock {
+  slope_per_chapter: number;
+  first_half_mean: number;
+  second_half_mean: number;
+  delta: number;
+}
+
+export interface TrendPoint {
+  chapter_num: number;
+  word_count: number;
+  composite_score: number;
+  mean_quality: number;
+  slop_penalty: number;
+}
+
+export interface TrendStory {
+  story_id: string;
+  story_title: string;
+  n_chapters: number;
+  chapters: TrendPoint[];
+  aggregates: {
+    composite: CompositeStatBlock;
+    mean_quality: StatBlock;
+    slop_penalty: StatBlock;
+    word_count: StatBlock;
+  };
+}
+
+export interface TrendData {
+  stories: TrendStory[];
+}
+
+export interface PerStoryDim {
+  story_id: string;
+  story_title?: string;
+  n_chapters: number;
+  scores: Record<string, StatBlock>;
+}
+
+export interface ByDimensionData {
+  dimensions: string[];
+  per_story: PerStoryDim[];
+  global: PerStoryDim;
+}
+
+export interface HeatmapData {
+  story_id: string;
+  story_title: string;
+  dimensions: string[];
+  chapters: number[];
+  matrix: number[][];
+  meta: { score_range: [number, number]; color_scheme_hint: string };
+  evidence?: Record<string, Record<string, string>>;
+}
+
+export interface HistBin {
+  bin_low: number;
+  bin_high: number;
+  count: number;
+}
+
+export interface DistributionData {
+  composite_histogram: HistBin[];
+  slop_histogram: HistBin[];
+  per_dimension_histograms: Record<string, HistBin[]>;
+  totals: { n_chapters: number; n_stories: number };
+}
+
+const QUALITY_BASE = `${API_BASE}/admin/quality`;
+
+export async function listQualityBatches(): Promise<{ batches: BatchSummary[] }> {
+  return fetchJson(`${QUALITY_BASE}/batches`);
+}
+
+export async function getQualityTrend(
+  batchId: number
+): Promise<QualityResponseEnvelope<TrendData>> {
+  return fetchJson(`${QUALITY_BASE}/batch/${batchId}/trend`);
+}
+
+export async function getQualityByDimension(
+  batchId: number
+): Promise<QualityResponseEnvelope<ByDimensionData>> {
+  return fetchJson(`${QUALITY_BASE}/batch/${batchId}/by-dimension`);
+}
+
+export async function getQualityHeatmap(
+  batchId: number,
+  storyId: string
+): Promise<QualityResponseEnvelope<HeatmapData>> {
+  return fetchJson(
+    `${QUALITY_BASE}/batch/${batchId}/heatmap?story_id=${encodeURIComponent(storyId)}`
+  );
+}
+
+export async function getQualityDistribution(
+  batchId: number
+): Promise<QualityResponseEnvelope<DistributionData>> {
+  return fetchJson(`${QUALITY_BASE}/batch/${batchId}/distribution`);
 }

@@ -314,6 +314,255 @@ async def delete_story(
     return {"message": f"Story {story_id} deleted"}
 
 
+class OutlineRegenRequest(BaseModel):
+    user_instructions: str = ""
+
+
+@router.post("/{story_id}/outline/regenerate")
+async def regenerate_outline(
+    story_id: str,
+    req: OutlineRegenRequest,
+    llm: LLMClient = Depends(get_llm),
+    sqlite: SQLiteStore = Depends(get_sqlite),
+    json_store: JSONStore = Depends(get_json_store),
+):
+    """Regenerate the volume outline based on the current bible + user instructions.
+
+    Preserves concept/world/characters, only replaces the volumes/initial_conflicts/planned_arc.
+    """
+    from backend.agents.outline_planner import OutlinePlannerAgent
+
+    story = await sqlite.get_story(story_id)
+    if not story:
+        raise HTTPException(404, "Story not found")
+
+    bible = json_store.load_story_bible(story_id)
+    if not bible:
+        raise HTTPException(404, "Story bible not found")
+
+    # Reconstruct concept/world/characters from bible for the agent
+    concept = {
+        "title": bible.get("title", ""),
+        "genre": bible.get("genre", ""),
+        "tone": bible.get("tone", ""),
+        "synopsis": bible.get("synopsis", ""),
+        "inspiration": bible.get("inspiration", ""),
+        "special_ability": (bible.get("world") or {}).get("special_ability") or {},
+    }
+    world_setting = bible.get("world") or {}
+    characters_design = {
+        "protagonist": bible.get("protagonist"),
+        "antagonist": bible.get("antagonist"),
+        "supporting_characters": bible.get("supporting_characters") or [],
+    }
+    current_outline = {
+        "initial_conflicts": bible.get("initial_conflicts") or [],
+        "planned_arc": bible.get("planned_arc") or "",
+        "volumes": bible.get("volumes") or [],
+    }
+
+    agent = OutlinePlannerAgent(llm)
+    new_outline = await agent.revise(
+        concept=concept,
+        world_setting=world_setting,
+        characters_design=characters_design,
+        current_outline=current_outline,
+        user_instructions=req.user_instructions,
+        story_id=story_id,
+    )
+
+    # Backup old outline into bible for reversibility
+    if "_outline_history" not in bible or not isinstance(bible["_outline_history"], list):
+        bible["_outline_history"] = []
+    bible["_outline_history"].append({
+        "replaced_at": __import__("datetime").datetime.now().isoformat(),
+        "user_instructions": req.user_instructions,
+        "outline": current_outline,
+    })
+    # Keep only last 5 history entries
+    bible["_outline_history"] = bible["_outline_history"][-5:]
+
+    # Apply new outline
+    bible["initial_conflicts"] = new_outline.get("initial_conflicts", [])
+    bible["planned_arc"] = new_outline.get("planned_arc", "")
+    bible["volumes"] = new_outline.get("volumes", [])
+
+    json_store.save_story_bible(story_id, bible)
+
+    return {
+        "message": "大纲已重新生成",
+        "volumes_count": len(bible["volumes"]),
+        "history_count": len(bible["_outline_history"]),
+    }
+
+
+@router.post("/{story_id}/clone-outline")
+async def clone_outline_to_new_story(
+    story_id: str,
+    req: dict | None = None,
+    sqlite: SQLiteStore = Depends(get_sqlite),
+    json_store: JSONStore = Depends(get_json_store),
+    world_book: WorldBook = Depends(get_world_book),
+):
+    """Clone the story's bible to a brand-new story (no chapters, fresh slate).
+
+    Clones: bible.json + characters.json + world book entries + empty event_graph.
+    Does NOT clone: chapters, versions, memories, states, arcs, triples, summaries.
+    """
+    source = await sqlite.get_story(story_id)
+    if not source:
+        raise HTTPException(404, "Source story not found")
+
+    bible = json_store.load_story_bible(story_id)
+    if not bible:
+        raise HTTPException(404, "Source bible not found")
+
+    new_story_id = str(uuid.uuid4())[:8]
+    title_suffix = (req or {}).get("title_suffix", "（分支）")
+    new_title = (bible.get("title", "") or source.get("theme", "")) + title_suffix
+
+    # Create new story
+    await sqlite.create_story(new_story_id, new_title, source["theme"])
+    await sqlite.update_story(new_story_id, status="bible_ready")
+
+    # Clone bible with new title
+    new_bible = {**bible}
+    new_bible["title"] = new_title
+    # Drop history (fresh slate)
+    new_bible.pop("_outline_history", None)
+    json_store.save_story_bible(new_story_id, new_bible)
+
+    # Clone characters
+    chars = json_store.load_characters(story_id) or []
+    json_store.save_characters(new_story_id, chars)
+
+    # Empty event graph
+    json_store.save_event_graph(new_story_id, [])
+
+    # Init world state
+    initial_world = {
+        "story_id": new_story_id,
+        "current_time": 0,
+        "time_description": "故事开始",
+        "global_flags": [],
+        "active_character_ids": [c.get("character_id") for c in chars if c.get("character_id")],
+        "version": 0,
+    }
+    await sqlite.save_world_state(new_story_id, initial_world, 0)
+
+    # Sync world book for the new story
+    try:
+        await world_book.sync_from_bible(new_story_id, new_bible)
+    except Exception:
+        pass
+
+    return {
+        "message": "已克隆大纲到新小说",
+        "new_story_id": new_story_id,
+        "new_title": new_title,
+    }
+
+
+@router.delete("/{story_id}/chapters/from/{chapter_num}")
+async def delete_chapters_from(
+    story_id: str,
+    chapter_num: int,
+    sqlite: SQLiteStore = Depends(get_sqlite),
+    vector: VectorStore = Depends(get_vector),
+    json_store: JSONStore = Depends(get_json_store),
+):
+    """Delete chapter_num and all subsequent chapters, plus all their memories.
+
+    SAFETY POLICY (per supervisor review 2026-04-26):
+    - chapter_num == 1: full reset (delete all + reset world_state + clear event_graph)
+    - chapter_num > 1: REJECTED until per-chapter world_state snapshots are
+      implemented. Without snapshots, world_state and event_graph remain at
+      the post-deletion-tail state and would contaminate future regeneration.
+      Tracked as separate feature (not Phase 0 scope).
+
+    Workaround for N > 1: use chapter version restore + chapter regenerate flow.
+    """
+    import aiosqlite
+    story = await sqlite.get_story(story_id)
+    if not story:
+        raise HTTPException(404, "Story not found")
+    if chapter_num < 1:
+        raise HTTPException(400, "chapter_num must be >= 1")
+    if chapter_num > 1:
+        raise HTTPException(
+            400,
+            "Deleting from chapter N>1 is currently disabled. World state and "
+            "event graph would remain stale and poison regeneration. "
+            "Use full reset (chapter_num=1) or chapter version restore instead. "
+            "Safe rewind with per-chapter snapshots is a separate planned feature."
+        )
+
+    # Count affected
+    async with aiosqlite.connect(sqlite.db_path) as db:
+        cur = await db.execute(
+            "SELECT COUNT(*) FROM chapters WHERE story_id = ? AND chapter_num >= ?",
+            (story_id, chapter_num),
+        )
+        row = await cur.fetchone()
+        affected = row[0] if row else 0
+
+        # Delete SQLite rows
+        for table in ("chapters", "chapter_versions", "chapter_summaries",
+                      "chapter_scenes", "character_states", "character_arcs"):
+            await db.execute(
+                f"DELETE FROM {table} WHERE story_id = ? AND chapter_num >= ?",
+                (story_id, chapter_num),
+            )
+        # knowledge_triples: valid_from is the chapter that created them
+        await db.execute(
+            "DELETE FROM knowledge_triples WHERE story_id = ? AND valid_from >= ?",
+            (story_id, chapter_num),
+        )
+        # chapter_dependencies (both as source and as depends_on)
+        await db.execute(
+            "DELETE FROM chapter_dependencies WHERE story_id = ? AND (chapter_num >= ? OR depends_on_chapter >= ?)",
+            (story_id, chapter_num, chapter_num),
+        )
+        await db.commit()
+
+    # Delete vector store entries
+    try:
+        collection = vector.get_collection(story_id)
+        # Fetch all ids with chapter >= N
+        got = collection.get(
+            where={"chapter": {"$gte": chapter_num}},
+            include=[],
+        )
+        ids = got.get("ids") or []
+        if ids:
+            collection.delete(ids=ids)
+    except Exception:
+        pass
+
+    # If we deleted from chapter 1, also reset world state and clear event graph
+    if chapter_num == 1:
+        try:
+            initial_world = {
+                "story_id": story_id,
+                "current_time": 0,
+                "time_description": "故事开始",
+                "global_flags": [],
+                "active_character_ids": [],
+                "version": 0,
+            }
+            await sqlite.save_world_state(story_id, initial_world, 0)
+            json_store.save_event_graph(story_id, [])
+        except Exception:
+            pass
+        await sqlite.update_story(story_id, status="bible_ready")
+
+    return {
+        "message": f"已删除从第 {chapter_num} 章起的 {affected} 个章节及相关记忆",
+        "deleted_count": affected,
+        "from_chapter": chapter_num,
+    }
+
+
 @router.put("/{story_id}/publish")
 async def publish_story(
     story_id: str,

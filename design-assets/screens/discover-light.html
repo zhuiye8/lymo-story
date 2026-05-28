@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&amp;family=Public+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-variant": "#e5e2da",
+                    "inverse-on-surface": "#f4f1e8",
+                    "on-surface-variant": "#52443b",
+                    "outline": "#84746a",
+                    "surface-container-highest": "#e5e2da",
+                    "tertiary-fixed": "#a9edff",
+                    "primary-fixed-dim": "#ffb783",
+                    "on-tertiary-fixed": "#001f26",
+                    "surface-dim": "#dddad1",
+                    "tertiary-container": "#8bd1e3",
+                    "error-container": "#ffdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed-dim": "#8bd1e3",
+                    "on-primary-fixed": "#301400",
+                    "outline-variant": "#d7c3b7",
+                    "secondary-container": "#fddab2",
+                    "secondary": "#735a3a",
+                    "on-secondary-fixed-variant": "#594325",
+                    "primary-container": "#ffb783",
+                    "on-secondary-fixed": "#291801",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "surface-bright": "#fcf9f0",
+                    "primary": "#875126",
+                    "surface": "#fcf9f0",
+                    "inverse-surface": "#31312b",
+                    "surface-tint": "#875126",
+                    "surface-container-low": "#f6f3ea",
+                    "on-primary-container": "#79461c",
+                    "surface-container": "#f1eee5",
+                    "on-surface": "#1c1c17",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#ffb783",
+                    "secondary-fixed-dim": "#e2c19b",
+                    "background": "#fcf9f0",
+                    "secondary-fixed": "#ffddb6",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#1c1c17",
+                    "on-primary-fixed-variant": "#6b3a11",
+                    "surface-container-high": "#ebe8df",
+                    "primary-fixed": "#ffdcc5",
+                    "on-tertiary-fixed-variant": "#004e5c",
+                    "on-tertiary-container": "#005b6a",
+                    "error": "#ba1a1a",
+                    "on-primary": "#ffffff",
+                    "tertiary": "#156777",
+                    "on-secondary-container": "#785e3e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Noto Serif SC"],
+                    "body": ["Noto Serif SC"],
+                    "label": ["Public Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background-color: #FCF9F0;
+            color: #1C1C17;
+            -webkit-font-smoothing: antialiased;
+        }
+        .reading-content p {
+            text-indent: 2em;
+            text-align: justify;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface">
+<!-- Top Navigation Bar (Floating/Tap triggered) -->
+<nav class="fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-[#FCF9F0]/80 backdrop-blur-xl transition-all duration-300 border-none shadow-none">
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline text-lg tracking-tight font-bold text-primary">第十四章：青灯古庙</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-primary">settings_brightness</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-primary">text_fields</span>
+</button>
+</div>
+</nav>
+<!-- Reading Canvas -->
+<main class="max-w-3xl mx-auto px-6 pt-24 pb-32 min-h-screen">
+<!-- Header Section -->
+<header class="mb-12 text-center">
+<div class="inline-block px-3 py-1 mb-6 rounded-full bg-primary-container/20 text-on-primary-container text-xs font-label tracking-widest uppercase">
+                狸梦独家
+            </div>
+<h2 class="text-3xl md:text-4xl font-headline font-bold text-on-surface leading-tight tracking-tight">第十四章：青灯古庙</h2>
+<div class="mt-4 flex justify-center items-center gap-4 text-sm text-outline font-label">
+<span>约 3,240 字</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>预计 10 分钟</span>
+</div>
+</header>
+<!-- Main Content -->
+<article class="reading-content text-lg md:text-xl text-on-surface/90 selection:bg-primary-container">
+<p>在那深秋的薄暮中，山间的雾气如同一层蝉翼般的轻纱，悄无声息地笼罩了古道的每一个转角。林长生紧了紧肩上的行囊，脚下的枯叶在步履间发出细碎的声响，仿佛是这寂静山岭中唯一的呼吸。</p>
+<p>半山腰处，一座被岁月剥蚀得近乎颓败的庙宇若隐若现。那庙门上的朱漆早已成片脱落，露出里头灰白的木质纹理，像极了百岁老人干枯的手。门楣上挂着一块歪斜的匾额，虽然字迹模糊，但依稀能辨认出“归云”二字。</p>
+<p>推门而入，一股夹杂着冷冽檀香与陈腐木头气息的味道扑面而来。大殿中心，一盏豆大的油灯在穿堂风中摇曳生姿，散发着昏黄而温软的光。那火苗极小，却异常坚韧，将神像那低眉顺目的影子长长地投射在剥落的青砖墙上。</p>
+<!-- Stylized Separator -->
+<div class="flex justify-center items-center my-12 gap-4">
+<div class="h-px w-12 bg-outline-variant"></div>
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-primary scale-75" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-primary scale-75" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div class="h-px w-12 bg-outline-variant"></div>
+</div>
+<p>长生在蒲团上坐定，目光掠过那些盛满尘埃的经卷。此时，一个苍老的身影从阴影中缓缓走出。那是一位老僧，僧袍虽然补丁累累，却浆洗得极其干净。他手里握着一串油光可鉴的念珠，每拨动一颗，仿佛都在这空旷的大殿里敲响了一声岁月的钟鸣。</p>
+<p>“客从何处来，往何处去？”老僧的声音沙哑，却透着一种让人心安的沉静。他并没有抬头，只是安静地拨弄着那盏明灭不定的油灯。长生微微一怔，他此行是为了寻找传说中能入梦的灵犀香，可在这荒山古寺之中，这个问题却让他无从答起。</p>
+<p>窗外的雨声渐起，淅淅沥沥地敲打着残破的瓦片。长生闭上眼，在这一刻，周遭的喧嚣似乎彻底远去，只剩下那盏青灯在意识的深处长明。他意识到，真正的寻找或许并不在远方，而是在每一个呼吸的间隙，在这一方寸之地的寂静里。</p>
+</article>
+<!-- Footer Actions -->
+<footer class="mt-20 border-t border-outline-variant/30 pt-12 flex flex-col items-center">
+<div class="flex flex-col md:flex-row gap-6 w-full justify-between items-center mb-12">
+<button class="w-full md:w-auto px-10 py-3 rounded-lg bg-surface-container-high text-primary font-label font-medium transition-all hover:bg-surface-variant flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+                    上一章
+                </button>
+<button class="w-full md:w-auto px-12 py-3 rounded-lg bg-primary text-on-primary font-label font-medium transition-all hover:opacity-90 shadow-sm flex items-center justify-center gap-2">
+                    下一章
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<div class="text-center">
+<p class="text-outline/40 font-label text-xs tracking-[0.2em] mb-4">本章节内容由 狸梦故事 AI 创作生成</p>
+<div class="flex justify-center items-center opacity-10">
+<span class="font-headline italic text-2xl tracking-tighter text-primary">Lymo Story</span>
+</div>
+</div>
+</footer>
+</main>
+<!-- Bottom Navigation Bar (Hidden by default or shown on scroll/tap) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-[#FCF9F0] shadow-[0_-4px_24px_rgba(135,81,38,0.06)] rounded-t-lg">
+<button class="flex flex-col items-center justify-center text-[#1C1C17]/50 hover:text-[#875126] transition-all">
+<span class="material-symbols-outlined" data-icon="list">list</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest mt-1">目录</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#1C1C17]/50 hover:text-[#875126] transition-all">
+<span class="material-symbols-outlined" data-icon="dark_mode">dark_mode</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest mt-1">夜间</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#875126] bg-[#FFB783]/20 rounded-xl px-4 py-1">
+<span class="material-symbols-outlined" data-icon="auto_stories" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest mt-1">进度</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#1C1C17]/50 hover:text-[#875126] transition-all">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span class="font-sans text-[11px] font-medium uppercase tracking-widest mt-1">书签</span>
+</button>
+</nav>
+<!-- Subtle Background Texture -->
+<div class="fixed inset-0 pointer-events-none opacity-5 mix-blend-multiply" data-alt="subtle organic paper texture with natural fibers and warm cream tones for professional reading background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAEo9Zfnj82ASGlSaL0GN2XuBHOXr3ItVcYbJSziOc_B-mx0q3WX0y3Ap4s-ZVC3KiQ251ecW1GngZAbxcKSH6fecxiAe9LrB9U458M_sgSLHSzSg6V9JPwsh7uG6lhHeWw0f47UrasdcKG94FCnK__Cemk0I3pcIaaOvcJb97Ba7wDXW5ho_zmfpooJRAnpSPjKc17_yK734z9A6omO1yqH_vhQFVL9Yidva-MNhmGIp-plrHzKts1q3VMINXLKwbGoBpYxMharhU');">
+</div>
+</body></html>

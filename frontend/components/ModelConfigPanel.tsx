@@ -248,10 +248,25 @@ export default function ModelConfigPanel({ models, onSave, onDelete }: Props) {
         {models.map((m) => (
           <div key={m.id} className="p-3 border rounded-lg">
             <div className="flex items-center justify-between">
-              <div>
-                <span className="font-medium">{m.display_name}</span>
-                <span className="ml-2 text-sm text-gray-500">{m.litellm_model}</span>
-                <span className={`ml-2 text-xs px-2 py-0.5 rounded ${m.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
+                <span className="font-medium truncate">{m.display_name}</span>
+                <span className="text-sm text-gray-500 font-mono">{m.litellm_model}</span>
+                {m.provider === "deepseek" && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-mono">
+                    DeepSeek
+                  </span>
+                )}
+                {m.provider_options?.thinking === "enabled" && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-200">
+                    💭 思考
+                  </span>
+                )}
+                {m.provider_options?.thinking === "disabled" && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                    ⚡ 快速
+                  </span>
+                )}
+                <span className={`text-xs px-2 py-0.5 rounded ${m.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
                   {m.is_active ? "启用" : "禁用"}
                 </span>
               </div>
