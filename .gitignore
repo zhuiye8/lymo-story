@@ -12,12 +12,18 @@ venv/
 # Data (runtime)
 data/stories/
 data/story.db
+data/story.db.bak_*
 data/checkpoints.db
 data/chroma/
 
 # IDE
 .vscode/
 .idea/
+
+# Claude Code local settings (per-developer roadmap / launch config)
+.claude/
+reader/.claude/
+frontend/.claude/
 
 # Node
 frontend/node_modules/
