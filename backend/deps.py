@@ -1,18 +1,13 @@
+"""依赖注入（Phase 1 精简）。"""
 from fastapi import Request
 
 from backend.config import Settings
 from backend.llm.client import LLMClient
 from backend.llm.logger import LLMLogger
 from backend.llm.model_registry import ModelRegistry
-from backend.memory.chapter_extractor import ChapterExtractor
-from backend.memory.context_builder import ContextBuilder
-from backend.memory.knowledge_graph import KnowledgeGraph
-from backend.memory.layered_memory import LayeredMemory
-from backend.memory.plot_dedup import PlotDedupStore
-from backend.memory.world_book import WorldBook
+from backend.memory.knowledge_quads import KnowledgeQuads
 from backend.services.task_registry import TaskRegistry
 from backend.progress import ProgressStore
-from backend.storage.json_store import JSONStore
 from backend.storage.sqlite_store import SQLiteStore
 from backend.storage.vector_store import VectorStore
 
@@ -25,8 +20,8 @@ def get_sqlite(request: Request) -> SQLiteStore:
     return request.app.state.sqlite
 
 
-def get_json_store(request: Request) -> JSONStore:
-    return request.app.state.json_store
+def get_quads(request: Request) -> KnowledgeQuads:
+    return request.app.state.quads
 
 
 def get_vector(request: Request) -> VectorStore:
@@ -47,30 +42,6 @@ def get_llm_logger(request: Request) -> LLMLogger:
 
 def get_progress_store(request: Request) -> ProgressStore:
     return request.app.state.progress_store
-
-
-def get_layered_memory(request: Request) -> LayeredMemory:
-    return request.app.state.layered_memory
-
-
-def get_chapter_extractor(request: Request) -> ChapterExtractor:
-    return request.app.state.chapter_extractor
-
-
-def get_plot_dedup(request: Request) -> PlotDedupStore:
-    return request.app.state.plot_dedup
-
-
-def get_knowledge_graph(request: Request) -> KnowledgeGraph:
-    return request.app.state.knowledge_graph
-
-
-def get_world_book(request: Request) -> WorldBook:
-    return request.app.state.world_book
-
-
-def get_context_builder(request: Request) -> ContextBuilder:
-    return request.app.state.context_builder
 
 
 def get_task_registry(request: Request) -> TaskRegistry:

@@ -1,92 +1,84 @@
-"""Public read-only API for the reader/preview frontend."""
+"""Reader 端只读 API（Phase 1）。
 
+读新 schema：已发布故事 = status 含 published 标记；章节 chapters.is_published=1。
+bible 从 stories.bible_json。
+"""
+from __future__ import annotations
+
+import aiosqlite
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.deps import get_json_store, get_sqlite
-from backend.storage.json_store import JSONStore
+from backend.deps import get_sqlite
 from backend.storage.sqlite_store import SQLiteStore
 
 router = APIRouter()
 
 
+async def _published_chapters(db_path: str, story_id: str) -> list[dict]:
+    async with aiosqlite.connect(db_path) as db:
+        db.row_factory = aiosqlite.Row
+        cur = await db.execute(
+            "SELECT chapter_num, title, pov, word_count, content FROM chapters "
+            "WHERE story_id = ? AND is_published = 1 ORDER BY chapter_num",
+            (story_id,))
+        return [dict(r) for r in await cur.fetchall()]
+
+
 @router.get("/books")
-async def list_books(sqlite: SQLiteStore = Depends(get_sqlite)):
-    stories = await sqlite.list_published_stories()
-    return [
-        {
-            "id": s["id"],
-            "title": s.get("title", ""),
-            "theme": s.get("theme", ""),
-            "chapter_count": s.get("published_chapter_count", 0),
-            "updated_at": s.get("updated_at", ""),
-        }
-        for s in stories
-    ]
+async def list_books(store: SQLiteStore = Depends(get_sqlite)):
+    stories = await store.list_stories()
+    out = []
+    for s in stories:
+        if s.get("status") == "published":
+            chs = await _published_chapters(store.db_path, s["id"])
+            out.append({
+                "id": s["id"], "title": s.get("title", ""), "genre": s.get("genre", ""),
+                "chapter_count": len(chs), "updated_at": s.get("updated_at", ""),
+            })
+    return out
 
 
 @router.get("/books/{book_id}")
-async def get_book(
-    book_id: str,
-    sqlite: SQLiteStore = Depends(get_sqlite),
-    json_store: JSONStore = Depends(get_json_store),
-):
-    story = await sqlite.get_story(book_id)
-    if not story or not story.get("is_published"):
+async def get_book(book_id: str, store: SQLiteStore = Depends(get_sqlite)):
+    story = await store.get_story(book_id)
+    if not story or story.get("status") != "published":
         raise HTTPException(404, "Book not found")
-
-    bible = json_store.load_story_bible(book_id)
-    chapters = await sqlite.list_published_chapters(book_id)
-
+    bible = story.get("bible", {})
+    concept = bible.get("concept", {})
+    chars = bible.get("characters", {})
+    char_list = []
+    if chars:
+        for cd in [chars.get("protagonist"), chars.get("antagonist"), *(chars.get("supporting") or [])]:
+            if cd:
+                char_list.append({"name": cd.get("name", ""), "role": cd.get("role", "")})
+    chapters = await _published_chapters(store.db_path, book_id)
     return {
-        "id": story["id"],
-        "title": story.get("title", ""),
-        "theme": story.get("theme", ""),
-        "genre": bible.get("genre", "") if bible else "",
-        "setting": bible.get("setting", "") if bible else "",
-        "characters": [
-            {"name": c.get("name", ""), "role": c.get("role", "")}
-            for c in (bible.get("characters", []) if bible else [])
-        ],
+        "id": story["id"], "title": story.get("title", ""),
+        "genre": story.get("genre", ""),
+        "synopsis": concept.get("synopsis", ""),
+        "characters": char_list,
         "chapters": [
-            {
-                "chapter_num": ch["chapter_num"],
-                "title": ch.get("title", ""),
-                "pov": ch.get("pov", ""),
-                "word_count": ch.get("word_count", 0),
-            }
-            for ch in chapters
+            {"chapter_num": c["chapter_num"], "title": c["title"], "pov": c["pov"], "word_count": c["word_count"]}
+            for c in chapters
         ],
     }
 
 
 @router.get("/books/{book_id}/chapters/{chapter_num}")
-async def read_chapter(
-    book_id: str,
-    chapter_num: int,
-    sqlite: SQLiteStore = Depends(get_sqlite),
-):
-    # Verify book is published
-    story = await sqlite.get_story(book_id)
-    if not story or not story.get("is_published"):
+async def read_chapter(book_id: str, chapter_num: int, store: SQLiteStore = Depends(get_sqlite)):
+    story = await store.get_story(book_id)
+    if not story or story.get("status") != "published":
         raise HTTPException(404, "Book not found")
-
-    ch = await sqlite.get_published_chapter(book_id, chapter_num)
-    if not ch:
+    chapters = await _published_chapters(store.db_path, book_id)
+    nums = [c["chapter_num"] for c in chapters]
+    if chapter_num not in nums:
         raise HTTPException(404, "Chapter not found or not published")
-
-    # Get total published chapters for navigation
-    all_chapters = await sqlite.list_published_chapters(book_id)
-    chapter_nums = [c["chapter_num"] for c in all_chapters]
-    current_idx = chapter_nums.index(chapter_num) if chapter_num in chapter_nums else -1
-
+    ch = next(c for c in chapters if c["chapter_num"] == chapter_num)
+    idx = nums.index(chapter_num)
     return {
-        "story_id": book_id,
-        "story_title": story.get("title", ""),
-        "chapter_num": ch["chapter_num"],
-        "title": ch.get("title", ""),
-        "pov": ch.get("pov", ""),
-        "content": ch.get("content", ""),
-        "word_count": len(ch.get("content", "")),
-        "prev_chapter": chapter_nums[current_idx - 1] if current_idx > 0 else None,
-        "next_chapter": chapter_nums[current_idx + 1] if current_idx < len(chapter_nums) - 1 else None,
+        "story_id": book_id, "story_title": story.get("title", ""),
+        "chapter_num": ch["chapter_num"], "title": ch["title"], "pov": ch["pov"],
+        "content": ch["content"], "word_count": ch["word_count"],
+        "prev_chapter": nums[idx - 1] if idx > 0 else None,
+        "next_chapter": nums[idx + 1] if idx < len(nums) - 1 else None,
     }

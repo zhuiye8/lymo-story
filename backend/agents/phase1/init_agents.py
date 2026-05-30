@@ -12,11 +12,14 @@ import logging
 
 from backend.agents.base import BaseAgent
 from backend.models.phase1 import (
-    Concept, WorldSetting, Characters, CharacterDesign, CharacterRoster, Outline, StoryBible,
+    Concept, WorldSetting, WorldCore, FactionList, WorldRuleList,
+    Characters, CharacterDesign, CharacterRoster,
+    Outline, OutlineSkeleton, VolumeList, StoryBible,
 )
 from backend.prompts.phase1.init_prompts import (
-    concept_prompt, world_builder_prompt, character_roster_prompt,
-    single_character_prompt, outline_planner_prompt,
+    concept_prompt, world_core_prompt, faction_list_prompt, world_rule_prompt,
+    character_roster_prompt, single_character_prompt,
+    outline_skeleton_prompt, volume_list_prompt,
 )
 
 logger = logging.getLogger(__name__)
@@ -35,11 +38,28 @@ class ConceptAgent(BaseAgent):
 
 
 class WorldBuilderAgent(BaseAgent):
+    """3 步：背景+力量体系 → 势力 → 世界规则。每步小而稳，聚合成 WorldSetting。"""
     name = "world_builder"
 
     async def run(self, *, concept: Concept, story_id: str | None = None) -> WorldSetting:
-        sys, usr = world_builder_prompt(_dump(concept))
-        return await self._call_structured(sys, usr, WorldSetting, story_id=story_id, temperature=0.7, max_tokens=3072)
+        c_json = _dump(concept)
+        # 步骤 1：背景 + 力量体系
+        sys1, usr1 = world_core_prompt(c_json)
+        core = await self._call_structured(sys1, usr1, WorldCore, story_id=story_id,
+                                           temperature=0.7, max_tokens=2048)
+        core_json = _dump(core)
+        # 步骤 2：势力
+        sys2, usr2 = faction_list_prompt(c_json, core_json)
+        flist = await self._call_structured(sys2, usr2, FactionList, story_id=story_id,
+                                            temperature=0.7, max_tokens=2048)
+        # 步骤 3：世界规则
+        sys3, usr3 = world_rule_prompt(c_json, core_json)
+        rlist = await self._call_structured(sys3, usr3, WorldRuleList, story_id=story_id,
+                                            temperature=0.6, max_tokens=1536)
+        return WorldSetting(
+            background=core.background, power_system=core.power_system,
+            factions=flist.factions, world_rules=rlist.world_rules,
+        )
 
 
 class CharacterDesignerAgent(BaseAgent):
@@ -66,7 +86,7 @@ class CharacterDesignerAgent(BaseAgent):
             sys2, usr2 = single_character_prompt(
                 c_json, w_json, roster_brief, entry.model_dump_json(), existing_voices)
             cd = await self._call_structured(sys2, usr2, CharacterDesign,
-                                            story_id=story_id, temperature=0.8, max_tokens=2048)
+                                            story_id=story_id, temperature=0.8, max_tokens=4096)
             # 强制 id/role 与名单一致（防模型漂移）
             cd.character_id = entry.character_id
             cd.role = entry.role
@@ -91,12 +111,24 @@ class CharacterDesignerAgent(BaseAgent):
 
 
 class OutlinePlannerAgent(BaseAgent):
+    """2 步：骨架（粗纲+弧线+标签）→ 分卷。聚合成 Outline。"""
     name = "outline_planner"
 
     async def run(self, *, concept: Concept, world: WorldSetting, characters: Characters,
                   target_chapters: int = 60, story_id: str | None = None) -> Outline:
-        sys, usr = outline_planner_prompt(_dump(concept), _dump(world), _dump(characters), target_chapters)
-        return await self._call_structured(sys, usr, Outline, story_id=story_id, temperature=0.6, max_tokens=4096)
+        # 步骤 1：骨架
+        sys1, usr1 = outline_skeleton_prompt(_dump(concept), _dump(world), _dump(characters), target_chapters)
+        skel = await self._call_structured(sys1, usr1, OutlineSkeleton, story_id=story_id,
+                                           temperature=0.6, max_tokens=2560)
+        # 步骤 2：分卷
+        sys2, usr2 = volume_list_prompt(_dump(skel), target_chapters)
+        vlist = await self._call_structured(sys2, usr2, VolumeList, story_id=story_id,
+                                            temperature=0.6, max_tokens=3072)
+        return Outline(
+            rough_stages=skel.rough_stages, volumes=vlist.volumes,
+            initial_conflicts=skel.initial_conflicts, planned_arc=skel.planned_arc,
+            narrative_func_tags=skel.narrative_func_tags,
+        )
 
 
 def assemble_bible(concept: Concept, world: WorldSetting, characters: Characters, outline: Outline) -> StoryBible:

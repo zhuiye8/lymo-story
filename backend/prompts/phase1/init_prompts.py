@@ -22,13 +22,35 @@ def concept_prompt(theme: str, requirements: str, title: str) -> tuple[str, str]
     return system, user
 
 
-def world_builder_prompt(concept_json: str) -> tuple[str, str]:
+def world_core_prompt(concept_json: str) -> tuple[str, str]:
+    """世界观第 1 步：背景 + 力量体系。"""
     system = with_anti_slop(
-        "你是网文世界观架构师。基于给定的立意，构建一个自洽的世界观："
-        "背景设定、主要势力、力量体系（境界等级从低到高 + 核心规则）、以及不可违反的世界硬规则。"
-        "力量体系要有清晰的升级阶梯（系统流的核心爽点来源）。"
+        "你是网文世界观架构师。基于立意，构建世界观的【背景】和【力量体系】。\n"
+        "字数约束：background 150-300 字。power_system：name + levels（境界由低到高，≤8 级，每级名称 ≤15 字）"
+        "+ rules（核心规则 ≤6 条，每条 ≤40 字，不要重复）。\n"
+        "力量体系要有清晰升级阶梯（系统流爽点来源）。"
     )
-    user = f"立意：\n{concept_json}\n\n请产出 WorldSetting。"
+    user = f"立意：\n{concept_json}\n\n请产出 WorldCore（仅背景 + 力量体系）。"
+    return system, user
+
+
+def faction_list_prompt(concept_json: str, world_core_json: str) -> tuple[str, str]:
+    """世界观第 2 步：势力。"""
+    system = with_anti_slop(
+        "你是网文世界观架构师。基于立意和已定的背景/力量体系，设计 3-5 个主要势力。"
+        "每个势力：name + description（≤60 字）+ stance（对主角立场）。"
+    )
+    user = f"立意：\n{concept_json}\n\n背景与力量体系：\n{world_core_json}\n\n请产出 FactionList。"
+    return system, user
+
+
+def world_rule_prompt(concept_json: str, world_core_json: str) -> tuple[str, str]:
+    """世界观第 3 步：世界硬规则。"""
+    system = with_anti_slop(
+        "你是网文世界观架构师。基于立意和力量体系，制定 3-6 条不可违反的世界硬规则"
+        "（限制金手指、设定红线等，避免后续剧情崩坏）。每条 rule_id + description（≤50 字）。"
+    )
+    user = f"立意：\n{concept_json}\n\n背景与力量体系：\n{world_core_json}\n\n请产出 WorldRuleList。"
     return system, user
 
 
@@ -52,8 +74,12 @@ def single_character_prompt(
 ) -> tuple[str, str]:
     """第二步：为单个角色出完整设定（逐个调用，每次输出小而稳）。"""
     system = with_anti_slop(
-        "你是人物设定师。为指定的【单个角色】设计完整设定，包括外貌/性格/背景/目标/弱点/成长弧线，"
-        "以及鲜明的【对白指纹 voice_profile】：口头禅、句式、语气、用词倾向、禁用方式。\n"
+        "你是人物设定师。为指定的【单个角色】设计完整设定。\n"
+        "【字数硬约束 —— 必须遵守，超长会被系统截断报废】：\n"
+        "  appearance ≤ 60 字；personality ≤ 120 字；background ≤ 150 字；"
+        "goals ≤ 80 字；weaknesses ≤ 80 字；arc_plan ≤ 120 字。\n"
+        "  voice_profile：catchphrases ≤ 4 条（每条 ≤ 12 字）；其余字段各 ≤ 40 字；forbidden ≤ 4 条。\n"
+        "精炼传神，不要堆砌。\n"
         "关键：这个角色的对白指纹必须与【已有角色的对白指纹】明显不同，确保读者盲读对白能分辨是谁。"
         "主角要有成长空间和软肋，反派要有可信动机。"
     )
@@ -67,18 +93,28 @@ def single_character_prompt(
     return system, user
 
 
-def outline_planner_prompt(concept_json: str, world_json: str, chars_json: str, target_chapters: int) -> tuple[str, str]:
+def outline_skeleton_prompt(concept_json: str, world_json: str, chars_json: str, target_chapters: int) -> tuple[str, str]:
+    """大纲第 1 步：骨架（5 段粗纲 + 弧线 + 冲突 + 标签）。"""
     system = with_anti_slop(
-        "你是网文大纲规划师。基于立意/世界观/角色，规划全书结构：\n"
-        "1. rough_stages：5 段粗纲（起承转合式或英雄之旅），每段标注章号范围；\n"
-        "2. volumes：分卷大纲，每卷有主线和高潮事件；\n"
-        "3. initial_conflicts：开篇冲突；planned_arc：总体弧线；\n"
-        "4. narrative_func_tags：贯穿全书的中文网文叙事功能标签（如 金手指觉醒/打脸/扮猪吃虎/升级/逆袭），"
-        "用于后续抗同质化检查。\n"
-        "结构要有张弛节奏，主线清晰，爽点分布合理。"
+        "你是网文大纲规划师。基于立意/世界观/角色，规划全书【骨架】：\n"
+        "1. rough_stages：5 段粗纲（起承转合式或英雄之旅），每段 stage_num/stage_name/summary(≤80字)/章号范围；\n"
+        "2. initial_conflicts：2-4 个开篇冲突；planned_arc：总体弧线（≤120 字）；\n"
+        "3. narrative_func_tags：4-8 个中文网文叙事功能标签（金手指觉醒/打脸/扮猪吃虎/升级/逆袭 等）。\n"
+        "结构有张弛节奏，主线清晰。"
     )
     user = (
         f"立意：\n{concept_json}\n\n世界观：\n{world_json}\n\n角色：\n{chars_json}\n\n"
-        f"目标总章数约 {target_chapters} 章。请产出 Outline。"
+        f"目标总章数约 {target_chapters} 章。请产出 OutlineSkeleton（不含分卷）。"
     )
+    return system, user
+
+
+def volume_list_prompt(skeleton_json: str, target_chapters: int) -> tuple[str, str]:
+    """大纲第 2 步：分卷。"""
+    system = with_anti_slop(
+        "你是网文大纲规划师。基于已定的粗纲骨架，拆分成分卷。"
+        "每卷：volume_num/volume_name/章号范围/main_plot(≤100字)/climax_event(≤40字)。"
+        "分卷章号要覆盖全书且与粗纲阶段呼应。"
+    )
+    user = f"粗纲骨架：\n{skeleton_json}\n\n目标总章数约 {target_chapters} 章。请产出 VolumeList。"
     return system, user

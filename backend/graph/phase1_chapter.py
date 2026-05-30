@@ -9,6 +9,7 @@
 """
 from __future__ import annotations
 
+import logging
 from typing import TypedDict
 
 from langgraph.graph import END, START, StateGraph
@@ -22,6 +23,8 @@ from backend.agents.phase1.chapter_agents import (
     OutlineAdvanceAgent, ScenePlanAgent, SceneWriterAgent, MemoryExtractorAgent,
 )
 from backend.graph.phase1_quality_gate import run_quality_gate
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_TARGET_WORDS = 3500   # I4：>3000 区间软目标
 BEST_OF_N = 2                 # I3/Q3：候选数，关键章可调高

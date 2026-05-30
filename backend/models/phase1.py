@@ -48,9 +48,27 @@ class WorldRule(BaseModel):
     description: str = Field(description="世界观硬规则（不可违反的设定）")
 
 
+# --- 分步 schema（避免单次大输出导致的概率性截断；逐步生成后聚合）---
+
+class WorldCore(BaseModel):
+    """世界观第 1 步：背景 + 力量体系（小而稳）。"""
+    background: str = Field(description="世界观背景 150-300 字")
+    power_system: PowerSystem = Field(description="力量体系")
+
+
+class FactionList(BaseModel):
+    """世界观第 2 步：势力清单。"""
+    factions: list[Faction] = Field(description="3-5 个主要势力")
+
+
+class WorldRuleList(BaseModel):
+    """世界观第 3 步：世界硬规则。"""
+    world_rules: list[WorldRule] = Field(description="3-6 条不可违反的世界硬规则")
+
+
 class WorldSetting(BaseModel):
-    """世界观层。"""
-    background: str = Field(description="世界观背景 200-400 字")
+    """世界观层（分步生成后聚合）。"""
+    background: str = Field(description="世界观背景")
     factions: list[Faction] = Field(default_factory=list, description="主要势力")
     power_system: PowerSystem = Field(description="力量体系")
     world_rules: list[WorldRule] = Field(default_factory=list, description="世界硬规则")
@@ -122,16 +140,29 @@ class RoughStage(BaseModel):
     chapter_end: int = Field(description="结束章号")
 
 
+# --- 分步 schema ---
+
+class OutlineSkeleton(BaseModel):
+    """大纲第 1 步：粗纲骨架 + 弧线 + 标签（文本短，稳）。"""
+    rough_stages: list[RoughStage] = Field(description="5 段粗纲（英雄之旅/Freytag），每段 summary ≤ 80 字")
+    initial_conflicts: list[str] = Field(default_factory=list, description="2-4 个开篇冲突")
+    planned_arc: str = Field(description="总体故事弧线 ≤ 120 字")
+    narrative_func_tags: list[str] = Field(
+        default_factory=list, description="贯穿全书的中文网文叙事功能标签 4-8 个")
+
+
+class VolumeList(BaseModel):
+    """大纲第 2 步：分卷。"""
+    volumes: list[Volume] = Field(description="分卷大纲，每卷 main_plot ≤ 100 字")
+
+
 class Outline(BaseModel):
-    """大纲层：DOME 双层（粗纲 5 段 + 卷）+ Propp-34 叙事功能标签。"""
-    rough_stages: list[RoughStage] = Field(description="5 段粗纲（英雄之旅/Freytag）")
+    """大纲层（分步生成后聚合）。"""
+    rough_stages: list[RoughStage] = Field(description="5 段粗纲")
     volumes: list[Volume] = Field(default_factory=list, description="分卷大纲")
     initial_conflicts: list[str] = Field(default_factory=list, description="开篇冲突")
     planned_arc: str = Field(description="总体故事弧线")
-    narrative_func_tags: list[str] = Field(
-        default_factory=list,
-        description="贯穿全书的中文网文叙事功能标签，如 金手指觉醒/打脸/升级/扮猪吃虎",
-    )
+    narrative_func_tags: list[str] = Field(default_factory=list, description="叙事功能标签")
 
 
 # ===================== StoryBible（assemble，无 LLM）=====================

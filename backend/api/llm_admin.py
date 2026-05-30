@@ -338,7 +338,7 @@ async def get_log_detail(
 
 @router.get("/usage")
 async def get_usage(
-    group_by: str = Query(default="agent", regex="^(agent|story|model)$"),
+    group_by: str = Query(default="agent", pattern="^(agent|story|model)$"),
     days: int = Query(default=7, ge=1, le=90),
     llm_logger: LLMLogger = Depends(get_llm_logger),
 ):
