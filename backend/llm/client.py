@@ -1,8 +1,10 @@
 import json
 import logging
 import time
+from typing import TypeVar
 
 import litellm
+from pydantic import BaseModel
 
 from backend.config import Settings
 from backend.llm.logger import LLMLogger
@@ -10,6 +12,8 @@ from backend.llm.model_registry import ModelRegistry
 from backend.llm.providers import build_extra_body
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar("T", bound=BaseModel)
 
 
 def normalize_litellm_model(model: str, api_base: str | None) -> str:
@@ -217,3 +221,188 @@ class LLMClient:
             lines = [l for l in lines if not l.strip().startswith("```")]
             text = "\n".join(lines)
         return json.loads(text)
+
+    # ===================================================================
+    # Phase 1 新增：Instructor 结构化 / logprobs / prefix / FIM
+    # 依据 phase1/01-implementation-plan.md Step 3.1
+    # ===================================================================
+
+    async def complete_structured(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        response_model: type[T],
+        *,
+        agent_name: str = "unknown",
+        story_id: str | None = None,
+        chapter_num: int | None = None,
+        temperature: float = 0.4,
+        max_tokens: int = 4096,
+        max_retries: int = 3,
+    ) -> T:
+        """用 Instructor (from_litellm) 返回校验过的 Pydantic 对象 + reask 自愈。
+
+        DeepSeek 无严格 json_schema → Instructor 走 Tools/MD_JSON mode + 校验失败重问。
+        复用 _resolve_model 的模型/key/base 解析；日志走 acompletion 内部（best-effort）。
+        """
+        import instructor
+
+        resolved = await self._resolve_model(agent_name)
+        client = instructor.from_litellm(litellm.acompletion)
+
+        kwargs: dict = {
+            "model": resolved["model"],
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "api_key": resolved["api_key"],
+            "response_model": response_model,
+            "max_retries": max_retries,
+        }
+        if resolved["api_base"]:
+            kwargs["api_base"] = resolved["api_base"]
+        extra = build_extra_body(resolved.get("provider"), resolved.get("provider_options"))
+        if extra:
+            kwargs["extra_body"] = extra
+
+        start = time.time()
+        status, error_msg = "success", None
+        try:
+            obj = await client.chat.completions.create(**kwargs)
+            return obj
+        except Exception as e:
+            status, error_msg = "error", str(e)[:500]
+            raise
+        finally:
+            latency_ms = int((time.time() - start) * 1000)
+            if self.llm_logger:
+                try:
+                    await self.llm_logger.log_call(
+                        agent_name=agent_name, model_config_id=resolved["model_config_id"],
+                        litellm_model=resolved["model"], system_prompt=system_prompt,
+                        user_prompt=user_prompt, response=f"<structured:{response_model.__name__}>",
+                        input_tokens=0, output_tokens=0, total_tokens=0, cost_estimate=0,
+                        latency_ms=latency_ms, story_id=story_id, chapter_num=chapter_num,
+                        status=status, error_message=error_msg,
+                    )
+                except Exception as log_err:
+                    logger.error(f"log structured call failed: {log_err}")
+            logger.info(f"[LLM·structured] agent={agent_name} model={resolved['model']} "
+                        f"schema={response_model.__name__} latency={latency_ms}ms status={status}")
+
+    async def complete_with_logprobs(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        *,
+        agent_name: str = "unknown",
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        top_logprobs: int = 0,
+    ) -> dict:
+        """返回 {content, tokens[], token_logprobs[]}，供 slop 低熵段检测 / best-of-N 打分。
+
+        注意（已核实）：DeepSeek thinking 模式不支持 logprobs → 调用方须确保走非 thinking。
+        """
+        resolved = await self._resolve_model(agent_name)
+        kwargs: dict = {
+            "model": resolved["model"],
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "api_key": resolved["api_key"],
+            "logprobs": True,
+        }
+        if top_logprobs:
+            kwargs["top_logprobs"] = top_logprobs
+        if resolved["api_base"]:
+            kwargs["api_base"] = resolved["api_base"]
+
+        resp = await litellm.acompletion(**kwargs)
+        choice = resp.choices[0]
+        content = choice.message.content
+        tokens: list[str] = []
+        token_logprobs: list[float] = []
+        lp = getattr(choice, "logprobs", None)
+        content_lp = getattr(lp, "content", None) if lp else None
+        if content_lp:
+            for item in content_lp:
+                tokens.append(getattr(item, "token", ""))
+                token_logprobs.append(getattr(item, "logprob", 0.0))
+        return {"content": content, "tokens": tokens, "token_logprobs": token_logprobs}
+
+    async def prefix_complete(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        assistant_prefix: str,
+        *,
+        agent_name: str = "unknown",
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        stop: list[str] | None = None,
+    ) -> str:
+        """Chat Prefix Completion（DeepSeek /beta）：给定 assistant 开头，模型续写其余。
+
+        用于：强制文风开头、anti-slop 局部重写、字数太短时扩展。
+        末条消息 role=assistant 且 prefix=True；需走 /beta base_url。
+        """
+        resolved = await self._resolve_model(agent_name)
+        api_base = resolved["api_base"] or "https://api.deepseek.com"
+        beta_base = api_base.rstrip("/")
+        if not beta_base.endswith("/beta"):
+            beta_base = beta_base + "/beta"
+
+        kwargs: dict = {
+            "model": resolved["model"],
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+                {"role": "assistant", "content": assistant_prefix, "prefix": True},
+            ],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "api_key": resolved["api_key"],
+            "api_base": beta_base,
+        }
+        if stop:
+            kwargs["stop"] = stop
+        resp = await litellm.acompletion(**kwargs)
+        return resp.choices[0].message.content
+
+    async def fim_complete(
+        self,
+        prefix: str,
+        suffix: str,
+        *,
+        agent_name: str = "unknown",
+        temperature: float = 0.7,
+        max_tokens: int = 2048,
+    ) -> str:
+        """FIM 填中（DeepSeek /beta）：给 prefix + suffix，模型填中间。
+
+        用于：挖空重写 slop 段（prefix=前文，suffix=后文，填干净的中段）。
+        走 /completions 端点的 FIM 参数。
+        """
+        resolved = await self._resolve_model(agent_name)
+        api_base = resolved["api_base"] or "https://api.deepseek.com"
+        beta_base = api_base.rstrip("/")
+        if not beta_base.endswith("/beta"):
+            beta_base = beta_base + "/beta"
+
+        resp = await litellm.atext_completion(
+            model=resolved["model"],
+            prompt=prefix,
+            suffix=suffix,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            api_key=resolved["api_key"],
+            api_base=beta_base,
+        )
+        return resp.choices[0].text

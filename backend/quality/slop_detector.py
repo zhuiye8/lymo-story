@@ -1,26 +1,19 @@
-"""Slop detector — Chinese-localised port of autonovel slop_score.
+"""Slop 检测器（Phase 1 重写）。
 
-Source: https://github.com/NousResearch/autonovel/blob/master/evaluate.py
-[verified:2026-04-26]
+设计依据 phase1/00-architecture.md §5.1。
 
-Output: list of (category, hits, raw_score, weighted_penalty) per chapter,
-plus a final 0-3 slop_penalty applied to SEQR composite.
+相对 Phase 0 的改动：
+  1. 词表外置到 slop_lexicon_zh.py（本文件只做检测逻辑）。
+  2. tier1 烂喻改频次感知（FREQ_SENSITIVE，同段 ≥2 才计）。
+  3. 输出 flagged_spans（带字符 offset），供 Step 6 的 prefix/FIM 局部重写精确定位。
+  4. 可选接收 logprobs，标记"模型高自信吐出的低熵套话"（slop 往往高频低熵）。
 
-Categories:
-  tier1_banned       : Chinese cliché phrases (烂用比喻 / 套话)
-  tier2_cluster      : abstract / vague filler words; only counted when ≥3 in one paragraph
-  structural         : "不仅仅是…更是…" structural tics
-  fiction_tell       : 中文 LLM 小说俗套（瞳孔紧缩 / 嘴角勾起 / 心脏漏跳）
-  show_vs_tell       : 显式情绪标注 ("他感到愤怒" 等)
-  sentence_cv        : sentence-length coefficient of variation (< 0.3 penalised)
-  em_dash_density    : 破折号 / em-dash 密度
-  transition_ratio   : 段首转折词比例
+输出 SlopReport：
+  - findings: 每类的命中明细
+  - penalty: 0~3 的总扣分（喂 SEQR composite）
+  - flagged_spans: [(start, end, category, text), ...] 供局部重写
 
-Versions:
-  v0 (2026-04-26): bootstrap port, calibrated against 25+12 sample set.
-  v1 (2026-04-27): regex fixes per AC3 calibration FN analysis (Report #2):
-      - fiction_tell: 心脏漏跳了一拍 / 嘴角微微勾起 / 眼神变得复杂 / 瞳孔骤然紧缩 now match
-      - structural: 不仅仅关乎X，更关乎Y now matches (was 是-only)
+DETECTOR_VERSION 是单一真源，backend.quality 从这里 re-export。
 """
 from __future__ import annotations
 
@@ -28,182 +21,128 @@ import re
 from dataclasses import dataclass, field
 from statistics import mean, stdev
 
+from backend.quality.slop_lexicon_zh import (
+    ALWAYS_BANNED,
+    FREQ_SENSITIVE,
+    FREQ_THRESHOLD,
+    TIER2_SUSPICIOUS,
+    CLUSTER_THRESHOLD,
+    FICTION_TELLS,
+    STRUCTURAL,
+    TELLING,
+    CATEGORY_WEIGHTS,
+    TOTAL_PENALTY_CAP,
+    LEXICON_VERSION,
+)
 
-# Single source of truth for detector version — re-exported from backend.quality.
-# Naming convention: keep the "slop-" prefix from v0 for backward-compatible
-# string matching in DB queries / log scrapers.
-DETECTOR_VERSION = "slop-v1"
+DETECTOR_VERSION = "slop-p1"  # Phase 1 detector
 
 
-# ---- v0 word lists (will be calibrated against samples_zh.json) ----
-
-TIER1_BANNED_ZH: list[str] = [
-    # 烂用比喻
-    "宛如", "犹如", "仿佛", "如同",
-    # 滥用心理描写
-    "在心底深处", "心中暗想", "脑海深处",
-    # 句式滥用
-    "不仅仅是", "更是",
-    # 套话
-    "千丝万缕", "千头万绪", "万千思绪",
-    # 成语堆砌
-    "刻骨铭心", "如雷贯耳", "震耳欲聋",
-    # 大词
-    "命运的齿轮", "时间的洪流", "岁月的长河",
-]
-
-TIER2_SUSPICIOUS_ZH: list[str] = [
-    # 抽象名词
-    "气息", "气场", "气氛", "氛围",
-    # 大词
-    "命运", "宿命", "缘分",
-    # 模糊副词
-    "冷冷地", "淡淡地", "轻轻地", "缓缓地", "渐渐地",
-    # 万能形容
-    "复杂", "深邃", "凌厉", "锐利",
-]
-
-# Chinese fiction AI tells — regex-based
-# v1 fixes (Report #2 AC3 FN analysis):
-#   - 瞳孔: add 骤然/猛然/猛地 prefixes (was missing 瞳孔骤然紧缩)
-#   - 心脏: add 漏跳/猛跳/停跳 compound forms (was missing 心脏漏跳了一拍)
-#   - 嘴角: change [微微]? char-class bug to (?:微微|微|轻)? non-cap group (was missing 嘴角微微勾起)
-#   - 眼神: change [变得]? char-class bug to (?:变得)? non-cap group (was missing 眼神变得复杂)
-FICTION_AI_TELLS_ZH: list[str] = [
-    r"瞳孔(?:骤然|猛然|猛地|微微|微|一)?[紧]?[缩]",
-    r"心脏(?:漏跳|猛跳|停跳|漏|停|猛)了一?[拍跳下]",
-    r"嘴角(?:微微|微|轻轻|轻)?(?:勾起|勾|上扬|扬起|扬|上翘|翘)",
-    r"眼神(?:变得)?(?:复杂|深邃|凌厉|锐利)",
-    r"血液?(?:几乎)?(?:凝固|凝住)",
-    r"呼吸(?:为之)?(?:一窒|一滞|急促)",
-    r"心头一[紧凉颤]",
-    r"脸色(?:变得|微微)?(?:煞白|惨白|铁青)",
-]
-
-# Structural AI tics
-# v1 fix: 不仅仅是X更是Y was 是-only; expand to 关乎/在于/为了/代表/意味着
-STRUCTURAL_AI_TICS: list[str] = [
-    r"不(?:仅仅|只)(?:是|关乎|在于|为了|代表|意味着).{2,30}(?:更|而)(?:是|关乎|在于|为了|代表|意味着)",
-    r"(?:不|没)有.{2,20}，[却但].{2,20}",
-    r"在.{2,15}的同时，.{2,15}",
-]
-
-# Show-vs-tell — explicit emotion labels
-TELLING_PATTERNS: list[str] = [
-    r"(?:他|她|它|我|你)(?:感到|觉得|心想)(?:很|非常|十分)?(?:愤怒|悲伤|高兴|难过|害怕|惊讶|焦虑|紧张|失望|喜悦)",
-    r"(?:愤怒|悲伤|高兴|难过|害怕|惊讶)地",
-]
+@dataclass
+class FlaggedSpan:
+    start: int          # 字符 offset（在原文中）
+    end: int
+    category: str
+    text: str           # 命中的子串
 
 
 @dataclass
 class SlopFinding:
     category: str
-    hits: list[str] = field(default_factory=list)  # actual matched substrings
+    hits: list[str] = field(default_factory=list)
     raw_score: float = 0.0
     weighted_penalty: float = 0.0
 
 
+@dataclass
+class SlopReport:
+    findings: list[SlopFinding] = field(default_factory=list)
+    penalty: float = 0.0
+    flagged_spans: list[FlaggedSpan] = field(default_factory=list)
+    lexicon_version: str = LEXICON_VERSION
+    detector_version: str = DETECTOR_VERSION
+
+
 def _split_sentences_zh(text: str) -> list[str]:
-    """Crude Chinese sentence split on . ! ? 。！？"""
     parts = re.split(r"[。！？.!?]", text)
     return [p.strip() for p in parts if p.strip()]
 
 
-def _split_paragraphs(text: str) -> list[str]:
-    return [p.strip() for p in text.split("\n") if p.strip()]
+def _paragraph_spans(text: str) -> list[tuple[int, int, str]]:
+    """返回 [(start, end, para_text), ...]，offset 是在原文中的字符位置。"""
+    spans: list[tuple[int, int, str]] = []
+    pos = 0
+    for line in text.split("\n"):
+        stripped = line.strip()
+        if stripped:
+            start = text.find(stripped, pos)
+            if start < 0:
+                start = pos
+            spans.append((start, start + len(stripped), stripped))
+        pos += len(line) + 1
+    return spans
 
-
-# ---- Detector ----
 
 class SlopDetector:
-    """SlopDetector v0 — Chinese localisation of autonovel slop_score.
+    """Phase 1 slop 检测器。频次感知 + flagged_spans。"""
 
-    Tunables (penalties capped per category):
-      TIER1: hit*1.5, max 4.0
-      TIER2: clusters*1.0, max 2.0
-      FICTION: hit*0.3, max 2.0
-      STRUCTURAL: hit*0.5, max 1.5
-      TELL: hit*0.3, max 2.0
-      SENTENCE_CV: 0-1.0 if cv<0.3
-      EM_DASH: per-1k>15 → up to 1.0
-      TRANSITION: ratio>0.3 → up to 1.0
-    """
-
-    def detect(self, text: str) -> list[SlopFinding]:
+    def detect(self, text: str) -> SlopReport:
         findings: list[SlopFinding] = []
+        spans: list[FlaggedSpan] = []
 
-        # Tier 1
-        t1_hits = []
-        for w in TIER1_BANNED_ZH:
+        # ---- ALWAYS_BANNED：任意一次即计 ----
+        ab_hits: list[str] = []
+        for w in ALWAYS_BANNED:
             for m in re.finditer(re.escape(w), text):
-                t1_hits.append(m.group(0))
-        if t1_hits:
-            findings.append(SlopFinding(
-                category="tier1_banned",
-                hits=t1_hits[:50],
-                raw_score=len(t1_hits),
-                weighted_penalty=min(len(t1_hits) * 1.5, 4.0),
-            ))
+                ab_hits.append(m.group(0))
+                spans.append(FlaggedSpan(m.start(), m.end(), "always_banned", m.group(0)))
+        if ab_hits:
+            findings.append(self._mk("always_banned", ab_hits))
 
-        # Tier 2 — cluster per paragraph
-        t2_clusters = 0
-        t2_hits: list[str] = []
-        for para in _split_paragraphs(text):
-            para_hits = []
-            for w in TIER2_SUSPICIOUS_ZH:
-                if w in para:
-                    para_hits.append(w)
-            if len(set(para_hits)) >= 3:
-                t2_clusters += 1
-                t2_hits.extend(para_hits[:5])
-        if t2_clusters > 0:
-            findings.append(SlopFinding(
-                category="tier2_cluster",
-                hits=t2_hits[:30],
-                raw_score=t2_clusters,
-                weighted_penalty=min(t2_clusters * 1.0, 2.0),
-            ))
+        # ---- FREQ_SENSITIVE：同段 ≥ 阈值才计；只计超出阈值的次数 ----
+        fs_hits: list[str] = []
+        for (p_start, _p_end, para) in _paragraph_spans(text):
+            for w in FREQ_SENSITIVE:
+                occ = [m for m in re.finditer(re.escape(w), para)]
+                if len(occ) >= FREQ_THRESHOLD:
+                    # 超阈值部分计 slop（前 FREQ_THRESHOLD-1 次视为合法修辞）
+                    for m in occ[FREQ_THRESHOLD - 1:]:
+                        fs_hits.append(w)
+                        gs = p_start + m.start()
+                        spans.append(FlaggedSpan(gs, gs + len(w), "freq_sensitive", w))
+        if fs_hits:
+            findings.append(self._mk("freq_sensitive", fs_hits))
 
-        # Fiction AI tells
-        f_hits: list[str] = []
-        for pat in FICTION_AI_TELLS_ZH:
-            for m in re.finditer(pat, text):
-                f_hits.append(m.group(0))
-        if f_hits:
-            findings.append(SlopFinding(
-                category="fiction_tell",
-                hits=f_hits[:30],
-                raw_score=len(f_hits),
-                weighted_penalty=min(len(f_hits) * 0.3, 2.0),
-            ))
+        # ---- TIER2_CLUSTER：同段聚集 ≥ 阈值种 ----
+        cluster_count = 0
+        cl_hits: list[str] = []
+        for (p_start, p_end, para) in _paragraph_spans(text):
+            present = [w for w in TIER2_SUSPICIOUS if w in para]
+            if len(set(present)) >= CLUSTER_THRESHOLD:
+                cluster_count += 1
+                cl_hits.extend(present[:5])
+                spans.append(FlaggedSpan(p_start, p_end, "tier2_cluster", para[:40]))
+        if cluster_count:
+            f = SlopFinding(category="tier2_cluster", hits=cl_hits[:30], raw_score=cluster_count)
+            w = CATEGORY_WEIGHTS["tier2_cluster"]
+            f.weighted_penalty = min(cluster_count * w["per_hit"], w["cap"])
+            findings.append(f)
 
-        # Structural tics
-        s_hits: list[str] = []
-        for pat in STRUCTURAL_AI_TICS:
-            for m in re.finditer(pat, text):
-                s_hits.append(m.group(0))
-        if s_hits:
-            findings.append(SlopFinding(
-                category="structural",
-                hits=s_hits[:20],
-                raw_score=len(s_hits),
-                weighted_penalty=min(len(s_hits) * 0.5, 1.5),
-            ))
+        # ---- 正则类：FICTION_TELLS / STRUCTURAL / TELLING ----
+        for cat, patterns in (
+            ("fiction_tell", FICTION_TELLS),
+            ("structural", STRUCTURAL),
+            ("telling", TELLING),
+        ):
+            hits: list[str] = []
+            for pat in patterns:
+                for m in re.finditer(pat, text):
+                    hits.append(m.group(0))
+                    spans.append(FlaggedSpan(m.start(), m.end(), cat, m.group(0)))
+            if hits:
+                findings.append(self._mk(cat, hits))
 
-        # Show-vs-tell
-        tell_hits: list[str] = []
-        for pat in TELLING_PATTERNS:
-            for m in re.finditer(pat, text):
-                tell_hits.append(m.group(0))
-        if tell_hits:
-            findings.append(SlopFinding(
-                category="show_vs_tell",
-                hits=tell_hits[:30],
-                raw_score=len(tell_hits),
-                weighted_penalty=min(len(tell_hits) * 0.3, 2.0),
-            ))
-
-        # Sentence-length coefficient of variation
+        # ---- 数学特征：句长 CV / 破折号 / 段首转折 ----
         sentences = _split_sentences_zh(text)
         if len(sentences) >= 8:
             lengths = [len(s) for s in sentences]
@@ -211,50 +150,57 @@ class SlopDetector:
             sd = stdev(lengths) if len(lengths) > 1 else 0.0
             cv = sd / m_len if m_len > 0 else 0.0
             if cv < 0.3:
-                # cv 0.3 → 0; cv 0.0 → 1.0
-                penalty = max(0.0, (0.3 - cv) / 0.3) * 1.0
-                findings.append(SlopFinding(
-                    category="sentence_cv",
-                    hits=[f"cv={cv:.3f}"],
-                    raw_score=cv,
-                    weighted_penalty=round(penalty, 3),
-                ))
+                pen = round(max(0.0, (0.3 - cv) / 0.3) * CATEGORY_WEIGHTS["sentence_cv"]["cap"], 3)
+                findings.append(SlopFinding("sentence_cv", [f"cv={cv:.3f}"], cv, pen))
 
-        # Em-dash density per 1000 chars
         n_em = len(re.findall(r"——|—|--", text))
-        text_len = max(1, len(text))
-        density = (n_em / text_len) * 1000
+        density = (n_em / max(1, len(text))) * 1000
         if density > 15:
-            penalty = min((density - 15) * 0.05, 1.0)
-            findings.append(SlopFinding(
-                category="em_dash_density",
-                hits=[f"density_per_1000={density:.1f}"],
-                raw_score=density,
-                weighted_penalty=round(penalty, 3),
-            ))
+            pen = round(min((density - 15) * 0.05, CATEGORY_WEIGHTS["em_dash"]["cap"]), 3)
+            findings.append(SlopFinding("em_dash", [f"density={density:.1f}"], density, pen))
 
-        # Transition ratio (段首转折词)
         TRANSITIONS = ["但是", "然而", "不过", "可是", "只是", "否则", "因此", "所以"]
-        paras = _split_paragraphs(text)
+        paras = [p for (_s, _e, p) in _paragraph_spans(text)]
         if paras:
-            with_trans = 0
-            for p in paras:
-                head = p[:6]
-                if any(t in head for t in TRANSITIONS):
-                    with_trans += 1
+            with_trans = sum(1 for p in paras if any(t in p[:6] for t in TRANSITIONS))
             ratio = with_trans / len(paras)
             if ratio > 0.3:
-                penalty = min((ratio - 0.3) * 4.0, 1.0)
-                findings.append(SlopFinding(
-                    category="transition_ratio",
-                    hits=[f"ratio={ratio:.3f}"],
-                    raw_score=ratio,
-                    weighted_penalty=round(penalty, 3),
-                ))
+                pen = round(min((ratio - 0.3) * 4.0, CATEGORY_WEIGHTS["transition"]["cap"]), 3)
+                findings.append(SlopFinding("transition", [f"ratio={ratio:.3f}"], ratio, pen))
 
-        return findings
+        penalty = round(min(sum(f.weighted_penalty for f in findings), TOTAL_PENALTY_CAP), 3)
+        spans.sort(key=lambda s: s.start)
+        return SlopReport(findings=findings, penalty=penalty, flagged_spans=spans)
 
     @staticmethod
-    def total_penalty(findings: list[SlopFinding]) -> float:
-        """Cap total slop penalty at 3.0 (the SEQR composite max deduction)."""
-        return round(min(sum(f.weighted_penalty for f in findings), 3.0), 3)
+    def _mk(category: str, hits: list[str]) -> SlopFinding:
+        w = CATEGORY_WEIGHTS[category]
+        pen = min(len(hits) * w["per_hit"], w["cap"])
+        return SlopFinding(category=category, hits=hits[:50], raw_score=len(hits), weighted_penalty=pen)
+
+    # ---- 可选：用 logprobs 标记低熵高自信套话段 ----
+    @staticmethod
+    def flag_low_entropy_spans(
+        tokens: list[str],
+        token_logprobs: list[float],
+        *,
+        logprob_threshold: float = -0.05,
+        min_run: int = 12,
+    ) -> list[tuple[int, int]]:
+        """在 token 序列里找"连续高自信"片段（logprob 接近 0 = 模型几乎必吐）。
+        这类长连续高自信片段常是陈词滥调。返回 token-index 区间列表。
+        调用方负责把 token-index 映射回字符 offset。
+        """
+        runs: list[tuple[int, int]] = []
+        run_start = None
+        for i, lp in enumerate(token_logprobs):
+            if lp >= logprob_threshold:
+                if run_start is None:
+                    run_start = i
+            else:
+                if run_start is not None and i - run_start >= min_run:
+                    runs.append((run_start, i))
+                run_start = None
+        if run_start is not None and len(token_logprobs) - run_start >= min_run:
+            runs.append((run_start, len(token_logprobs)))
+        return runs

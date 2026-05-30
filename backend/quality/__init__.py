@@ -1,39 +1,47 @@
-"""SEQR v0 (Story Engine Quality Rubric) — Phase 0 evaluation baseline.
+"""SEQR 质量评测（Phase 1）。
 
-Project-local rubric. Borrows dimensions from WebNovelBench
-(https://arxiv.org/html/2505.14818) and slop detection from autonovel
-(https://github.com/NousResearch/autonovel/blob/master/evaluate.py),
-but does not implement either paper's full methodology — see
-`workspace/plans/2026-04-26-rearchitecture/phase-0/phase-gate.md` for scope.
+单一真源 re-export：rubric 维度、composite、slop 检测、critic room。
+phase1/00-architecture.md §5 §7。
 """
 
-RUBRIC_VERSION = "SEQR-v0"
+from backend.quality.rubric import (
+    RUBRIC_VERSION,
+    DIMENSIONS,
+    DIMENSION_LABELS_ZH,
+    DIMENSION_GUIDE_ZH,
+    composite_score,
+)
+from backend.quality.slop_detector import (
+    DETECTOR_VERSION,
+    SlopDetector,
+    SlopReport,
+    SlopFinding,
+    FlaggedSpan,
+)
+from backend.quality.slop_lexicon_zh import LEXICON_VERSION
+from backend.quality.critic_room import (
+    DimensionScore,
+    CriticVerdict,
+    CriticRoomResult,
+    aggregate_verdicts,
+    build_critic_prompt,
+)
 
-# DETECTOR_VERSION is canonically defined in backend.quality.slop_detector
-# and re-exported here so legacy imports (`from backend.quality import DETECTOR_VERSION`)
-# always reflect the active detector. Do NOT shadow this with a local literal —
-# Report #3 review (supervisor 2026-04-27) flagged the split-brain bug where
-# this file said "slop-v0" while slop_detector.py was already at v1.
-from backend.quality.slop_detector import DETECTOR_VERSION  # noqa: E402, F401
-
-DIMENSIONS = [
-    "fluency",
-    "dialogue_distinct",
-    "character_consistency",
-    "scene_drama",
-    "sensory_detail",
-    "rhetoric_quality",
-    "continuity",
-    "overall_readability",
+__all__ = [
+    "RUBRIC_VERSION",
+    "DIMENSIONS",
+    "DIMENSION_LABELS_ZH",
+    "DIMENSION_GUIDE_ZH",
+    "composite_score",
+    "DETECTOR_VERSION",
+    "SlopDetector",
+    "SlopReport",
+    "SlopFinding",
+    "FlaggedSpan",
+    "LEXICON_VERSION",
+    "DimensionScore",
+    "CriticVerdict",
+    "CriticRoomResult",
+    "aggregate_verdicts",
+    "build_critic_prompt",
 ]
-
-DIMENSION_LABELS_ZH = {
-    "fluency": "语言流畅度",
-    "dialogue_distinct": "对白独特性",
-    "character_consistency": "角色一致性",
-    "scene_drama": "场景戏剧性",
-    "sensory_detail": "感官描写",
-    "rhetoric_quality": "修辞质量",
-    "continuity": "跨场景衔接",
-    "overall_readability": "整体可读性",
-}
