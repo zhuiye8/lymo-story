@@ -21,8 +21,10 @@ from backend.models.phase1_chapter import DetailedOutline, ScenePlan, ChapterExt
 from backend.agents.phase1.chapter_agents import (
     OutlineAdvanceAgent, ScenePlanAgent, SceneWriterAgent, MemoryExtractorAgent,
 )
+from backend.graph.phase1_quality_gate import run_quality_gate
 
 DEFAULT_TARGET_WORDS = 3500   # I4：>3000 区间软目标
+BEST_OF_N = 2                 # I3/Q3：候选数，关键章可调高
 
 
 class ChapterState(TypedDict, total=False):
@@ -39,6 +41,8 @@ class ChapterState(TypedDict, total=False):
     voice_profiles: str
     content: str
     word_count: int
+    quality: dict
+    slop_findings: list
     extract: ChapterExtract
 
 
@@ -111,8 +115,8 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
         facts = "\n".join(f"- {q['subject']} {q['predicate']} {q['object']}" for q in valid[:40])
         return {"facts_brief": facts or "（暂无已确立事实）"}
 
-    async def write_chapter(state: ChapterState) -> ChapterState:
-        """逐场景生成，拼成整章。前一场景结尾作为下一场景上文衔接。"""
+    async def _draft_once(state: ChapterState) -> str:
+        """逐场景生成一个完整章节候选。前一场景结尾作下一场景衔接。"""
         plan = state["plan"]
         parts: list[str] = []
         prev_tail = ""
@@ -127,9 +131,41 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
                 prev_text=prev_tail, word_budget=sc.word_budget,
                 chapter_num=state["chapter_num"], story_id=state["story_id"])
             parts.append(text.strip())
-            prev_tail = text.strip()[-400:]  # 末 400 字作下场景衔接
-        content = "\n\n".join(parts)
-        return {"content": content, "word_count": len(content)}
+            prev_tail = text.strip()[-400:]
+        return "\n\n".join(parts)
+
+    async def write_chapter(state: ChapterState) -> ChapterState:
+        """best-of-N：生成 N 个候选，各过质量闸（检测-重写-评分），选 composite 最高。"""
+        import asyncio
+
+        plan = state["plan"]
+        scene_brief_all = "；".join(f"S{sc.scene_id}:{sc.goal}" for sc in plan.scenes)
+        target = state["target_words"]
+
+        # 1. 并发生成 N 个候选
+        drafts = await asyncio.gather(*[_draft_once(state) for _ in range(BEST_OF_N)])
+
+        # 2. 各候选过质量闸（检测-重写-字数矫正-Critic 评分）
+        gate_results = await asyncio.gather(*[
+            run_quality_gate(llm, d, target_words=target, scene_brief=scene_brief_all)
+            for d in drafts
+        ])
+
+        # 3. 选 composite 最高的候选
+        best = max(gate_results, key=lambda r: r["quality"]["composite_score"])
+        logger.info(
+            f"[write_chapter] best-of-{BEST_OF_N} ch{state['chapter_num']}: "
+            f"composites={[round(r['quality']['composite_score'],2) for r in gate_results]} "
+            f"-> picked {best['quality']['composite_score']:.2f} "
+            f"(slop={best['quality']['slop_penalty']:.2f}, {best['quality']['word_count']}字, "
+            f"rewrite_rounds={best['rounds']})"
+        )
+        return {
+            "content": best["content"],
+            "word_count": best["quality"]["word_count"],
+            "quality": best["quality"],
+            "slop_findings": best["slop_findings"],
+        }
 
     async def extract_memory(state: ChapterState) -> ChapterState:
         sid, cn = state["story_id"], state["chapter_num"]
@@ -155,24 +191,52 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
             sid, cn, beats=[b.model_dump() for b in detailed.beats],
             narrative_func_tags="、".join(detailed.narrative_func_tags),
             word_budget=state["target_words"])
-        # 3. 新四元组（含失效处理）
-        new_q = []
+        # 3. 一致性检测（② 层）：新四元组 vs 既有有效事实
+        new_q = [{"subject": q.subject, "predicate": q.predicate, "object": q.object}
+                 for q in ex.new_quads]
+        conflicts = await quads.find_conflicts(sid, new_q, cn) if new_q else []
+        if conflicts:
+            logger.warning(f"[save] ch{cn} 检测到 {len(conflicts)} 个事实冲突: "
+                           f"{[(c['new']['subject'], c['new']['predicate']) for c in conflicts[:3]]}")
+
+        # 4. 写入新四元组（含失效处理）
         for q in ex.new_quads:
             if q.invalidates_prior:
-                # 该 subject+predicate 的旧有效事实在本章失效
                 priors = await quads.query_subject(sid, q.subject, cn)
                 for p in priors:
                     if p["predicate"] == q.predicate and p["object"] != q.object:
                         await quads.invalidate(p["id"], at_chapter=cn)
-            new_q.append({"subject": q.subject, "predicate": q.predicate, "object": q.object})
         if new_q:
             await quads.add_quads_batch(sid, new_q, source_chapter=cn)
-        # 4. 角色状态变化
+
+        # 5. 角色状态变化
         for sc in ex.state_changes:
             await store.save_character_state(
                 sid, sc.character_id, cn,
                 location=sc.location, status=sc.status, emotional_state=sc.emotional_state,
                 state={"note": sc.note})
+
+        # 6. 质量落库（喂 quality_admin 4 图表）+ 一致性冲突计入 quality
+        q = state.get("quality", {})
+        if q:
+            # 有事实冲突 → composite 额外惩罚（一致性是硬指标）
+            consistency_penalty = min(len(conflicts) * 0.5, 2.0)
+            comp = q["composite_score"] - consistency_penalty
+            await store.save_quality(
+                sid, cn,
+                dim_scores=q.get("dim_scores", {}),
+                mean_quality=q.get("mean_quality", 0),
+                slop_penalty=q.get("slop_penalty", 0),
+                composite_score=round(comp, 3),
+                word_count=q.get("word_count", state.get("word_count", 0)),
+                judge_model="+".join(q.get("judges", [])),
+                slop_findings=state.get("slop_findings", []),
+            )
+            # 把最终 quality 快照也写进章节
+            await store.save_chapter(
+                sid, cn, title=detailed.chapter_title, pov=plan.pov,
+                content=state["content"], summary=ex.summary,
+                quality={**q, "consistency_conflicts": len(conflicts), "composite_final": round(comp, 3)})
         return {}
 
     g = StateGraph(ChapterState)
