@@ -32,16 +32,37 @@ def world_builder_prompt(concept_json: str) -> tuple[str, str]:
     return system, user
 
 
-def character_designer_prompt(concept_json: str, world_json: str) -> tuple[str, str]:
+def character_roster_prompt(concept_json: str, world_json: str) -> tuple[str, str]:
+    """第一步：只定角色名单（轻量，避免一次输出过大）。"""
     system = with_anti_slop(
-        "你是人物设定师。基于立意和世界观，设计主角、主要反派、2-4 个配角。"
-        "每个角色必须有鲜明的【对白指纹 voice_profile】：口头禅、句式特点、说话语气、用词倾向、禁用方式——"
-        "这是让不同角色说话能被一眼辨认的关键，务必让每个角色的 voice_profile 互不相同、各具特色。"
-        "主角要有成长空间和软肋，反派要有可信的动机。"
+        "你是选角导演。基于立意和世界观，列出本书的核心角色名单："
+        "1 个主角(protagonist)、1 个主要反派(antagonist)、2-4 个配角(supporting)。"
+        "每个角色给 id、姓名、定位、一句话作用即可，不要展开详细设定。"
+        "角色之间要有戏剧张力和关系网。"
     )
     user = (
         f"立意：\n{concept_json}\n\n世界观：\n{world_json}\n\n"
-        "请产出 Characters（含每个角色的 voice_profile，确保各角色对白指纹差异明显）。"
+        "请产出 CharacterRoster（4-6 个角色名单）。"
+    )
+    return system, user
+
+
+def single_character_prompt(
+    concept_json: str, world_json: str, roster_brief: str, entry_json: str, existing_voices: str
+) -> tuple[str, str]:
+    """第二步：为单个角色出完整设定（逐个调用，每次输出小而稳）。"""
+    system = with_anti_slop(
+        "你是人物设定师。为指定的【单个角色】设计完整设定，包括外貌/性格/背景/目标/弱点/成长弧线，"
+        "以及鲜明的【对白指纹 voice_profile】：口头禅、句式、语气、用词倾向、禁用方式。\n"
+        "关键：这个角色的对白指纹必须与【已有角色的对白指纹】明显不同，确保读者盲读对白能分辨是谁。"
+        "主角要有成长空间和软肋，反派要有可信动机。"
+    )
+    user = (
+        f"立意：\n{concept_json}\n\n世界观：\n{world_json}\n\n"
+        f"【全部角色名单】\n{roster_brief}\n\n"
+        f"【已有角色的对白指纹（你设计的必须与这些不同）】\n{existing_voices or '（暂无，你是第一个）'}\n\n"
+        f"【本次要设计的角色】\n{entry_json}\n\n"
+        "请产出这一个角色的完整 CharacterDesign（含 voice_profile）。"
     )
     return system, user
 

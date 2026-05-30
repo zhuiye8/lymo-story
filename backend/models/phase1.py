@@ -82,8 +82,21 @@ class CharacterDesign(BaseModel):
     voice_profile: VoiceProfile = Field(description="对白指纹")
 
 
+class CharacterRosterEntry(BaseModel):
+    """角色名单条目（轻量，第一步先定名单，再逐个出完整设定）。"""
+    character_id: str = Field(description="角色英文/拼音 id，如 lin_fan")
+    name: str = Field(description="角色姓名")
+    role: str = Field(description="protagonist/antagonist/supporting")
+    one_line: str = Field(description="一句话定位（这个角色是谁、起什么作用）")
+
+
+class CharacterRoster(BaseModel):
+    """角色名单：主角 1 + 反派 1 + 配角 2-4。"""
+    entries: list[CharacterRosterEntry] = Field(description="全部角色名单，含主角/反派/配角")
+
+
 class Characters(BaseModel):
-    """角色层。"""
+    """角色层（逐角色生成后聚合）。"""
     protagonist: CharacterDesign = Field(description="主角")
     antagonist: CharacterDesign = Field(description="主要反派")
     supporting: list[CharacterDesign] = Field(default_factory=list, description="配角（2-4 个）")
