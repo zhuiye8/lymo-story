@@ -21,8 +21,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from backend.config import Settings
 from backend.llm.model_registry import ModelRegistry
 
-# MiMo（经 newapi 代理）—— 从环境变量读，避免硬编码 key 进源码
-MIMO_API_BASE = os.environ.get("MIMO_API_BASE", "http://58.220.229.11:50002/v1")
+# MiMo（经 newapi 代理）—— 全部从环境变量读，不硬编码 key/代理地址进源码。
+# 用法：MIMO_API_KEY=... MIMO_API_BASE=http://<your-proxy>/v1 python scripts/seed_phase1_models.py
+MIMO_API_BASE = os.environ.get("MIMO_API_BASE", "")
 MIMO_API_KEY = os.environ.get("MIMO_API_KEY", "")
 MIMO_MODEL = os.environ.get("MIMO_MODEL", "mimo-v2.5-pro")
 
@@ -51,7 +52,9 @@ async def main():
             "provider": "deepseek", "provider_options": {},
         },
     ]
-    if MIMO_API_KEY:
+    if MIMO_API_KEY and not MIMO_API_BASE:
+        print("WARN: 设了 MIMO_API_KEY 但没设 MIMO_API_BASE，跳过 MiMo（需传代理地址）")
+    if MIMO_API_KEY and MIMO_API_BASE:
         models.append({
             "id": "mimo-v2.5-pro", "display_name": "小米 MiMo V2.5 Pro（第二评委·代理）",
             "litellm_model": f"openai/{MIMO_MODEL}", "api_key": MIMO_API_KEY, "api_base": MIMO_API_BASE,
@@ -80,7 +83,7 @@ async def main():
         # 评委
         "critic_primary": "deepseek-v4-flash",
     }
-    if MIMO_API_KEY:
+    if MIMO_API_KEY and MIMO_API_BASE:
         bindings["critic_secondary"] = "mimo-v2.5-pro"
 
     for agent, model_id in bindings.items():
