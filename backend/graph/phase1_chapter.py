@@ -115,15 +115,16 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
     async def retrieve_memory(state: ChapterState) -> ChapterState:
         """取本章生成的事实约束。#2 一致性闭环：把'硬约束'（角色生死/能力/位置）
         单列高亮，让 writer 主动规避矛盾，而不只是事后检测扣分。"""
+        from backend.memory.predicates import is_single_valued, normalize_predicate
         sid, cn = state["story_id"], state["chapter_num"]
         valid = await quads.query_valid_at(sid, cn)
 
-        # 硬约束 predicate（这些一旦违反就是'死人复活'式硬伤）
-        HARD = ("状态", "境界", "能力", "位置", "所在", "持有", "身份", "生死", "等级")
+        # 单值谓语（存活/境界/身份/阵营）= 硬约束，违反即'死人复活'式硬伤
         hard_facts, soft_facts = [], []
         for q in valid:
             line = f"- {q['subject']} {q['predicate']} {q['object']}"
-            if any(h in q["predicate"] for h in HARD):
+            canon = normalize_predicate(q["predicate"])
+            if canon and is_single_valued(canon):
                 hard_facts.append(line)
             else:
                 soft_facts.append(line)
@@ -221,23 +222,37 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
             sid, cn, beats=[b.model_dump() for b in detailed.beats],
             narrative_func_tags="、".join(detailed.narrative_func_tags),
             word_budget=state["target_words"])
-        # 3. 一致性检测（② 层）：新四元组 vs 既有有效事实
-        new_q = [{"subject": q.subject, "predicate": q.predicate, "object": q.object}
-                 for q in ex.new_quads]
-        conflicts = await quads.find_conflicts(sid, new_q, cn) if new_q else []
+        # 3. 归一 + 过滤四元组：只留持久状态事实，事件/动作谓语（修改/执行/…）丢弃归摘要。
+        #    这是 #2 根因修复——否则事件四元组累积，撞出大量误报冲突。
+        from backend.memory.predicates import normalize_predicate
+        norm_quads, dropped = [], 0
+        for q in ex.new_quads:
+            canon = normalize_predicate(q.predicate)
+            if not canon:
+                dropped += 1
+                continue
+            norm_quads.append({
+                "subject": q.subject, "predicate": canon, "object": q.object,
+                "invalidates_prior": q.invalidates_prior,
+            })
+        if dropped:
+            logger.info(f"[save] ch{cn} 丢弃 {dropped} 个事件/非状态四元组（归摘要不入库）")
+
+        # 4. 一致性检测（② 层，精确：单值谓语 + 未声明失效才算真矛盾）
+        conflicts = await quads.find_conflicts(sid, norm_quads, cn) if norm_quads else []
         if conflicts:
-            logger.warning(f"[save] ch{cn} 检测到 {len(conflicts)} 个事实冲突: "
+            logger.warning(f"[save] ch{cn} 检测到 {len(conflicts)} 个真冲突: "
                            f"{[(c['new']['subject'], c['new']['predicate']) for c in conflicts[:3]]}")
 
-        # 4. 写入新四元组（含失效处理）
-        for q in ex.new_quads:
-            if q.invalidates_prior:
-                priors = await quads.query_subject(sid, q.subject, cn)
+        # 5. 写入新四元组（含失效处理，canonical 谓语匹配）
+        for q in norm_quads:
+            if q["invalidates_prior"]:
+                priors = await quads.query_subject(sid, q["subject"], cn)
                 for p in priors:
-                    if p["predicate"] == q.predicate and p["object"] != q.object:
+                    if normalize_predicate(p["predicate"]) == q["predicate"] and p["object"] != q["object"]:
                         await quads.invalidate(p["id"], at_chapter=cn)
-        if new_q:
-            await quads.add_quads_batch(sid, new_q, source_chapter=cn)
+        if norm_quads:
+            await quads.add_quads_batch(sid, norm_quads, source_chapter=cn)
 
         # 5. 角色状态变化
         for sc in ex.state_changes:

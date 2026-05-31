@@ -95,21 +95,34 @@ class KnowledgeQuads:
             await db.commit()
 
     async def find_conflicts(self, story_id: str, new_quads: list[dict], chapter: int) -> list[dict]:
-        """检测新四元组与既有有效事实的矛盾。
+        """检测新四元组与既有有效事实的**真**矛盾（死人复活式硬伤）。
 
-        当前规则（可扩展）：
-          - 同 (subject, predicate) 但 object 不同，且既有事实在本章仍有效
-            → 潜在矛盾（如"林某|状态|死亡" vs 新"林某|状态|活跃"）
+        真冲突需同时满足（避免把合法演变/累积误判成冲突）：
+          1. 谓语是**单值**状态谓语（存活/境界/身份/阵营）—— 多值谓语（能力/持有/
+             关系）可累积，多 object 合法，不算冲突；
+          2. 同 subject + 同 canonical 谓语，但 object 不同；
+          3. 既有事实在本章仍有效；
+          4. 新事实**没声明使旧值失效**（invalidates_prior=False）—— 声明失效的是
+             合法状态转移（境界突破 筑基→金丹），不是矛盾。
         返回冲突列表：[{new, existing, kind}]，供 quality_gate 一致性检测用。
         """
+        from backend.memory.predicates import is_single_valued, normalize_predicate
+
         conflicts: list[dict] = []
         existing = await self.query_valid_at(story_id, chapter)
         idx: dict[tuple[str, str], list[dict]] = {}
         for e in existing:
-            idx.setdefault((e["subject"], e["predicate"]), []).append(e)
+            canon = normalize_predicate(e["predicate"])
+            if canon and is_single_valued(canon):
+                idx.setdefault((e["subject"], canon), []).append(e)
         for nq in new_quads:
-            key = (nq["subject"], nq["predicate"])
-            for e in idx.get(key, []):
+            # 声明失效旧值 = 合法转移，不是矛盾
+            if nq.get("invalidates_prior"):
+                continue
+            canon = normalize_predicate(nq["predicate"])
+            if not canon or not is_single_valued(canon):
+                continue  # 多值/事件谓语不判冲突
+            for e in idx.get((nq["subject"], canon), []):
                 if e["object"] != nq["object"]:
                     conflicts.append({"new": nq, "existing": e, "kind": "object_mismatch"})
         return conflicts

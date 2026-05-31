@@ -45,10 +45,16 @@ class ScenePlan(BaseModel):
 # ===================== extract_memory：抽本章新事实/状态变化 =====================
 
 class ExtractedQuad(BaseModel):
-    subject: str
-    predicate: str
-    object: str
-    invalidates_prior: bool = Field(default=False, description="是否使该 subject+predicate 的旧事实失效（如状态变化）")
+    subject: str = Field(description="主体（角色/物/势力名）")
+    predicate: str = Field(
+        description="谓词，只能是状态类：存活状态/境界/身份/阵营/能力/持有/关系。"
+                    "禁止用动词（修改/执行/发现/攻击等事件不是四元组，应写进 summary）"
+    )
+    object: str = Field(description="客体（状态值/能力名/物品名/\"对象=关系型\"）")
+    invalidates_prior: bool = Field(
+        default=False,
+        description="仅单值谓语（存活状态/境界/身份/阵营）发生变更时为 true（如境界突破、角色死亡）"
+    )
 
 
 class CharacterStateChange(BaseModel):
