@@ -252,6 +252,17 @@ class SQLiteStore:
                     await db.execute(ddl)
                 except Exception:
                     pass  # 列已存在
+            # 回填：Phase B 之前的故事每章即一个推进单元（无切分），令 installments_done=章数。
+            # 仅影响 installments_done=0 且已有章节的旧故事；新故事/已跟踪故事不受影响。
+            try:
+                await db.execute(
+                    "UPDATE stories SET installments_done = "
+                    "(SELECT COUNT(*) FROM chapters WHERE chapters.story_id = stories.id) "
+                    "WHERE installments_done = 0 "
+                    "AND EXISTS (SELECT 1 FROM chapters WHERE chapters.story_id = stories.id)"
+                )
+            except Exception:
+                pass
             await db.commit()
 
     # ===================== stories =====================
