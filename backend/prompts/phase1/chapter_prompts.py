@@ -8,17 +8,22 @@ from backend.prompts.phase1.shared import with_anti_slop
 
 
 def outline_advance_prompt(
-    bible_brief: str, rough_stage: str, chapter_num: int, recent_summaries: str
+    bible_brief: str, rough_stage: str, chapter_num: int, recent_summaries: str,
+    open_foreshadowing: str = ""
 ) -> tuple[str, str]:
     system = with_anti_slop(
         "你是网文细纲师。根据全书设定、当前所处的粗纲阶段、以及前几章的剧情，"
         "把本章展开成细纲：标题、一句话概要、3-5 个情节节拍 beats、命中的叙事功能标签。"
-        "要承接前文、推进主线，节奏明快。"
+        "要承接前文、推进主线，节奏明快。\n"
+        "★【待回收伏笔】里埋得越久（age 越大）的坑越要优先安排回收——网文最忌挖坑不填。"
+        "在合适的 beat 里自然兑现，别生硬。但也不必每章都填，按剧情节奏来。"
     )
+    fore = f"\n【待回收伏笔（age=已拖章数，越大越该填）】\n{open_foreshadowing}\n" if open_foreshadowing else ""
     user = (
         f"【全书设定摘要】\n{bible_brief}\n\n"
         f"【当前粗纲阶段】\n{rough_stage}\n\n"
-        f"【前几章剧情】\n{recent_summaries or '（这是第一章）'}\n\n"
+        f"【前几章剧情】\n{recent_summaries or '（这是第一章）'}\n"
+        f"{fore}\n"
         f"请为第 {chapter_num} 章产出 DetailedOutline。"
     )
     return system, user
@@ -63,7 +68,9 @@ def write_scene_prompt(
     return system, user
 
 
-def extract_memory_prompt(chapter_text: str, character_ids: str, chapter_num: int) -> tuple[str, str]:
+def extract_memory_prompt(
+    chapter_text: str, character_ids: str, chapter_num: int, open_foreshadowing: str = ""
+) -> tuple[str, str]:
     system = (
         "你是剧情记录员。读完本章正文，分门别类抽取信息。各类信息严格归位，不要混放：\n\n"
         "1. new_quads：只记**持久状态事实**，谓词（predicate）必须从下表选，禁止用动词：\n"
@@ -80,14 +87,18 @@ def extract_memory_prompt(chapter_text: str, character_ids: str, chapter_num: in
         "   ★只在本章**新出现或确实变化**的状态才记；与前文相同的状态不要重复抽取。\n"
         "   ★object 用稳定简洁的措辞，别每章换说法（如统一写\"系统管理员\"，别一会儿加括号备注）。\n"
         "2. state_changes：出场角色本章的**易变态**（地点/即时状态/情绪）——这些不进 quad。\n"
-        "3. foreshadowing：本章埋下的伏笔（待回收）。\n"
-        "4. summary：100-150 字压缩摘要，承载本章**事件经过**（发生了什么、谁做了什么）。"
+        "3. foreshadowing：本章**新埋下**的伏笔（待回收的坑），各一句话。\n"
+        "4. resolved_foreshadowing：若本章**兑现/回收**了下方【待回收伏笔】中的某些坑，"
+        "把对应 id 填进来（只能填给出的 id；本章没回收任何坑就留空）。\n"
+        "5. summary：100-150 字压缩摘要，承载本章**事件经过**（发生了什么、谁做了什么）。"
         "事件就写在这里，不要塞进 new_quads。不必文采，要信息密度。\n"
         "只记真实发生的，不要脑补。"
     )
+    fore = f"\n【待回收伏笔（id: 内容）】\n{open_foreshadowing}\n" if open_foreshadowing else ""
     user = (
         f"【出场角色 id】{character_ids}\n"
-        f"【第 {chapter_num} 章正文】\n{chapter_text}\n\n"
+        f"【第 {chapter_num} 章正文】\n{chapter_text}\n"
+        f"{fore}\n"
         "请产出 ChapterExtract。"
     )
     return system, user

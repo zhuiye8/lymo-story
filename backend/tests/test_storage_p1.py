@@ -167,3 +167,46 @@ class TestQualitySave:
         assert n_scores == 8   # 8 维
         assert n_eval == 1
         assert n_slop == 1
+
+
+class TestForeshadowing:
+    """伏笔埋坑/填坑闭环。"""
+
+    @pytest.mark.asyncio
+    async def test_plant_and_get_open(self, store):
+        await store.create_story("s1", "书")
+        ids = await store.save_foreshadowing("s1", 1, ["神秘玉佩来历不明", "村口老人欲言又止", "  "])
+        assert len(ids) == 2  # 空白项被跳过
+        open_f = await store.get_open_foreshadowing("s1", before_chapter=3)
+        assert len(open_f) == 2
+        assert all(f["age"] == 2 for f in open_f)  # ch3 看 ch1 埋的 → age=2
+
+    @pytest.mark.asyncio
+    async def test_resolve(self, store):
+        await store.create_story("s1", "书")
+        ids = await store.save_foreshadowing("s1", 1, ["坑A", "坑B"])
+        n = await store.resolve_foreshadowing("s1", [ids[0]], chapter=4)
+        assert n == 1
+        open_f = await store.get_open_foreshadowing("s1", before_chapter=5)
+        assert len(open_f) == 1 and open_f[0]["description"] == "坑B"
+
+    @pytest.mark.asyncio
+    async def test_age_ordering_oldest_first(self, store):
+        await store.create_story("s1", "书")
+        await store.save_foreshadowing("s1", 5, ["较新的坑"])
+        await store.save_foreshadowing("s1", 1, ["很老的坑"])
+        open_f = await store.get_open_foreshadowing("s1", before_chapter=6)
+        assert [f["description"] for f in open_f] == ["很老的坑", "较新的坑"]  # 老的催收在前
+
+    @pytest.mark.asyncio
+    async def test_before_chapter_excludes_current(self, store):
+        await store.create_story("s1", "书")
+        await store.save_foreshadowing("s1", 5, ["本章刚埋"])
+        # 第5章自己埋的，第5章生成时（before=5）不该看到（planted_chapter < before）
+        assert await store.get_open_foreshadowing("s1", before_chapter=5) == []
+        assert len(await store.get_open_foreshadowing("s1", before_chapter=6)) == 1
+
+    @pytest.mark.asyncio
+    async def test_resolve_empty_noop(self, store):
+        await store.create_story("s1", "书")
+        assert await store.resolve_foreshadowing("s1", [], chapter=2) == 0

@@ -228,6 +228,18 @@ class SQLiteStore:
                     detected_at TEXT NOT NULL
                 );
                 CREATE INDEX IF NOT EXISTS idx_slop_story ON slop_findings(story_id, chapter_num);
+
+                -- ============ 伏笔（埋坑/填坑闭环）============
+                CREATE TABLE IF NOT EXISTS foreshadowing (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    story_id TEXT NOT NULL,
+                    description TEXT NOT NULL,              -- 伏笔内容
+                    planted_chapter INTEGER NOT NULL,       -- 埋下的章
+                    status TEXT NOT NULL DEFAULT 'open',    -- open 待回收 / resolved 已回收
+                    resolved_chapter INTEGER,               -- 回收的章
+                    created_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_foreshadow_story ON foreshadowing(story_id, status);
                 """
             )
             await db.commit()
@@ -334,6 +346,58 @@ class SQLiteStore:
             )
             rows = [dict(r) for r in await cur.fetchall()]
             return list(reversed(rows))
+
+    # ===================== 伏笔（埋坑/填坑）=====================
+
+    async def save_foreshadowing(self, story_id: str, chapter: int, items: list[str]) -> list[int]:
+        """记录本章埋下的伏笔（status=open），返回新 id 列表。"""
+        ids: list[int] = []
+        now = _now()
+        async with aiosqlite.connect(self.db_path) as db:
+            for desc in items:
+                desc = (desc or "").strip()
+                if not desc:
+                    continue
+                cur = await db.execute(
+                    "INSERT INTO foreshadowing (story_id, description, planted_chapter, status, created_at) "
+                    "VALUES (?, ?, ?, 'open', ?)",
+                    (story_id, desc, chapter, now),
+                )
+                ids.append(cur.lastrowid or 0)
+            await db.commit()
+        return ids
+
+    async def get_open_foreshadowing(self, story_id: str, before_chapter: int) -> list[dict]:
+        """取仍未回收的伏笔（planted_chapter < before_chapter），带 age=拖了多少章。
+        越老的排前面——便于催收（埋了很久没填的坑优先回收）。"""
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cur = await db.execute(
+                "SELECT id, description, planted_chapter FROM foreshadowing "
+                "WHERE story_id = ? AND status = 'open' AND planted_chapter < ? "
+                "ORDER BY planted_chapter ASC",
+                (story_id, before_chapter),
+            )
+            out = []
+            for r in await cur.fetchall():
+                d = dict(r)
+                d["age"] = max(0, before_chapter - d["planted_chapter"])
+                out.append(d)
+            return out
+
+    async def resolve_foreshadowing(self, story_id: str, ids: list[int], chapter: int) -> int:
+        """把指定伏笔标为已回收（resolved）。返回实际更新条数。"""
+        if not ids:
+            return 0
+        async with aiosqlite.connect(self.db_path) as db:
+            placeholders = ",".join("?" * len(ids))
+            cur = await db.execute(
+                f"UPDATE foreshadowing SET status='resolved', resolved_chapter=? "
+                f"WHERE story_id=? AND status='open' AND id IN ({placeholders})",
+                (chapter, story_id, *ids),
+            )
+            await db.commit()
+            return cur.rowcount or 0
 
     # ===================== characters =====================
 

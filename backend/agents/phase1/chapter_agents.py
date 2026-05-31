@@ -17,8 +17,10 @@ class OutlineAdvanceAgent(BaseAgent):
     name = "outline_advance"
 
     async def run(self, *, bible_brief: str, rough_stage: str, chapter_num: int,
-                  recent_summaries: str, story_id: str | None = None) -> DetailedOutline:
-        sys, usr = outline_advance_prompt(bible_brief, rough_stage, chapter_num, recent_summaries)
+                  recent_summaries: str, open_foreshadowing: str = "",
+                  story_id: str | None = None) -> DetailedOutline:
+        sys, usr = outline_advance_prompt(bible_brief, rough_stage, chapter_num,
+                                          recent_summaries, open_foreshadowing)
         return await self._call_structured(sys, usr, DetailedOutline,
                                            story_id=story_id, chapter_num=chapter_num,
                                            temperature=0.6, max_tokens=2048)
@@ -53,8 +55,9 @@ class MemoryExtractorAgent(BaseAgent):
     name = "memory_extractor"
 
     async def run(self, *, chapter_text: str, character_ids: str, chapter_num: int,
-                  story_id: str | None = None) -> ChapterExtract:
-        sys, usr = extract_memory_prompt(chapter_text, character_ids, chapter_num)
+                  open_foreshadowing: str = "", story_id: str | None = None) -> ChapterExtract:
+        sys, usr = extract_memory_prompt(chapter_text, character_ids, chapter_num,
+                                         open_foreshadowing)
         return await self._call_structured(sys, usr, ChapterExtract,
                                            story_id=story_id, chapter_num=chapter_num,
                                            temperature=0.3, max_tokens=2048)

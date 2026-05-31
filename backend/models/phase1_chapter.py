@@ -69,5 +69,9 @@ class ChapterExtract(BaseModel):
     """章节后抽取：新事实四元组 + 角色状态变化 + 伏笔 + 压缩摘要。"""
     new_quads: list[ExtractedQuad] = Field(default_factory=list, description="本章新增/变更的事实")
     state_changes: list[CharacterStateChange] = Field(default_factory=list, description="角色状态变化")
-    foreshadowing: list[str] = Field(default_factory=list, description="本章埋下的伏笔（待回收）")
+    foreshadowing: list[str] = Field(default_factory=list, description="本章新埋下的伏笔（待回收）")
+    resolved_foreshadowing: list[int] = Field(
+        default_factory=list,
+        description="本章回收/兑现的【待回收伏笔】的 id（只填上下文给出的 id，没回收就留空）"
+    )
     summary: str = Field(description="本章 100-150 字压缩摘要（喂下一章上下文）")

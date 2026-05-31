@@ -38,6 +38,7 @@ class ChapterState(TypedDict, total=False):
     bible_brief: str
     rough_stage: str
     recent_summaries: str
+    open_foreshadowing: list
     detailed: DetailedOutline
     plan: ScenePlan
     facts_brief: str
@@ -78,6 +79,7 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
         stage_txt = f"{stage['stage_name']}：{stage['summary']}" if stage else "（无对应阶段，自由发挥推进主线）"
         recent = await store.get_recent_summaries(sid, before_chapter=cn, limit=3)
         recent_txt = "\n".join(f"第{r['chapter_num']}章 {r['title']}：{r['summary']}" for r in recent)
+        open_fore = await store.get_open_foreshadowing(sid, before_chapter=cn)
         # 角色对白指纹简表
         chars = await store.list_characters(sid)
         vp_lines = []
@@ -92,15 +94,19 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
             "bible_brief": _bible_brief(bible),
             "rough_stage": stage_txt,
             "recent_summaries": recent_txt,
+            "open_foreshadowing": open_fore,
             "voice_profiles": "\n".join(vp_lines),
             "target_words": state.get("target_words", DEFAULT_TARGET_WORDS),
         }
 
     async def outline_advance(state: ChapterState) -> ChapterState:
+        # 给细纲师看"待回收伏笔"（按 age 催收），让它在 beat 里安排填坑
+        of = state.get("open_foreshadowing") or []
+        fore_txt = "\n".join(f"- (age={f['age']}) {f['description']}" for f in of)
         d = await outline_agent.run(
             bible_brief=state["bible_brief"], rough_stage=state["rough_stage"],
             chapter_num=state["chapter_num"], recent_summaries=state["recent_summaries"],
-            story_id=state["story_id"])
+            open_foreshadowing=fore_txt, story_id=state["story_id"])
         return {"detailed": d}
 
     async def scene_plan(state: ChapterState) -> ChapterState:
@@ -202,9 +208,12 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
         sid, cn = state["story_id"], state["chapter_num"]
         chars = await store.list_characters(sid)
         char_ids = "、".join(f"{c['name']}={c['character_id']}" for c in chars)
+        # 给抽取器看"待回收伏笔(id: 内容)"，让它标记本章兑现了哪些
+        of = state.get("open_foreshadowing") or []
+        fore_txt = "\n".join(f"{f['id']}: {f['description']}" for f in of)
         ex = await extractor.run(
             chapter_text=state["content"], character_ids=char_ids,
-            chapter_num=cn, story_id=sid)
+            chapter_num=cn, open_foreshadowing=fore_txt, story_id=sid)
         return {"extract": ex}
 
     async def save(state: ChapterState) -> ChapterState:
@@ -267,6 +276,14 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
                 sid, sc.character_id, cn,
                 location=sc.location, status=sc.status, emotional_state=sc.emotional_state,
                 state={"note": sc.note})
+
+        # 6c. 伏笔闭环：先回收本章兑现的旧坑，再记录新埋的坑（埋坑/填坑）
+        if ex.resolved_foreshadowing:
+            n = await store.resolve_foreshadowing(sid, ex.resolved_foreshadowing, cn)
+            if n:
+                logger.info(f"[save] ch{cn} 回收伏笔 {n} 个")
+        if ex.foreshadowing:
+            await store.save_foreshadowing(sid, cn, ex.foreshadowing)
 
         # 7. 质量落库（喂 quality_admin 4 图表）+ 一致性冲突计入 quality
         q = state.get("quality", {})
