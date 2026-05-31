@@ -5,10 +5,11 @@ Each provider module exposes:
   - build_extra_body(options: dict) -> dict | None: per-provider extra params
   - resolve_model_name(litellm_model: str, api_base: str | None) -> str
 """
-from backend.llm.providers import deepseek
+from backend.llm.providers import deepseek, mimo
 
 PROVIDERS = {
     "deepseek": deepseek,
+    "mimo": mimo,
 }
 
 

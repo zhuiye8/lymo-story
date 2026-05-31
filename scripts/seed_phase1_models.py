@@ -60,7 +60,8 @@ async def main():
             "litellm_model": f"openai/{MIMO_MODEL}", "api_key": MIMO_API_KEY, "api_base": MIMO_API_BASE,
             "max_tokens": 4096, "default_temperature": 0.3,
             "cost_per_million_input": 1.0, "cost_per_million_output": 3.0, "currency": "USD",
-            "provider": "generic", "provider_options": {},
+            # provider=mimo → build_extra_body 关 thinking（reasoning 烧 token 撑爆评委 JSON）
+            "provider": "mimo", "provider_options": {"thinking": "disabled"},
         })
 
     for m in models:
