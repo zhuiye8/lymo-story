@@ -126,6 +126,38 @@ async def expand_if_short(
         return text
 
 
+async def soft_close(
+    llm: LLMClient, text: str, *, agent_name: str = "scene_writer",
+) -> str:
+    """给被切出的"前半段"末尾补一个轻收束（分页切分用）。
+
+    切分时前半段当初是为衔接下一场景而写的，结尾可能"话说一半"。这里只改**最后一段**，
+    让它落在一个完整的画面/动作/心绪上、有停顿感——不是强钩子（合并发布无需悬念），
+    也不是注水扩写（字数相近、不加新信息）。
+    """
+    paras = [p for p in text.split("\n\n") if p.strip()]
+    if len(paras) < 2:
+        return text
+    last = paras[-1]
+    system = (
+        "你是中文小说编辑。下面这段是一章的结尾段，但它当初是为衔接下一场景写的，显得没收住。"
+        "请改写成一个有'停顿感'的轻收束：落在完整的画面/动作/心绪上，读起来像一段落幕，"
+        "不是话说一半。不要强行制造悬念，不要加新信息，字数相近。只输出改写后的这一段。"
+        f"\n\n{ANTI_SLOP_ZH}"
+    )
+    try:
+        new_last = await llm.complete(
+            system, last, agent_name=agent_name,
+            max_tokens=int(len(last) * 2.2) + 200, temperature=0.7)
+        new_last = new_last.strip()
+        if new_last and len(new_last) > len(last) * 0.4 and "改写" not in new_last[:8]:
+            paras[-1] = new_last
+            return "\n\n".join(paras)
+    except Exception as e:
+        logger.warning(f"[rewrite] soft_close failed: {e}")
+    return text
+
+
 async def compress_if_long(
     llm: LLMClient, text: str, target_words: int, *,
     agent_name: str = "scene_writer", ceiling: int = 4500,

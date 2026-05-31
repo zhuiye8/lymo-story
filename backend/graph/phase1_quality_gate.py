@@ -18,13 +18,11 @@ import logging
 
 from backend.llm.client import LLMClient
 from backend.quality.slop_detector import SlopDetector
-from backend.quality.rewrite import rewrite_slop_paragraphs, expand_if_short, compress_if_long
+from backend.quality.rewrite import rewrite_slop_paragraphs
 from backend.quality.critic_room import run_critic_room
 
 logger = logging.getLogger(__name__)
 
-WORD_FLOOR = 3000
-WORD_CEILING = 4500
 PASS_THRESHOLD = 6.0
 MAX_REWRITE_ROUNDS = 2
 
@@ -37,24 +35,17 @@ async def run_quality_gate(
     scene_brief: str = "",
     use_secondary_judge: bool = True,
 ) -> dict:
-    """对一章正文跑质量闸。返回 {content, quality, slop_findings, passed, rounds}。
+    """对一个推进单元正文跑质量闸。返回 {content, quality, slop_findings, passed, rounds}。
 
-    流程：
-      1. 字数矫正（短则扩、长则压，保钩子）
-      2. slop 检测 → 命中则局部重写（最多 MAX_REWRITE_ROUNDS 轮）
-      3. 异源 Critic 评分 → composite 过闸判定
+    流程（字数控制已上移到 paginate 节点，本闸不再管字数）：
+      1. slop 检测 → 命中则局部重写（最多 MAX_REWRITE_ROUNDS 轮）
+      2. 异源 Critic 评分 → composite 过闸判定
     """
     detector = SlopDetector()
     cur = content
     rounds = 0
 
-    # ---- 1. 字数矫正（与 anti-slop 共用引擎）----
-    if len(cur) < WORD_FLOOR:
-        cur = await expand_if_short(llm, cur, target_words, floor=WORD_FLOOR)
-    elif len(cur) > WORD_CEILING:
-        cur = await compress_if_long(llm, cur, target_words, ceiling=WORD_CEILING)
-
-    # ---- 2. slop 检测 + 局部重写循环 ----
+    # ---- 1. slop 检测 + 局部重写循环 ----
     report = detector.detect(cur)
     while report.penalty > 0.5 and rounds < MAX_REWRITE_ROUNDS:
         rounds += 1

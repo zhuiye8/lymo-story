@@ -80,11 +80,13 @@ Copy `.env.example` to `.env`. All vars use the `STORY_` prefix (Pydantic Settin
 `concept → world_build → character_design → outline_plan → assemble`
 assemble persists: bible (`stories.bible_json`), characters (+ voice_profile), rough outline, initial DOME quads (存活/身份 baseline), and **L0 identity-core memories** per character.
 
-**Chapter graph** (`phase1_chapter.py`) — generates one chapter (7 nodes):
-`load_context → outline_advance → scene_plan → retrieve_memory → write_chapter → extract_memory → save`
-- `write_chapter` does **best-of-N** (N=2): N drafts → each through the quality gate → pick highest composite.
-- `retrieve_memory` surfaces DOME hard-constraints + character states + **semantic memory recall** (relevant + high-emotional) + open foreshadowing.
-- `save` writes chapter/outline/quads (normalized + deduped) + character_states + foreshadowing (plant/resolve) + L1 memories + quality.
+**Chapter graph** (`phase1_chapter.py`) — generates one **plot installment** → 1..N physical chapters (7 nodes):
+`load_context → outline_advance → scene_plan → retrieve_memory → write_chapter → paginate → finalize`
+- **推进单元 ≠ 物理章**: the outline/plot is planned in *installments* (`installment_num`, used for rough-stage lookup); a long installment is split into multiple *physical chapters* (`chapter_num`). `installments_done` (stories table) tracks plot progress; chapter_count can exceed it. This keeps plot pacing stable regardless of splits.
+- `write_chapter` does **best-of-N** (N=2): N drafts → each through the quality gate (slop detect/rewrite + critic; **no word correction**) → pick highest composite.
+- `paginate` splits the installment by target/floor/ceiling/split_threshold (config): ≤ceiling or <threshold → 1 chapter; else even-split at paragraph boundaries into N parts, **soft-close** non-final parts (a landing beat, not a hard cliffhanger), mildly expand any sub-floor part. Titles get （上/下）or（一/二/…）.
+- `finalize` loops the parts: per physical chapter, extract (quads/states/memories/foreshadowing/summary) + persist. Quality dims are **installment-shared**; only the per-chapter consistency penalty varies.
+- `retrieve_memory` surfaces DOME hard-constraints + character states + **semantic memory recall** + open foreshadowing.
 
 **Quality gate** (`phase1_quality_gate.py`): deterministic slop detect → word-count correction → local rewrite loop → **heterogeneous critic room** (8-dim WebNovelBench rubric).
 

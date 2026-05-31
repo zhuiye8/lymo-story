@@ -75,21 +75,23 @@ async def _run_init(app_state, story_id: str, theme: str, requirements: str, tit
         await store.update_story_status(story_id, "init_failed")
 
 
-async def _run_chapter(app_state, story_id: str, chapter_num: int, target_words: int):
+async def _run_chapter(app_state, story_id: str, installment_num: int, start_chapter_num: int, target_words: int):
     store: SQLiteStore = app_state.sqlite
     llm: LLMClient = app_state.llm
     quads: KnowledgeQuads = app_state.quads
     mem: LayeredMemory = app_state.mem
     progress: ProgressStore = app_state.progress_store
     try:
-        progress.start(story_id, chapter_num)
-        graph = build_chapter_graph(llm, store, quads, mem, progress)
-        await graph.ainvoke({"story_id": story_id, "chapter_num": chapter_num, "target_words": target_words})
+        progress.start(story_id, start_chapter_num)
+        graph = build_chapter_graph(llm, store, quads, mem, progress, app_state.settings)
+        await graph.ainvoke({"story_id": story_id, "chapter_num": start_chapter_num,
+                             "installment_num": installment_num, "target_words": target_words})
         progress.finish(story_id)
-        # 复位状态：本章已落库，可生成下一章（前端"生成中"改看 progress.finished，不再看此状态）
+        # 推进单元 +1（物理章可能因切分 +N）；复位状态 → 可生成下一单元
+        await store.bump_installments_done(story_id)
         await store.update_story_status(story_id, "bible_ready")
     except Exception as e:
-        logger.exception(f"chapter {chapter_num} failed for {story_id}")
+        logger.exception(f"installment {installment_num} failed for {story_id}")
         progress.set_error(story_id, str(e)[:300])
 
 
@@ -147,10 +149,12 @@ async def generate_chapter(story_id: str, req: GenerateReq, request: Request,
         raise HTTPException(404, "story not found")
     if s["status"] not in ("bible_ready", "writing"):
         raise HTTPException(400, f"story not ready to generate (status={s['status']})")
-    next_num = await store.get_chapter_count(story_id) + 1
+    start_chapter_num = await store.get_chapter_count(story_id) + 1
+    installment_num = await store.get_installments_done(story_id) + 1
     await store.update_story_status(story_id, "writing")
-    asyncio.create_task(_run_chapter(request.app.state, story_id, next_num, req.target_words))
-    return {"story_id": story_id, "chapter_num": next_num, "status": "generating"}
+    asyncio.create_task(_run_chapter(
+        request.app.state, story_id, installment_num, start_chapter_num, req.target_words))
+    return {"story_id": story_id, "chapter_num": start_chapter_num, "status": "generating"}
 
 
 @router.get("/{story_id}/chapters")

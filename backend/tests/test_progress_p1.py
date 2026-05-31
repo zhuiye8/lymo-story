@@ -20,7 +20,7 @@ def test_enter_stage_cascades_prior_to_done():
     by = {st["name"]: st["status"] for st in d["stages"]}
     assert by["load_context"] == "done" and by["outline_advance"] == "done"
     assert by["scene_plan"] == "running"
-    assert by["save"] == "pending"
+    assert by["finalize"] == "pending"
     assert d["finished"] is False
 
 

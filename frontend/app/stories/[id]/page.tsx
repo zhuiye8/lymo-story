@@ -7,6 +7,7 @@ import { getStory, getProgress, generateChapter, listChapters, parseQuality } fr
 import type { StoryDetail, ProgressResponse, ChapterSummary, StoryBible } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function StageRow({ status, label, detail }: { status: string; label: string; detail?: string }) {
@@ -35,6 +36,7 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
   const [prog, setProg] = useState<ProgressResponse | null>(null);
   const [chapters, setChapters] = useState<ChapterSummary[]>([]);
   const [busy, setBusy] = useState(false);
+  const [targetWords, setTargetWords] = useState(3500);
 
   const refresh = useCallback(async () => {
     const [s, p, chs] = await Promise.all([
@@ -60,7 +62,7 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
   async function onGenerate() {
     setBusy(true);
     try {
-      await generateChapter(id);
+      await generateChapter(id, targetWords);
       await refresh();
     } catch (e) {
       alert(`生成失败：${e instanceof Error ? e.message : e}`);
@@ -89,10 +91,24 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
             <Badge variant={ready ? "gold" : "stellar"} className="text-[10px]">{status}</Badge>
           </div>
         </div>
-        <Button onClick={onGenerate} disabled={!ready || busy || generating} variant="gold" size="lg">
-          {busy || generating ? <Loader2 className="size-4 mr-1.5 animate-spin" /> : <Play className="size-4 mr-1.5" />}
-          {generating ? "生成中…" : `生成第 ${prog?.chapter_count ? prog.chapter_count + 1 : 1} 章`}
-        </Button>
+        <div className="flex items-end gap-2 shrink-0">
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] text-muted-foreground">单章目标字数</label>
+            <Input
+              type="number"
+              value={targetWords}
+              min={1500}
+              step={500}
+              disabled={generating}
+              onChange={(e) => setTargetWords(parseInt(e.target.value || "3500", 10))}
+              className="h-10 w-24 text-sm tabular-nums"
+            />
+          </div>
+          <Button onClick={onGenerate} disabled={!ready || busy || generating} variant="gold" size="lg">
+            {busy || generating ? <Loader2 className="size-4 mr-1.5 animate-spin" /> : <Play className="size-4 mr-1.5" />}
+            {generating ? "生成中…" : `生成第 ${prog?.chapter_count ? prog.chapter_count + 1 : 1} 章`}
+          </Button>
+        </div>
       </div>
 
       {/* 立意卡片 */}

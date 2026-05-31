@@ -25,6 +25,8 @@ from backend.agents.phase1.chapter_agents import (
     OutlineAdvanceAgent, ScenePlanAgent, SceneWriterAgent, MemoryExtractorAgent,
 )
 from backend.graph.phase1_quality_gate import run_quality_gate
+from backend.quality.rewrite import soft_close, expand_if_short
+from backend.config import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -32,9 +34,46 @@ DEFAULT_TARGET_WORDS = 3500   # I4：>3000 区间软目标
 BEST_OF_N = 2                 # I3/Q3：候选数，关键章可调高
 
 
+def _split_even(content: str, n: int) -> list[str]:
+    """把正文按段落边界（\\n\\n）尽量均分成 n 段（每段一物理章）。
+    不按字符硬切，落点都在段落边界，避免切断句子；n 段达不到则返回实际段数。"""
+    paras = [p for p in content.split("\n\n") if p.strip()]
+    if len(paras) <= 1 or n <= 1:
+        return [content]
+    total = sum(len(p) for p in paras)
+    cut_targets = [total * k / n for k in range(1, n)]  # 全局累计切点
+    parts: list[str] = []
+    cur: list[str] = []
+    acc = 0  # 全局累计长度（不随分段重置，否则 n≥3 的后续切点会错位）
+    ti = 0
+    for p in paras:
+        cur.append(p)
+        acc += len(p)
+        if ti < len(cut_targets) and acc >= cut_targets[ti] and len(parts) < n - 1:
+            parts.append("\n\n".join(cur))
+            cur = []
+            ti += 1
+    if cur:
+        parts.append("\n\n".join(cur))
+    return parts or [content]
+
+
+_CN_NUM = "一二三四五六七八九十"
+
+
+def _title_parts(n: int, base_title: str) -> list[str]:
+    """n 个物理章的标题：1 章原样；2 章 上/下；3+ 章 一/二/…"""
+    if n <= 1:
+        return [base_title]
+    if n == 2:
+        return [f"{base_title}（上）", f"{base_title}（下）"]
+    return [f"{base_title}（{_CN_NUM[i] if i < len(_CN_NUM) else i + 1}）" for i in range(n)]
+
+
 class ChapterState(TypedDict, total=False):
     story_id: str
-    chapter_num: int
+    chapter_num: int          # 物理章号起点（本推进单元的首个物理章）
+    installment_num: int      # 剧情推进单元序号（大纲按它排，切分不影响）
     target_words: int
     # 中间产物
     bible_brief: str
@@ -49,7 +88,7 @@ class ChapterState(TypedDict, total=False):
     word_count: int
     quality: dict
     slop_findings: list
-    extract: ChapterExtract
+    parts: list               # 分页后的物理章列表 [{content, title}]
 
 
 def _bible_brief(bible: dict) -> str:
@@ -66,22 +105,25 @@ def _bible_brief(bible: dict) -> str:
 
 
 def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuads,
-                        mem: LayeredMemory, progress: ProgressStore | None = None):
+                        mem: LayeredMemory, progress: ProgressStore | None = None,
+                        settings: Settings | None = None):
+    settings = settings or Settings()
     outline_agent = OutlineAdvanceAgent(llm)
     plan_agent = ScenePlanAgent(llm)
     writer = SceneWriterAgent(llm)
     extractor = MemoryExtractorAgent(llm)
 
     async def load_context(state: ChapterState) -> ChapterState:
-        sid, cn = state["story_id"], state["chapter_num"]
+        sid, cn = state["story_id"], state["chapter_num"]      # cn = 本单元物理章起点
+        inst = state.get("installment_num", cn)                # 剧情推进单元序号
         story = await store.get_story(sid)
         bible = story["bible"]
         rough = await store.get_rough_outline(sid)
-        # 找当前章号所属的粗纲阶段
-        stage = next((s for s in rough if (s["chapter_start"] or 0) <= cn <= (s["chapter_end"] or 9999)), None)
+        # 粗纲阶段按【推进单元】查，不用物理章号 —— 切分让物理章变多也不漂移剧情节奏
+        stage = next((s for s in rough if (s["chapter_start"] or 0) <= inst <= (s["chapter_end"] or 9999)), None)
         stage_txt = f"{stage['stage_name']}：{stage['summary']}" if stage else "（无对应阶段，自由发挥推进主线）"
         recent = await store.get_recent_summaries(sid, before_chapter=cn, limit=3)
-        recent_txt = "\n".join(f"第{r['chapter_num']}章 {r['title']}：{r['summary']}" for r in recent)
+        recent_txt = "\n".join(f"- {r['title']}：{r['summary']}" for r in recent)  # 不强调物理章号，避免与单元号错位
         open_fore = await store.get_open_foreshadowing(sid, before_chapter=cn)
         # 角色对白指纹简表
         chars = await store.list_characters(sid)
@@ -108,7 +150,8 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
         fore_txt = "\n".join(f"- (age={f['age']}) {f['description']}" for f in of)
         d = await outline_agent.run(
             bible_brief=state["bible_brief"], rough_stage=state["rough_stage"],
-            chapter_num=state["chapter_num"], recent_summaries=state["recent_summaries"],
+            chapter_num=state.get("installment_num", state["chapter_num"]),
+            recent_summaries=state["recent_summaries"],
             open_foreshadowing=fore_txt, story_id=state["story_id"])
         return {"detailed": d}
 
@@ -118,7 +161,8 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
         p = await plan_agent.run(
             detailed_outline=state["detailed"].model_dump_json(),
             characters_brief=cbrief, target_words=state["target_words"],
-            chapter_num=state["chapter_num"], story_id=state["story_id"])
+            chapter_num=state.get("installment_num", state["chapter_num"]),
+            story_id=state["story_id"])
         return {"plan": p}
 
     async def retrieve_memory(state: ChapterState) -> ChapterState:
@@ -225,118 +269,119 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
             "slop_findings": best["slop_findings"],
         }
 
-    async def extract_memory(state: ChapterState) -> ChapterState:
-        sid, cn = state["story_id"], state["chapter_num"]
-        chars = await store.list_characters(sid)
-        char_ids = "、".join(f"{c['name']}={c['character_id']}" for c in chars)
-        # 给抽取器看"待回收伏笔(id: 内容)"，让它标记本章兑现了哪些
-        of = state.get("open_foreshadowing") or []
-        fore_txt = "\n".join(f"{f['id']}: {f['description']}" for f in of)
-        ex = await extractor.run(
-            chapter_text=state["content"], character_ids=char_ids,
-            chapter_num=cn, open_foreshadowing=fore_txt, story_id=sid)
-        return {"extract": ex}
+    async def paginate(state: ChapterState) -> ChapterState:
+        """把一个推进单元的正文按目标字数切成 1..N 个物理章。
+        ≤上限 或 <切分线 → 1 章（接受偏长，不造 runt）；否则等分（场景/段落边界）。
+        非末章补软收束治戛然而止；个别仍 <floor 的小幅补足。"""
+        content = state["content"]
+        target = settings.chapter_target_words
+        floor, ceiling, threshold = settings.chapter_floor, settings.chapter_ceiling, settings.chapter_split_threshold
+        base_title = state["detailed"].chapter_title
+        L = len(content)
 
-    async def save(state: ChapterState) -> ChapterState:
-        sid, cn = state["story_id"], state["chapter_num"]
-        ex: ChapterExtract = state["extract"]
-        plan: ScenePlan = state["plan"]
-        detailed: DetailedOutline = state["detailed"]
+        if L <= ceiling or L < threshold:
+            return {"parts": [{"content": content, "title": base_title}]}
 
-        # 1. 章节正文 + 摘要
-        await store.save_chapter(
-            sid, cn, title=detailed.chapter_title, pov=plan.pov,
-            content=state["content"], summary=ex.summary)
-        # 2. 细纲落库
-        await store.save_detailed_outline(
-            sid, cn, beats=[b.model_dump() for b in detailed.beats],
-            narrative_func_tags="、".join(detailed.narrative_func_tags),
-            word_budget=state["target_words"])
-        # 3. 归一 + 过滤四元组：只留持久状态事实，事件/动作谓语（修改/执行/…）丢弃归摘要。
-        #    这是 #2 根因修复——否则事件四元组累积，撞出大量误报冲突。
+        n = max(2, round(L / max(target, 1)))
+        chunks = _split_even(content, n)
+        if len(chunks) < 2:  # 无可切段落边界（单大段）→ 接受偏长一章
+            return {"parts": [{"content": content, "title": base_title}]}
+
+        for i in range(len(chunks) - 1):           # 非末段：软收束
+            chunks[i] = await soft_close(llm, chunks[i])
+        for i in range(len(chunks)):               # 仍短于 floor：小幅补足（罕见）
+            if len(chunks[i]) < floor:
+                chunks[i] = await expand_if_short(llm, chunks[i], target, floor=floor)
+
+        titles = _title_parts(len(chunks), base_title)
+        logger.info(f"[paginate] inst{state.get('installment_num')} {L}字 → {len(chunks)} 章 {[len(c) for c in chunks]}")
+        return {"parts": [{"content": c, "title": t} for c, t in zip(chunks, titles)]}
+
+    async def _persist_one(sid, cn, text, title, pov, ex, base_quality, inst, detailed):
+        """落一个物理章：正文/摘要、细纲、四元组(归一/冲突/失效/去重)、状态、伏笔、记忆、质量。"""
         from backend.memory.predicates import (
             normalize_predicate, is_single_valued, objects_compatible,
         )
+        await store.save_chapter(sid, cn, title=title, pov=pov, content=text,
+                                 summary=ex.summary, installment_num=inst)
+        await store.save_detailed_outline(
+            sid, cn, beats=[b.model_dump() for b in detailed.beats],
+            narrative_func_tags="、".join(detailed.narrative_func_tags), word_budget=len(text))
+
         norm_quads, dropped = [], 0
         for q in ex.new_quads:
             canon = normalize_predicate(q.predicate)
             if not canon:
                 dropped += 1
                 continue
-            norm_quads.append({
-                "subject": q.subject, "predicate": canon, "object": q.object,
-                "invalidates_prior": q.invalidates_prior,
-            })
-        if dropped:
-            logger.info(f"[save] ch{cn} 丢弃 {dropped} 个事件/非状态四元组（归摘要不入库）")
-
-        # 4. 一致性检测（② 层，精确：单值离散谓语 + object 不兼容 + 未声明失效才算真矛盾）
+            norm_quads.append({"subject": q.subject, "predicate": canon, "object": q.object,
+                               "invalidates_prior": q.invalidates_prior})
         conflicts = await quads.find_conflicts(sid, norm_quads, cn) if norm_quads else []
         if conflicts:
-            logger.warning(f"[save] ch{cn} 检测到 {len(conflicts)} 个真冲突: "
+            logger.warning(f"[finalize] ch{cn} {len(conflicts)} 个真冲突: "
                            f"{[(c['new']['subject'], c['new']['predicate']) for c in conflicts[:3]]}")
-
-        # 5. 失效处理：仅单值离散谓语的真转移（境界突破/死亡），且新旧值不兼容才失效旧值
         for q in norm_quads:
             if q["invalidates_prior"] and is_single_valued(q["predicate"]):
-                priors = await quads.query_subject(sid, q["subject"], cn)
-                for p in priors:
+                for p in await quads.query_subject(sid, q["subject"], cn):
                     if (normalize_predicate(p["predicate"]) == q["predicate"]
                             and not objects_compatible(p["object"], q["object"])):
                         await quads.invalidate(p["id"], at_chapter=cn)
-
-        # 6. 去重写入（跳过同义改写/细化，根除反复入库膨胀）
         if norm_quads:
-            inserted, skipped = await quads.add_quads_deduped(sid, norm_quads, source_chapter=cn)
-            if skipped:
-                logger.info(f"[save] ch{cn} 去重跳过 {skipped} 个同义事实，入库 {inserted}")
+            await quads.add_quads_deduped(sid, norm_quads, source_chapter=cn)
 
-        # 6b. 角色状态变化（→ character_states 表，易变态：位置/即时状态/情绪）
         for sc in ex.state_changes:
-            await store.save_character_state(
-                sid, sc.character_id, cn,
-                location=sc.location, status=sc.status, emotional_state=sc.emotional_state,
-                state={"note": sc.note})
-
-        # 6c. 伏笔闭环：先回收本章兑现的旧坑，再记录新埋的坑（埋坑/填坑）
+            await store.save_character_state(sid, sc.character_id, cn, location=sc.location,
+                                             status=sc.status, emotional_state=sc.emotional_state,
+                                             state={"note": sc.note})
         if ex.resolved_foreshadowing:
-            n = await store.resolve_foreshadowing(sid, ex.resolved_foreshadowing, cn)
-            if n:
-                logger.info(f"[save] ch{cn} 回收伏笔 {n} 个")
+            await store.resolve_foreshadowing(sid, ex.resolved_foreshadowing, cn)
         if ex.foreshadowing:
             await store.save_foreshadowing(sid, cn, ex.foreshadowing)
-
-        # 6d. 分层记忆：写入本章角色情感关键记忆（L1）→ SQLite + ChromaDB
         if ex.memories:
             try:
-                wrote = await mem.remember_batch(
-                    sid, [m.model_dump() for m in ex.memories], chapter=cn)
-                if wrote:
-                    logger.info(f"[save] ch{cn} 写入角色记忆 {wrote} 条")
+                await mem.remember_batch(sid, [m.model_dump() for m in ex.memories], chapter=cn)
             except Exception as e:
-                logger.warning(f"[save] ch{cn} 记忆写入失败（不阻断）: {type(e).__name__}: {e}")
+                logger.warning(f"[finalize] ch{cn} 记忆写入失败: {type(e).__name__}: {e}")
 
-        # 7. 质量落库（喂 quality_admin 4 图表）+ 一致性冲突计入 quality
-        q = state.get("quality", {})
+        # 质量：各物理章共享单元维度分，仅本章一致性冲突单独扣（用户选定 installment 共享）
+        q = base_quality or {}
         if q:
-            # 有事实冲突 → composite 额外惩罚（一致性是硬指标）
             consistency_penalty = min(len(conflicts) * 0.5, 2.0)
-            comp = q["composite_score"] - consistency_penalty
+            comp = q.get("composite_score", 0) - consistency_penalty
             await store.save_quality(
-                sid, cn,
-                dim_scores=q.get("dim_scores", {}),
-                mean_quality=q.get("mean_quality", 0),
-                slop_penalty=q.get("slop_penalty", 0),
-                composite_score=round(comp, 3),
-                word_count=q.get("word_count", state.get("word_count", 0)),
-                judge_model="+".join(q.get("judges", [])),
-                slop_findings=state.get("slop_findings", []),
-            )
-            # 把最终 quality 快照也写进章节
-            await store.save_chapter(
-                sid, cn, title=detailed.chapter_title, pov=plan.pov,
-                content=state["content"], summary=ex.summary,
-                quality={**q, "consistency_conflicts": len(conflicts), "composite_final": round(comp, 3)})
+                sid, cn, dim_scores=q.get("dim_scores", {}), mean_quality=q.get("mean_quality", 0),
+                slop_penalty=q.get("slop_penalty", 0), composite_score=round(comp, 3),
+                word_count=len(text), judge_model="+".join(q.get("judges", [])), slop_findings=[])
+            await store.save_chapter(sid, cn, title=title, pov=pov, content=text, summary=ex.summary,
+                                     installment_num=inst,
+                                     quality={**q, "word_count": len(text),
+                                              "consistency_conflicts": len(conflicts),
+                                              "composite_final": round(comp, 3)})
+
+    async def finalize(state: ChapterState) -> ChapterState:
+        """逐物理章：抽取记忆 + 落库。一个推进单元产出 1..N 个物理章（共享单元质量分）。"""
+        sid = state["story_id"]
+        start_cn = state["chapter_num"]
+        inst = state.get("installment_num", start_cn)
+        detailed: DetailedOutline = state["detailed"]
+        plan: ScenePlan = state["plan"]
+        base_quality = state.get("quality", {})
+        parts = state.get("parts") or [{"content": state["content"], "title": detailed.chapter_title}]
+
+        chars = await store.list_characters(sid)
+        char_ids = "、".join(f"{c['name']}={c['character_id']}" for c in chars)
+
+        for i, part in enumerate(parts):
+            cn = start_cn + i
+            # 逐章刷新待回收伏笔，使同单元内 A 埋 B 收也能衔接
+            of = await store.get_open_foreshadowing(sid, before_chapter=cn)
+            fore_txt = "\n".join(f"{f['id']}: {f['description']}" for f in of)
+            ex = await extractor.run(chapter_text=part["content"], character_ids=char_ids,
+                                     chapter_num=cn, open_foreshadowing=fore_txt, story_id=sid)
+            await _persist_one(sid, cn, part["content"], part["title"], plan.pov, ex,
+                               base_quality, inst, detailed)
+        if len(parts) > 1:
+            logger.info(f"[finalize] inst{inst} 落 {len(parts)} 物理章: {start_cn}~{start_cn + len(parts) - 1}")
         return {}
 
     def _staged(name, fn):
@@ -351,7 +396,7 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
     for name, fn in [
         ("load_context", load_context), ("outline_advance", outline_advance),
         ("scene_plan", scene_plan), ("retrieve_memory", retrieve_memory),
-        ("write_chapter", write_chapter), ("extract_memory", extract_memory), ("save", save),
+        ("write_chapter", write_chapter), ("paginate", paginate), ("finalize", finalize),
     ]:
         g.add_node(name, _staged(name, fn))
     g.add_edge(START, "load_context")
@@ -359,7 +404,7 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
     g.add_edge("outline_advance", "scene_plan")
     g.add_edge("scene_plan", "retrieve_memory")
     g.add_edge("retrieve_memory", "write_chapter")
-    g.add_edge("write_chapter", "extract_memory")
-    g.add_edge("extract_memory", "save")
-    g.add_edge("save", END)
+    g.add_edge("write_chapter", "paginate")
+    g.add_edge("paginate", "finalize")
+    g.add_edge("finalize", END)
     return g.compile()

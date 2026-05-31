@@ -31,6 +31,12 @@ class Settings(BaseSettings):
     max_consistency_retries: int = 2
     default_chapter_word_count: int = 3000
 
+    # 单章字数控制（分页切分）。一个剧情推进单元写出来若过长，按场景/段落切成多个物理章。
+    chapter_target_words: int = 3500     # 单章目标
+    chapter_floor: int = 3000            # 单章下限（低于此考虑小幅补足）
+    chapter_ceiling: int = 4500          # 单章上限（高于此但不够切两章 → 接受偏长）
+    chapter_split_threshold: int = 6000  # ≥ 此值才切分（=2×floor，保证切后每章≥floor）
+
     # Consistency thresholds (0-100 for chapter, 0.0-1.0 for scene)
     # Lower = more lenient (fewer rewrites). Raise early in a story, lower when long context degrades scores.
     chapter_consistency_threshold: int = 70        # score out of 100; below this → fail

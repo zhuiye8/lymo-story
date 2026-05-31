@@ -55,8 +55,8 @@ CHAPTER_STAGES = [
     ("scene_plan", "分镜规划"),
     ("retrieve_memory", "召回记忆"),
     ("write_chapter", "撰写正文"),
-    ("extract_memory", "抽取记忆"),
-    ("save", "保存落库"),
+    ("paginate", "切分分章"),
+    ("finalize", "抽取落库"),
 ]
 
 # Phase 1 初始化管线阶段（名称与 backend/graph/phase1_init.py 的图节点一致）

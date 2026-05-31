@@ -242,6 +242,16 @@ class SQLiteStore:
                 CREATE INDEX IF NOT EXISTS idx_foreshadow_story ON foreshadowing(story_id, status);
                 """
             )
+            # 轻量迁移：给既有库补列（CREATE TABLE IF NOT EXISTS 不会改已存在的表）。
+            # installment_num: 该物理章属哪个剧情推进单元；installments_done: 故事已推进的单元数。
+            for ddl in (
+                "ALTER TABLE chapters ADD COLUMN installment_num INTEGER DEFAULT 0",
+                "ALTER TABLE stories ADD COLUMN installments_done INTEGER DEFAULT 0",
+            ):
+                try:
+                    await db.execute(ddl)
+                except Exception:
+                    pass  # 列已存在
             await db.commit()
 
     # ===================== stories =====================
@@ -289,24 +299,39 @@ class SQLiteStore:
             )
             await db.commit()
 
+    async def get_installments_done(self, story_id: str) -> int:
+        """已推进的剧情单元数（≠物理章数；切分会让物理章多于单元）。"""
+        async with aiosqlite.connect(self.db_path) as db:
+            cur = await db.execute("SELECT installments_done FROM stories WHERE id = ?", (story_id,))
+            row = await cur.fetchone()
+            return (row[0] or 0) if row else 0
+
+    async def bump_installments_done(self, story_id: str) -> None:
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute(
+                "UPDATE stories SET installments_done = installments_done + 1, updated_at = ? WHERE id = ?",
+                (_now(), story_id),
+            )
+            await db.commit()
+
     # ===================== chapters =====================
 
     async def save_chapter(
         self, story_id: str, chapter_num: int, *,
         title: str = "", pov: str = "", content: str = "",
-        summary: str = "", quality: dict | None = None,
+        summary: str = "", quality: dict | None = None, installment_num: int = 0,
     ) -> None:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 """INSERT INTO chapters
-                   (story_id, chapter_num, title, pov, content, word_count, summary, quality_json, created_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   (story_id, chapter_num, title, pov, content, word_count, summary, quality_json, installment_num, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                    ON CONFLICT(story_id, chapter_num) DO UPDATE SET
                      title=excluded.title, pov=excluded.pov, content=excluded.content,
                      word_count=excluded.word_count, summary=excluded.summary,
-                     quality_json=excluded.quality_json""",
+                     quality_json=excluded.quality_json, installment_num=excluded.installment_num""",
                 (story_id, chapter_num, title, pov, content, len(content),
-                 summary, json.dumps(quality or {}, ensure_ascii=False), _now()),
+                 summary, json.dumps(quality or {}, ensure_ascii=False), installment_num, _now()),
             )
             await db.commit()
 
