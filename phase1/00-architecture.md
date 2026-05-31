@@ -1,10 +1,12 @@
 # 狸梦 Story Engine — 全新架构方案（从 0 重建）
 
-> 状态：草案 v0.1，待用户审定
-> 日期：2026-05-30
-> 作者：engineer (Claude)
-> 流程：你我直接定，无监督协议
-> 前置依据：`workspace/research/` 三轮调研（v1 + v2 + supplement-production，全部 source-verified）+ DeepSeek/MiMo 官方 API 逐字核实
+> **状态：✅ 已实现并验证（2026-06-01）。** 本文为设计依据；实现以代码为准（`backend/**/phase1*`），权威运行指引见根 `CLAUDE.md`。
+> 实现增量（相对本设计）：
+>   - DOME 冲突检测根因修复——四元组只存**状态事实**（受控谓语词表 `backend/memory/predicates.py`），事件归摘要；单值谓语 + object 兼容性 + 写入去重，消除误报（10 章压测冲突 51→0）。
+>   - 分层记忆 L0-L3 接入管线（`layered_memory.py`），嵌入选定本地 **ollama + Qwen3-Embedding-4B**（中文 SOTA，GPU）。
+>   - 伏笔埋坑/填坑闭环落地；MiMo 第二评委须关 thinking（`enable_thinking=false`）。
+> 日期：2026-05-30（设计）／2026-06-01（实现完成）
+> 前置依据：`workspace/research/` 三轮调研（全部 source-verified）+ DeepSeek/MiMo 官方 API 逐字核实
 
 ---
 

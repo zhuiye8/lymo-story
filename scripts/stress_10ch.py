@@ -1,10 +1,16 @@
-"""压测：连续生成 10 章，实测长程一致性 + 质量稳定性。
+"""压测：连续生成 N 章（STRESS_N，默认 10），实测长程一致性 + 质量稳定性。
+
+前置：先跑 `python scripts/seed_phase1_models.py` 把模型/绑定写入 DB。
+本脚本从 DB 读模型配置（含 MiMo 第二评委凭证），**无需**手传 MIMO_* 环境变量。
+.env 的 STORY_EMBED_PROVIDER=ollama 决定记忆走 Qwen3 嵌入。
 
 跑完汇总：
-  - 每章 composite / slop / 字数 / 重写轮数 / 一致性冲突
-  - 质量曲线趋势（是否随章数下滑）
-  - 角色 voice 是否保持（人工抽查靠读正文）
-  - 四元组增长曲线（长程记忆是否在累积）
+  - 每章 composite / slop / 字数 / 一致性冲突 / 累计四元组
+  - 质量曲线趋势（是否随章数下滑）+ composite 半段 delta
+  - 累计一致性冲突（应≈0）
+  - 伏笔：埋 / 已回收 / 待回收（回收率）
+  - 分层记忆：L0 身份核心 / L1 情感关键 计数
+  - 角色 voice / 文笔质感（人工抽查靠读正文）
 """
 import asyncio
 import os
