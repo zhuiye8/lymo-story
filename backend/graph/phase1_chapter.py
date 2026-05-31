@@ -113,10 +113,37 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
         return {"plan": p}
 
     async def retrieve_memory(state: ChapterState) -> ChapterState:
+        """取本章生成的事实约束。#2 一致性闭环：把'硬约束'（角色生死/能力/位置）
+        单列高亮，让 writer 主动规避矛盾，而不只是事后检测扣分。"""
         sid, cn = state["story_id"], state["chapter_num"]
         valid = await quads.query_valid_at(sid, cn)
-        facts = "\n".join(f"- {q['subject']} {q['predicate']} {q['object']}" for q in valid[:40])
-        return {"facts_brief": facts or "（暂无已确立事实）"}
+
+        # 硬约束 predicate（这些一旦违反就是'死人复活'式硬伤）
+        HARD = ("状态", "境界", "能力", "位置", "所在", "持有", "身份", "生死", "等级")
+        hard_facts, soft_facts = [], []
+        for q in valid:
+            line = f"- {q['subject']} {q['predicate']} {q['object']}"
+            if any(h in q["predicate"] for h in HARD):
+                hard_facts.append(line)
+            else:
+                soft_facts.append(line)
+
+        # 角色最新状态（位置/状态/情绪）—— 冲突高发区
+        states = await store.get_latest_character_states(sid, cn - 1) if cn > 1 else []
+        state_lines = [
+            f"- {st['character_id']}：位置={st.get('location','?')} 状态={st.get('status','?')}"
+            for st in states if st.get("location") or st.get("status")
+        ]
+
+        parts = []
+        if hard_facts:
+            parts.append("【硬约束·绝不可违反（角色生死/能力/位置/境界等）】\n" + "\n".join(hard_facts[:25]))
+        if state_lines:
+            parts.append("【角色当前状态·须延续】\n" + "\n".join(state_lines[:10]))
+        if soft_facts:
+            parts.append("【背景事实】\n" + "\n".join(soft_facts[:20]))
+        facts = "\n\n".join(parts) if parts else "（暂无已确立事实）"
+        return {"facts_brief": facts}
 
     async def _draft_once(state: ChapterState) -> str:
         """逐场景生成一个完整章节候选。前一场景结尾作下一场景衔接。"""
