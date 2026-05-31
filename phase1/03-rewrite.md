@@ -1,6 +1,7 @@
 # Phase 1 — 章节重写（重写最新推进单元）施工规划
 
-> 状态：规划已审定，待施工（2026-06-01）
+> 状态：✅ 已实现并验证（2026-06-01）。4 层全部落地：L1 清理方法 / L2 graph 重写模式（purge 节点）/ L3 API（rewrite-latest[/info]）/ L4 前端（重写最新按钮 + 确认框）。
+> 实测：重写最新单元（带修改意见）→ 完成、章号连续、installments_done 不 bump、无孤儿 记忆/四元组/质量 数据（DB 审计 VERDICT PASS）。
 > 配套：`phase1/00-architecture.md` §章节循环、`phase1/02`(分页，若有)、根 `CLAUDE.md`
 > 决策来源：与用户逐条确认
 

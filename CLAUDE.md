@@ -80,13 +80,14 @@ Copy `.env.example` to `.env`. All vars use the `STORY_` prefix (Pydantic Settin
 `concept → world_build → character_design → outline_plan → assemble`
 assemble persists: bible (`stories.bible_json`), characters (+ voice_profile), rough outline, initial DOME quads (存活/身份 baseline), and **L0 identity-core memories** per character.
 
-**Chapter graph** (`phase1_chapter.py`) — generates one **plot installment** → 1..N physical chapters (7 nodes):
-`load_context → outline_advance → scene_plan → retrieve_memory → write_chapter → paginate → finalize`
+**Chapter graph** (`phase1_chapter.py`) — generates one **plot installment** → 1..N physical chapters (8 nodes):
+`load_context → outline_advance → scene_plan → retrieve_memory → write_chapter → paginate → purge → finalize`
 - **推进单元 ≠ 物理章**: the outline/plot is planned in *installments* (`installment_num`, used for rough-stage lookup); a long installment is split into multiple *physical chapters* (`chapter_num`). `installments_done` (stories table) tracks plot progress; chapter_count can exceed it. This keeps plot pacing stable regardless of splits.
 - `write_chapter` does **best-of-N** (N=2): N drafts → each through the quality gate (slop detect/rewrite + critic; **no word correction**) → pick highest composite.
 - `paginate` splits the installment by target/floor/ceiling/split_threshold (config): ≤ceiling or <threshold → 1 chapter; else even-split at paragraph boundaries into N parts, **soft-close** non-final parts (a landing beat, not a hard cliffhanger), mildly expand any sub-floor part. Titles get （上/下）or（一/二/…）.
 - `finalize` loops the parts: per physical chapter, extract (quads/states/memories/foreshadowing/summary) + persist. Quality dims are **installment-shared**; only the per-chapter consistency penalty varies.
 - `retrieve_memory` surfaces DOME hard-constraints + character states + **semantic memory recall** + open foreshadowing.
+- **Rewrite mode** (`rewrite=True`, same graph): reuses the stored detailed outline (skips the outline agent), re-runs scene_plan with an optional `revision_note`, and the `purge` node (no-op in normal generation) cleans the old installment **after** the new draft succeeds. Only the **latest** installment is rewritable (no cascade); never bumps `installments_done`. API: `POST /stories/{id}/rewrite-latest` (+`/info`). See `phase1/03-rewrite.md`.
 
 **Quality gate** (`phase1_quality_gate.py`): deterministic slop detect → word-count correction → local rewrite loop → **heterogeneous critic room** (8-dim WebNovelBench rubric).
 
