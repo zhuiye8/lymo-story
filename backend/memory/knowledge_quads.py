@@ -61,6 +61,36 @@ class KnowledgeQuads:
             await db.commit()
         return n
 
+    async def add_quads_deduped(
+        self, story_id: str, quads: list[dict], *, source_chapter: int
+    ) -> tuple[int, int]:
+        """写入新四元组，跳过与既有有效事实「兼容」（同义改写/细化）的，避免反复入库膨胀。
+
+        既要对比既有库存，也要对比同批次已接受的（一章里两处改写同一事实）。
+        返回 (inserted, skipped)。
+        """
+        from backend.memory.predicates import normalize_predicate, objects_compatible
+
+        existing = await self.query_valid_at(story_id, source_chapter + 1)
+        idx: dict[tuple[str, str], list[str]] = {}
+        for e in existing:
+            canon = normalize_predicate(e["predicate"]) or e["predicate"]
+            idx.setdefault((e["subject"], canon), []).append(e["object"])
+
+        to_insert: list[dict] = []
+        skipped = 0
+        for q in quads:
+            canon = normalize_predicate(q["predicate"]) or q["predicate"]
+            key = (q["subject"], canon)
+            if any(objects_compatible(o, q["object"]) for o in idx.get(key, [])):
+                skipped += 1
+                continue
+            to_insert.append(q)
+            idx.setdefault(key, []).append(q["object"])  # 防同批次重复
+        if to_insert:
+            await self.add_quads_batch(story_id, to_insert, source_chapter=source_chapter)
+        return len(to_insert), skipped
+
     async def query_valid_at(self, story_id: str, chapter: int) -> list[dict]:
         """返回在第 chapter 章时点仍有效的所有四元组（valid_from ≤ chapter < valid_to|∞）。"""
         async with aiosqlite.connect(self.db_path) as db:
@@ -97,16 +127,18 @@ class KnowledgeQuads:
     async def find_conflicts(self, story_id: str, new_quads: list[dict], chapter: int) -> list[dict]:
         """检测新四元组与既有有效事实的**真**矛盾（死人复活式硬伤）。
 
-        真冲突需同时满足（避免把合法演变/累积误判成冲突）：
-          1. 谓语是**单值**状态谓语（存活/境界/身份/阵营）—— 多值谓语（能力/持有/
-             关系）可累积，多 object 合法，不算冲突；
-          2. 同 subject + 同 canonical 谓语，但 object 不同；
+        真冲突需同时满足（避免把合法演变/累积/同义改写误判成冲突）：
+          1. 谓语是**单值离散**谓语（存活状态/境界）—— 多值/描述性谓语（身份/阵营/
+             能力/持有/关系）可累积或多面描述，不算冲突；
+          2. 同 subject + 同 canonical 谓语，object **不兼容**（非同义改写/细化）；
           3. 既有事实在本章仍有效；
           4. 新事实**没声明使旧值失效**（invalidates_prior=False）—— 声明失效的是
              合法状态转移（境界突破 筑基→金丹），不是矛盾。
         返回冲突列表：[{new, existing, kind}]，供 quality_gate 一致性检测用。
         """
-        from backend.memory.predicates import is_single_valued, normalize_predicate
+        from backend.memory.predicates import (
+            is_single_valued, normalize_predicate, objects_compatible,
+        )
 
         conflicts: list[dict] = []
         existing = await self.query_valid_at(story_id, chapter)
@@ -121,8 +153,9 @@ class KnowledgeQuads:
                 continue
             canon = normalize_predicate(nq["predicate"])
             if not canon or not is_single_valued(canon):
-                continue  # 多值/事件谓语不判冲突
+                continue  # 多值/描述性谓语不判冲突
             for e in idx.get((nq["subject"], canon), []):
-                if e["object"] != nq["object"]:
+                # object 兼容（同义改写/细化）不是矛盾，只有真正不同的离散值才算
+                if not objects_compatible(e["object"], nq["object"]):
                     conflicts.append({"new": nq, "existing": e, "kind": "object_mismatch"})
         return conflicts

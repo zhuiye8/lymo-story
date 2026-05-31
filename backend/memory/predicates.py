@@ -20,16 +20,21 @@ find_conflicts 全判成 object_mismatch → 10 章压测 51 个"冲突"几乎�
 """
 from __future__ import annotations
 
-# 单值状态谓语：变更须 invalidate 旧值；同时有效的多 object = 硬矛盾
+# 单值离散谓语：值空间离散、相互排斥，变更须 invalidate 旧值；
+#   同时有效的「不兼容」多 object = 硬矛盾（死人复活 / 境界倒退）。
+# 只放真正离散、矛盾即硬伤的谓语——身份/阵营是多面自由文本，移出（见下）。
 SINGLE_VALUED: frozenset[str] = frozenset({
-    "存活状态",  # 存活 / 死亡 / 重伤 / 失踪 / 昏迷
-    "境界",      # 修为境界 / 战力等阶 / 系统等级
-    "身份",      # 当前主身份 / 头衔 / 职位
-    "阵营",      # 所属势力 / 阵营 / 立场
+    "存活状态",  # 存活 / 死亡 / 重伤 / 失踪 / 昏迷（互斥）
+    "境界",      # 修为境界 / 战力等阶 / 系统等级（离散阶梯）
 })
 
-# 多值状态谓语：可累积，多 object 合法（不判冲突）
+# 多值/描述性谓语：可累积或多面描述，多 object 合法，不判冲突。
+#   身份/阵营在此——它们是自由文本多面描述（"系统管理员" 与 "protagonist" 是
+#   不同维度，不是矛盾），用精确字符串比会爆假冲突。身份/阵营的"反转"是剧情
+#   揭示，交给读正文的 Critic，不靠字符串错判。
 MULTI_VALUED: frozenset[str] = frozenset({
+    "身份",  # 当前身份 / 头衔 / 职位（多面，累积）
+    "阵营",  # 所属势力 / 立场（多面，累积）
     "能力",  # 掌握的功法 / 技能 / 系统能力
     "持有",  # 持有的关键物品 / 法宝 / 系统
     "关系",  # 与某角色的关系（object 编码 "对象=关系型"，如 "李四=师徒"）
@@ -87,5 +92,34 @@ def normalize_predicate(p: str) -> str | None:
 
 
 def is_single_valued(canonical_predicate: str) -> bool:
-    """该 canonical 谓语是否单值（单值才做'同时多值=矛盾'的冲突判定）。"""
+    """该 canonical 谓语是否单值离散（才做'同时不兼容多值=矛盾'的冲突判定）。"""
     return canonical_predicate in SINGLE_VALUED
+
+
+def _bigrams(s: str) -> set[str]:
+    s = "".join(s.split())
+    return {s[i:i + 2] for i in range(len(s) - 1)} or ({s} if s else set())
+
+
+def objects_compatible(a: str, b: str, threshold: float = 0.5) -> bool:
+    """两个 object 是否指同一事实（同义改写/细化），用于写入去重 + 冲突豁免。
+
+    LLM 每章把同一状态换个措辞（"Lv2权限持有者" / "Lv2权限持有者（含职务）"），
+    精确字符串比会爆假冲突、且让 quad 反复入库膨胀。判定：
+      - 去空白后相等 / 一方包含另一方（细化）→ 兼容
+      - 字符 bigram Jaccard ≥ threshold（语序变化/小改写）→ 兼容
+    注意：这只豁免"看起来是同一事实"的；真正对立的值（存活 vs 死亡）重叠低，不豁免。
+    """
+    a = (a or "").strip()
+    b = (b or "").strip()
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    na, nb = "".join(a.split()), "".join(b.split())
+    if na == nb or na in nb or nb in na:
+        return True
+    A, B = _bigrams(na), _bigrams(nb)
+    if not A or not B:
+        return False
+    return len(A & B) / len(A | B) >= threshold

@@ -53,7 +53,7 @@ class ExtractedQuad(BaseModel):
     object: str = Field(description="客体（状态值/能力名/物品名/\"对象=关系型\"）")
     invalidates_prior: bool = Field(
         default=False,
-        description="仅单值谓语（存活状态/境界/身份/阵营）发生变更时为 true（如境界突破、角色死亡）"
+        description="仅单值谓语（存活状态/境界）发生变更时为 true（如境界突破、角色死亡）"
     )
 
 

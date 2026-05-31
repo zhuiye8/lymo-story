@@ -14,7 +14,8 @@ import pytest_asyncio
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from backend.memory.predicates import (
-    normalize_predicate, is_single_valued, SINGLE_VALUED, MULTI_VALUED,
+    normalize_predicate, is_single_valued, objects_compatible,
+    SINGLE_VALUED, MULTI_VALUED,
 )
 from backend.memory.knowledge_quads import KnowledgeQuads
 from backend.storage.sqlite_store import SQLiteStore
@@ -51,7 +52,27 @@ def test_single_vs_multi():
     assert is_single_valued("存活状态")
     assert not is_single_valued("能力")
     assert not is_single_valued("持有")
+    # 身份/阵营 是多面自由文本，已移出单值（不再字符串错判矛盾）
+    assert not is_single_valued("身份")
+    assert not is_single_valued("阵营")
+    assert "身份" in MULTI_VALUED and "阵营" in MULTI_VALUED
     assert SINGLE_VALUED.isdisjoint(MULTI_VALUED)
+
+
+# ---------------- objects_compatible ----------------
+
+def test_compatible_identical_and_containment():
+    assert objects_compatible("金丹期", "金丹期")
+    assert objects_compatible("Lv2权限持有者", "Lv2权限持有者（含职务）")  # 细化
+    assert objects_compatible("金丹", "金丹期")  # 包含
+
+def test_compatible_rephrase_high_overlap():
+    assert objects_compatible("系统管理员Lv2权限", "Lv2权限系统管理员")  # 语序变化
+
+def test_incompatible_opposites():
+    assert not objects_compatible("存活", "死亡")
+    assert not objects_compatible("金丹期", "练气期")
+    assert not objects_compatible("正派", "魔教")
 
 
 # ---------------- find_conflicts 精确性 ----------------
@@ -127,3 +148,44 @@ async def test_alias_normalized_conflict_detected(quads):
     new = [{"subject": "李四", "predicate": "修为", "object": "练气期", "invalidates_prior": False}]
     conflicts = await quads.find_conflicts("t", new, 5)
     assert len(conflicts) == 1
+
+
+@pytest.mark.asyncio
+async def test_identity_rephrase_not_conflict(quads):
+    # 身份现在是多值/描述性：同角色不同措辞的身份不该算冲突（这正是 v2 压测 44 误报的主因）
+    await quads.add_quads_batch("t", [
+        {"subject": "墨默", "predicate": "身份", "object": "系统管理员"}
+    ], source_chapter=1)
+    new = [
+        {"subject": "墨默", "predicate": "身份", "object": "Lv2权限持有者", "invalidates_prior": False},
+        {"subject": "墨默", "predicate": "身份", "object": "protagonist", "invalidates_prior": False},
+    ]
+    conflicts = await quads.find_conflicts("t", new, 5)
+    assert conflicts == []
+
+
+@pytest.mark.asyncio
+async def test_dedup_skips_compatible(quads):
+    # 写入去重：同义改写不重复入库
+    await quads.add_quads_batch("t", [
+        {"subject": "墨默", "predicate": "境界", "object": "Lv2"}
+    ], source_chapter=1)
+    inserted, skipped = await quads.add_quads_deduped("t", [
+        {"subject": "墨默", "predicate": "境界", "object": "Lv2"},            # 完全重复
+        {"subject": "墨默", "predicate": "境界", "object": "Lv2（系统等级）"},  # 细化
+        {"subject": "墨默", "predicate": "境界", "object": "Lv3"},            # 真新值
+    ], source_chapter=2)
+    assert inserted == 1 and skipped == 2
+    valid = await quads.query_valid_at("t", 3)
+    objs = sorted(q["object"] for q in valid if q["predicate"] == "境界")
+    assert objs == ["Lv2", "Lv3"]
+
+
+@pytest.mark.asyncio
+async def test_dedup_within_batch(quads):
+    # 同一批次里的两个同义事实也只入一个
+    inserted, skipped = await quads.add_quads_deduped("t", [
+        {"subject": "墨默", "predicate": "能力", "object": "代码编辑器"},
+        {"subject": "墨默", "predicate": "能力", "object": "代码编辑器系统"},  # 同批次细化
+    ], source_chapter=1)
+    assert inserted == 1 and skipped == 1

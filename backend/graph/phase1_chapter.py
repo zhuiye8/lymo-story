@@ -224,7 +224,9 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
             word_budget=state["target_words"])
         # 3. 归一 + 过滤四元组：只留持久状态事实，事件/动作谓语（修改/执行/…）丢弃归摘要。
         #    这是 #2 根因修复——否则事件四元组累积，撞出大量误报冲突。
-        from backend.memory.predicates import normalize_predicate
+        from backend.memory.predicates import (
+            normalize_predicate, is_single_valued, objects_compatible,
+        )
         norm_quads, dropped = [], 0
         for q in ex.new_quads:
             canon = normalize_predicate(q.predicate)
@@ -238,21 +240,26 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
         if dropped:
             logger.info(f"[save] ch{cn} 丢弃 {dropped} 个事件/非状态四元组（归摘要不入库）")
 
-        # 4. 一致性检测（② 层，精确：单值谓语 + 未声明失效才算真矛盾）
+        # 4. 一致性检测（② 层，精确：单值离散谓语 + object 不兼容 + 未声明失效才算真矛盾）
         conflicts = await quads.find_conflicts(sid, norm_quads, cn) if norm_quads else []
         if conflicts:
             logger.warning(f"[save] ch{cn} 检测到 {len(conflicts)} 个真冲突: "
                            f"{[(c['new']['subject'], c['new']['predicate']) for c in conflicts[:3]]}")
 
-        # 5. 写入新四元组（含失效处理，canonical 谓语匹配）
+        # 5. 失效处理：仅单值离散谓语的真转移（境界突破/死亡），且新旧值不兼容才失效旧值
         for q in norm_quads:
-            if q["invalidates_prior"]:
+            if q["invalidates_prior"] and is_single_valued(q["predicate"]):
                 priors = await quads.query_subject(sid, q["subject"], cn)
                 for p in priors:
-                    if normalize_predicate(p["predicate"]) == q["predicate"] and p["object"] != q["object"]:
+                    if (normalize_predicate(p["predicate"]) == q["predicate"]
+                            and not objects_compatible(p["object"], q["object"])):
                         await quads.invalidate(p["id"], at_chapter=cn)
+
+        # 6. 去重写入（跳过同义改写/细化，根除反复入库膨胀）
         if norm_quads:
-            await quads.add_quads_batch(sid, norm_quads, source_chapter=cn)
+            inserted, skipped = await quads.add_quads_deduped(sid, norm_quads, source_chapter=cn)
+            if skipped:
+                logger.info(f"[save] ch{cn} 去重跳过 {skipped} 个同义事实，入库 {inserted}")
 
         # 5. 角色状态变化
         for sc in ex.state_changes:
@@ -261,7 +268,7 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
                 location=sc.location, status=sc.status, emotional_state=sc.emotional_state,
                 state={"note": sc.note})
 
-        # 6. 质量落库（喂 quality_admin 4 图表）+ 一致性冲突计入 quality
+        # 7. 质量落库（喂 quality_admin 4 图表）+ 一致性冲突计入 quality
         q = state.get("quality", {})
         if q:
             # 有事实冲突 → composite 额外惩罚（一致性是硬指标）
