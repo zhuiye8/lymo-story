@@ -124,6 +124,33 @@ class KnowledgeQuads:
             )
             await db.commit()
 
+    async def delete_by_source(self, story_id: str, chapter_nums: list[int]) -> int:
+        """删这些章新产生的四元组（重写清理用）。返回删除数。"""
+        if not chapter_nums:
+            return 0
+        ph = ",".join("?" * len(chapter_nums))
+        async with aiosqlite.connect(self.db_path) as db:
+            cur = await db.execute(
+                f"DELETE FROM knowledge_quads WHERE story_id=? AND source_chapter IN ({ph})",
+                (story_id, *chapter_nums),
+            )
+            await db.commit()
+            return cur.rowcount or 0
+
+    async def restore_invalidated_at(self, story_id: str, chapter_nums: list[int]) -> int:
+        """还原"被这些章失效"的更早四元组：valid_to ∈ chapter_nums → NULL（重写清理用）。
+        仅最新单元能 invalidate 到这些章号，故按 valid_to 精确还原、无需额外字段。返回还原数。"""
+        if not chapter_nums:
+            return 0
+        ph = ",".join("?" * len(chapter_nums))
+        async with aiosqlite.connect(self.db_path) as db:
+            cur = await db.execute(
+                f"UPDATE knowledge_quads SET valid_to=NULL WHERE story_id=? AND valid_to IN ({ph})",
+                (story_id, *chapter_nums),
+            )
+            await db.commit()
+            return cur.rowcount or 0
+
     async def find_conflicts(self, story_id: str, new_quads: list[dict], chapter: int) -> list[dict]:
         """检测新四元组与既有有效事实的**真**矛盾（死人复活式硬伤）。
 

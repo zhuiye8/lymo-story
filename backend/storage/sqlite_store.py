@@ -530,6 +530,56 @@ class SQLiteStore:
             )
             return [dict(r) for r in await cur.fetchall()]
 
+    # ===================== 重写：按章号区间清理一个推进单元 =====================
+
+    async def get_installment_chapter_nums(self, story_id: str, installment_num: int) -> list[int]:
+        """该推进单元对应的全部物理章号（升序）。"""
+        async with aiosqlite.connect(self.db_path) as db:
+            cur = await db.execute(
+                "SELECT chapter_num FROM chapters WHERE story_id=? AND installment_num=? ORDER BY chapter_num",
+                (story_id, installment_num),
+            )
+            return [r[0] for r in await cur.fetchall()]
+
+    async def get_memory_vector_ids(self, story_id: str, chapter_nums: list[int]) -> list[str]:
+        """这些章产生的记忆对应的 ChromaDB vector_id（删向量用，须在删 SQLite 行前取）。"""
+        if not chapter_nums:
+            return []
+        ph = ",".join("?" * len(chapter_nums))
+        async with aiosqlite.connect(self.db_path) as db:
+            cur = await db.execute(
+                f"SELECT vector_id FROM memories WHERE story_id=? AND source_chapter IN ({ph}) AND vector_id != ''",
+                (story_id, *chapter_nums),
+            )
+            return [r[0] for r in await cur.fetchall()]
+
+    async def purge_installment_chapters(self, story_id: str, chapter_nums: list[int]) -> None:
+        """删这些物理章的全部 SQLite 痕迹（不含 quads / ChromaDB 向量，那两个各自处理）：
+        chapters / outline_detailed / character_states / memories(行) /
+        chapter_quality_scores / chapter_quality_evaluations / slop_findings；
+        + 伏笔：删本区间埋的坑、把本区间回收的更早坑改回 open。"""
+        if not chapter_nums:
+            return
+        ph = ",".join("?" * len(chapter_nums))
+        args = (story_id, *chapter_nums)
+        async with aiosqlite.connect(self.db_path) as db:
+            # 这些表用 chapter_num 列
+            for table in ("chapters", "outline_detailed", "character_states",
+                          "chapter_quality_scores", "chapter_quality_evaluations", "slop_findings"):
+                await db.execute(
+                    f"DELETE FROM {table} WHERE story_id=? AND chapter_num IN ({ph})", args)
+            # memories 用 source_chapter 列
+            await db.execute(
+                f"DELETE FROM memories WHERE story_id=? AND source_chapter IN ({ph})", args)
+            # 伏笔·埋的坑：删
+            await db.execute(
+                f"DELETE FROM foreshadowing WHERE story_id=? AND planted_chapter IN ({ph})", args)
+            # 伏笔·本区间回收的更早坑：改回 open（resolved_chapter 落在区间内、但 planted 在区间外）
+            await db.execute(
+                f"UPDATE foreshadowing SET status='open', resolved_chapter=NULL "
+                f"WHERE story_id=? AND resolved_chapter IN ({ph})", args)
+            await db.commit()
+
     # ===================== characters =====================
 
     async def save_character(

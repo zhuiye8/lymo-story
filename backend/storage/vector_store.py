@@ -256,3 +256,14 @@ class VectorStore:
             return len(ids)
         except Exception:
             return 0
+
+    def delete_ids(self, story_id: str, ids: list[str]) -> int:
+        """按 vector_id 列表硬删（章节重写清理用）。返回尝试删除数。"""
+        if not ids:
+            return 0
+        collection = self.get_collection(story_id)
+        try:
+            collection.delete(ids=ids)
+            return len(ids)
+        except Exception:
+            return 0

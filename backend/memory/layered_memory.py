@@ -112,3 +112,16 @@ class LayeredMemory:
             for m in key:
                 _add(cid, m, "key")
         return out
+
+    async def forget_chapters(self, story_id: str, chapter_nums: list[int]) -> int:
+        """删这些章产生的记忆向量（章节重写清理用）。
+
+        ⚠️ 只删 ChromaDB 向量；对应 memories 表行由 SQLiteStore.purge_installment_chapters 删。
+        必须在删 SQLite 行【之前】调用（要先从 SQLite 取 vector_id）。返回删除向量数。
+        """
+        if not chapter_nums:
+            return 0
+        vids = await self.store.get_memory_vector_ids(story_id, chapter_nums)
+        if not vids:
+            return 0
+        return await asyncio.to_thread(self.vector.delete_ids, story_id, vids)
