@@ -22,6 +22,21 @@ def concept_prompt(theme: str, requirements: str, title: str) -> tuple[str, str]
     return system, user
 
 
+def title_prompt(genre: str, tone: str, synopsis: str, ability: str, avoid: str = "") -> tuple[str, str]:
+    """只生成书名（重新生成书名用）—— 不动其它立意，基于已有设定取一个更好的书名。"""
+    system = (
+        "你是资深中文网文起名手。根据题材/基调/梗概/金手指，起一个吸引人的网文书名。"
+        "要求：4-12 字，有钩子或记忆点，契合题材与基调，不烂俗、不堆砌。"
+        "只输出书名本身，不要书名号、不要解释、不要多个候选。"
+    )
+    user = (
+        f"题材：{genre}\n基调：{tone}\n金手指：{ability}\n梗概：{synopsis}\n"
+        + (f"避免与此重复：{avoid}\n" if avoid else "")
+        + "\n请只输出一个书名："
+    )
+    return system, user
+
+
 def world_core_prompt(concept_json: str) -> tuple[str, str]:
     """世界观第 1 步：背景 + 力量体系。"""
     system = with_anti_slop(

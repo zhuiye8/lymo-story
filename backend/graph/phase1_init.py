@@ -70,8 +70,11 @@ def build_init_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuads,
         sid = state["story_id"]
         bible = assemble_bible(state["concept"], state["world"], state["characters"], state["outline"])
 
-        # 1. bible 落库
+        # 1. bible 落库 + 书名回写到故事标题（ConceptAgent 取的书名才会显示出来）
         await store.save_bible(sid, bible.model_dump())
+        gen_title = (bible.concept.title or "").strip()
+        if gen_title:
+            await store.update_story_title(sid, gen_title)
 
         # 2. 角色（含 voice_profile）落库
         all_chars = [bible.characters.protagonist, bible.characters.antagonist, *bible.characters.supporting]

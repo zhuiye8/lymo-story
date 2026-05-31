@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, Copy, Check } from "lucide-react";
+import { BookOpen, Copy, Check, ArrowLeft } from "lucide-react";
 import { listChapters, getChapter, parseQuality } from "@/lib/api";
 import type { ChapterSummary } from "@/types";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,12 @@ export default function ChaptersPage({ params }: { params: Promise<{ id: string 
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-8">
+      <Link
+        href={`/stories/${id}`}
+        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-4"
+      >
+        <ArrowLeft className="size-3" /> 返回仪表盘
+      </Link>
       <h1 className="font-serif text-2xl font-bold mb-6">章节列表</h1>
       {loading ? (
         <div className="text-muted-foreground text-sm">加载中…</div>

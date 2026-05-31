@@ -2,8 +2,8 @@
 
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Play, Loader2, CheckCircle2, AlertCircle, Circle, BookOpen } from "lucide-react";
-import { getStory, getProgress, generateChapter, listChapters, parseQuality } from "@/lib/api";
+import { Play, Loader2, CheckCircle2, AlertCircle, Circle, BookOpen, Pencil, Check, X, Wand2 } from "lucide-react";
+import { getStory, getProgress, generateChapter, listChapters, parseQuality, renameStory, regenerateTitle } from "@/lib/api";
 import type { StoryDetail, ProgressResponse, ChapterSummary, StoryBible } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,9 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
   const [chapters, setChapters] = useState<ChapterSummary[]>([]);
   const [busy, setBusy] = useState(false);
   const [targetWords, setTargetWords] = useState(3000);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState("");
+  const [titleBusy, setTitleBusy] = useState(false);
 
   const refresh = useCallback(async () => {
     const [s, p, chs] = await Promise.all([
@@ -71,6 +74,40 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
     }
   }
 
+  function startEditTitle() {
+    setTitleDraft(story?.title ?? "");
+    setEditingTitle(true);
+  }
+
+  async function saveTitle() {
+    const t = titleDraft.trim();
+    if (!t) return;
+    setTitleBusy(true);
+    try {
+      await renameStory(id, t);
+      setEditingTitle(false);
+      await refresh();
+    } catch (e) {
+      alert(`改名失败：${e instanceof Error ? e.message : e}`);
+    } finally {
+      setTitleBusy(false);
+    }
+  }
+
+  async function onRegenTitle() {
+    setTitleBusy(true);
+    try {
+      const r = await regenerateTitle(id);
+      setTitleDraft(r.title);
+      setEditingTitle(true); // 重生成后进编辑态，便于确认或微调
+      await refresh();
+    } catch (e) {
+      alert(`生成书名失败：${e instanceof Error ? e.message : e}`);
+    } finally {
+      setTitleBusy(false);
+    }
+  }
+
   if (!story) return <div className="p-8 text-muted-foreground text-sm">加载中…</div>;
 
   const bible = (story.bible ?? {}) as StoryBible;
@@ -85,7 +122,36 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
     <div className="mx-auto max-w-5xl px-6 py-8 space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl font-bold">{story.title || "未命名"}</h1>
+          {editingTitle ? (
+            <div className="flex items-center gap-2">
+              <Input
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") saveTitle(); if (e.key === "Escape") setEditingTitle(false); }}
+                autoFocus
+                disabled={titleBusy}
+                className="h-9 w-64 font-serif text-lg"
+              />
+              <Button size="sm" variant="gold" onClick={saveTitle} disabled={titleBusy || !titleDraft.trim()} className="h-9">
+                {titleBusy ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setEditingTitle(false)} disabled={titleBusy} className="h-9">
+                <X className="size-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 group">
+              <h1 className="font-serif text-2xl font-bold">{story.title || "未命名"}</h1>
+              <button onClick={startEditTitle} title="改名"
+                className="opacity-0 group-hover:opacity-100 transition text-muted-foreground hover:text-foreground">
+                <Pencil className="size-4" />
+              </button>
+              <button onClick={onRegenTitle} disabled={titleBusy || !ready} title="AI 重新生成书名"
+                className="opacity-0 group-hover:opacity-100 transition text-muted-foreground hover:text-lymo-gold-400 disabled:opacity-0">
+                {titleBusy ? <Loader2 className="size-4 animate-spin" /> : <Wand2 className="size-4" />}
+              </button>
+            </div>
+          )}
           <div className="flex items-center gap-2 mt-2">
             {story.genre && <Badge variant="ghost" className="text-[10px]">{story.genre}</Badge>}
             <Badge variant={ready ? "gold" : "stellar"} className="text-[10px]">{status}</Badge>

@@ -50,7 +50,11 @@ class CreateStoryResp(BaseModel):
 
 
 class GenerateReq(BaseModel):
-    target_words: int = 3500
+    target_words: int = 3000
+
+
+class RenameReq(BaseModel):
+    title: str = Field(description="新书名")
 
 
 # ---------- background runners ----------
@@ -107,6 +111,44 @@ async def create_story(req: CreateStoryReq, request: Request,
     asyncio.create_task(_run_init(
         request.app.state, story_id, req.theme, req.requirements, req.title, req.target_chapters))
     return CreateStoryResp(story_id=story_id, status="initializing")
+
+
+@router.put("/{story_id}/title")
+async def rename_story(story_id: str, req: RenameReq, store: SQLiteStore = Depends(get_sqlite)):
+    """手动改书名（同步进 bible.concept.title）。"""
+    s = await store.get_story(story_id)
+    if not s:
+        raise HTTPException(404, "story not found")
+    title = req.title.strip()
+    if not title:
+        raise HTTPException(400, "title 不能为空")
+    await store.update_story_title(story_id, title)
+    return {"story_id": story_id, "title": title}
+
+
+@router.post("/{story_id}/regenerate-title")
+async def regenerate_title(story_id: str, store: SQLiteStore = Depends(get_sqlite),
+                           llm: LLMClient = Depends(get_llm)):
+    """基于已有立意 AI 重新生成书名（不动其它设定）。"""
+    s = await store.get_story(story_id)
+    if not s:
+        raise HTTPException(404, "story not found")
+    bible = s.get("bible") or {}
+    concept = bible.get("concept") or {}
+    if not concept:
+        raise HTTPException(400, "故事尚未初始化完成，无法生成书名")
+    from backend.agents.phase1.init_agents import ConceptAgent
+    agent = ConceptAgent(llm)
+    title = await agent.gen_title(
+        genre=concept.get("genre", s.get("genre", "")),
+        tone=concept.get("tone", ""),
+        synopsis=concept.get("synopsis", concept.get("one_line", "")),
+        ability=(concept.get("special_ability") or {}).get("name", ""),
+        avoid=s.get("title", ""), story_id=story_id)
+    if not title:
+        raise HTTPException(502, "书名生成失败，请重试")
+    await store.update_story_title(story_id, title)
+    return {"story_id": story_id, "title": title}
 
 
 @router.get("")

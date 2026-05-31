@@ -252,6 +252,16 @@ class SQLiteStore:
                     await db.execute(ddl)
                 except Exception:
                     pass  # 列已存在
+            # 回填：书名 bug 之前的故事，title 卡在"未命名"但 bible.concept.title 已有 → 提上来。
+            try:
+                await db.execute(
+                    "UPDATE stories SET title = json_extract(bible_json, '$.concept.title') "
+                    "WHERE (title = '未命名' OR title = '') "
+                    "AND json_extract(bible_json, '$.concept.title') IS NOT NULL "
+                    "AND json_extract(bible_json, '$.concept.title') != ''"
+                )
+            except Exception:
+                pass
             # 回填：Phase B 之前的故事每章即一个推进单元（无切分），令 installments_done=章数。
             # 仅影响 installments_done=0 且已有章节的旧故事；新故事/已跟踪故事不受影响。
             try:
@@ -307,6 +317,21 @@ class SQLiteStore:
             await db.execute(
                 "UPDATE stories SET status = ?, updated_at = ? WHERE id = ?",
                 (status, _now(), story_id),
+            )
+            await db.commit()
+
+    async def update_story_title(self, story_id: str, title: str) -> None:
+        """更新故事标题，并同步进 bible.concept.title，保持一致。"""
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cur = await db.execute("SELECT bible_json FROM stories WHERE id = ?", (story_id,))
+            row = await cur.fetchone()
+            bible = json.loads(row["bible_json"]) if row and row["bible_json"] else {}
+            if bible:
+                bible.setdefault("concept", {})["title"] = title
+            await db.execute(
+                "UPDATE stories SET title = ?, bible_json = ?, updated_at = ? WHERE id = ?",
+                (title, json.dumps(bible, ensure_ascii=False), _now(), story_id),
             )
             await db.commit()
 

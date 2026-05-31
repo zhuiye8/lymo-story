@@ -56,6 +56,25 @@ export async function getStory(storyId: string): Promise<StoryDetail> {
   return fetchJson(`${API_BASE}/stories/${storyId}`);
 }
 
+export async function renameStory(
+  storyId: string,
+  title: string,
+): Promise<{ story_id: string; title: string }> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/title`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
+  });
+}
+
+export async function regenerateTitle(
+  storyId: string,
+): Promise<{ story_id: string; title: string }> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/regenerate-title`, {
+    method: "POST",
+  });
+}
+
 export async function getProgress(storyId: string): Promise<ProgressResponse> {
   return fetchJson(`${API_BASE}/stories/${storyId}/progress`);
 }
