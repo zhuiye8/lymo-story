@@ -20,7 +20,7 @@ from backend.memory.knowledge_quads import KnowledgeQuads
 from backend.memory.layered_memory import LayeredMemory
 from backend.progress import ProgressStore
 from backend.models.phase1 import StoryBible
-from backend.models.phase1_chapter import DetailedOutline, ScenePlan, ChapterExtract
+from backend.models.phase1_chapter import DetailedOutline, ChapterBeat, ScenePlan, ChapterExtract
 from backend.agents.phase1.chapter_agents import (
     OutlineAdvanceAgent, ScenePlanAgent, SceneWriterAgent, MemoryExtractorAgent,
 )
@@ -70,11 +70,20 @@ def _title_parts(n: int, base_title: str) -> list[str]:
     return [f"{base_title}（{_CN_NUM[i] if i < len(_CN_NUM) else i + 1}）" for i in range(n)]
 
 
+import re as _re
+
+def _strip_part_suffix(title: str) -> str:
+    """去掉分页加的 （上）/（下）/（一）… 后缀，还原推进单元的基础标题（重写沿用细纲用）。"""
+    return _re.sub(r"（[上下一二三四五六七八九十\d]+）\s*$", "", title or "").strip() or title
+
+
 class ChapterState(TypedDict, total=False):
     story_id: str
     chapter_num: int          # 物理章号起点（本推进单元的首个物理章）
     installment_num: int      # 剧情推进单元序号（大纲按它排，切分不影响）
     target_words: int
+    rewrite: bool             # 重写模式：沿用原细纲、写后清理旧单元再落库
+    revision_note: str        # 重写时的可选修改意见
     # 中间产物
     bible_brief: str
     rough_stage: str
@@ -146,6 +155,23 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
 
     async def outline_advance(state: ChapterState) -> ChapterState:
         # 给细纲师看"待回收伏笔"（按 age 催收），让它在 beat 里安排填坑
+        # 重写模式：沿用原细纲（从 outline_detailed 读回 beats），不重跑细纲师，剧情骨架不变
+        if state.get("rewrite"):
+            sid, start_cn = state["story_id"], state["chapter_num"]
+            od = await store.get_detailed_outline(sid, start_cn)
+            first_ch = await store.get_chapter(sid, start_cn)
+            base_title = _strip_part_suffix(first_ch["title"]) if first_ch else "（重写）"
+            beats = [ChapterBeat(beat=b.get("beat", ""), purpose=b.get("purpose", ""))
+                     for b in (od or {}).get("beats", [])] or [ChapterBeat(beat="承接原细纲推进本章")]
+            tags = (od or {}).get("narrative_func_tags", "")
+            d = DetailedOutline(
+                chapter_title=base_title,
+                summary=(first_ch or {}).get("summary", "")[:60] or base_title,
+                beats=beats,
+                narrative_func_tags=tags.split("、") if tags else [],
+            )
+            return {"detailed": d}
+
         of = state.get("open_foreshadowing") or []
         fore_txt = "\n".join(f"- (age={f['age']}) {f['description']}" for f in of)
         d = await outline_agent.run(
@@ -231,7 +257,8 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
                 bible_brief=state["bible_brief"], scene_brief=scene_brief,
                 voice_profiles=state["voice_profiles"], facts_brief=state["facts_brief"],
                 prev_text=prev_tail, word_budget=sc.word_budget,
-                chapter_num=state["chapter_num"], story_id=state["story_id"])
+                chapter_num=state["chapter_num"], story_id=state["story_id"],
+                revision_note=state.get("revision_note", "") if state.get("rewrite") else "")
             parts.append(text.strip())
             prev_tail = text.strip()[-400:]
         return "\n\n".join(parts)
@@ -384,6 +411,29 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
             logger.info(f"[finalize] inst{inst} 落 {len(parts)} 物理章: {start_cn}~{start_cn + len(parts) - 1}")
         return {}
 
+    async def purge(state: ChapterState) -> ChapterState:
+        """重写模式专用：新稿已生成（state.parts），在落库前清理旧推进单元的全部痕迹。
+        正常生成时为空操作。放在 write/paginate 之后、finalize 之前（写成功才清，无数据空洞）。"""
+        if not state.get("rewrite"):
+            return {}
+        sid = state["story_id"]
+        inst = state.get("installment_num", state["chapter_num"])
+        nums = await store.get_installment_chapter_nums(sid, inst)
+        if not nums:
+            return {}
+        # 1. 先删 ChromaDB 记忆向量（须在删 SQLite 行前，靠 vector_id）
+        try:
+            await mem.forget_chapters(sid, nums)
+        except Exception as e:
+            logger.warning(f"[purge] inst{inst} 向量清理失败（不阻断）: {type(e).__name__}: {e}")
+        # 2. 四元组：删本单元新增 + 还原被本单元失效的更早事实
+        await quads.delete_by_source(sid, nums)
+        await quads.restore_invalidated_at(sid, nums)
+        # 3. SQLite：章节/细纲/状态/记忆行/质量 + 伏笔（埋删、收还原）
+        await store.purge_installment_chapters(sid, nums)
+        logger.info(f"[purge] inst{inst} 清理旧物理章 {nums}（重写）")
+        return {}
+
     def _staged(name, fn):
         """包一层：节点开头上报进度阶段（progress 为 None 时无副作用，如压测）。"""
         async def wrapped(state: ChapterState) -> ChapterState:
@@ -396,7 +446,8 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
     for name, fn in [
         ("load_context", load_context), ("outline_advance", outline_advance),
         ("scene_plan", scene_plan), ("retrieve_memory", retrieve_memory),
-        ("write_chapter", write_chapter), ("paginate", paginate), ("finalize", finalize),
+        ("write_chapter", write_chapter), ("paginate", paginate),
+        ("purge", purge), ("finalize", finalize),
     ]:
         g.add_node(name, _staged(name, fn))
     g.add_edge(START, "load_context")
@@ -405,6 +456,7 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
     g.add_edge("scene_plan", "retrieve_memory")
     g.add_edge("retrieve_memory", "write_chapter")
     g.add_edge("write_chapter", "paginate")
-    g.add_edge("paginate", "finalize")
+    g.add_edge("paginate", "purge")       # 重写：写成功后清理旧单元；正常生成时 purge 为空操作
+    g.add_edge("purge", "finalize")
     g.add_edge("finalize", END)
     return g.compile()

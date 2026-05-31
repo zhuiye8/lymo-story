@@ -56,6 +56,7 @@ CHAPTER_STAGES = [
     ("retrieve_memory", "召回记忆"),
     ("write_chapter", "撰写正文"),
     ("paginate", "切分分章"),
+    ("purge", "清理旧稿"),
     ("finalize", "抽取落库"),
 ]
 

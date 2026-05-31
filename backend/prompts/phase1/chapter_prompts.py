@@ -51,7 +51,8 @@ def scene_plan_prompt(
 
 def write_scene_prompt(
     bible_brief: str, scene_brief: str, voice_profiles: str,
-    facts_brief: str, prev_text: str, word_budget: int
+    facts_brief: str, prev_text: str, word_budget: int,
+    revision_note: str = ""
 ) -> tuple[str, str]:
     system = with_anti_slop(
         "你是顶尖中文网文写手。根据场景规划写出这一段正文。要求：\n"
@@ -61,10 +62,12 @@ def write_scene_prompt(
         f"4. 本段约 {word_budget} 字，自然成段，不要硬凑字数也不要中途截断；\n"
         "5. 只输出正文，不要任何解释/标题/分镜标记。"
     )
+    rev = f"【本次重写要求（务必体现）】\n{revision_note}\n\n" if revision_note else ""
     user = (
         f"【全书设定】\n{bible_brief}\n\n"
         f"【在场角色对白指纹】\n{voice_profiles}\n\n"
         f"【已知事实（不可矛盾）】\n{facts_brief}\n\n"
+        f"{rev}"
         f"【上文衔接】\n{prev_text or '（本章开头）'}\n\n"
         f"【本场景规划】\n{scene_brief}\n\n"
         f"请写出本场景正文（约 {word_budget} 字）。"

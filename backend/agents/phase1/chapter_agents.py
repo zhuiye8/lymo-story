@@ -42,9 +42,10 @@ class SceneWriterAgent(BaseAgent):
 
     async def run(self, *, bible_brief: str, scene_brief: str, voice_profiles: str,
                   facts_brief: str, prev_text: str, word_budget: int,
-                  chapter_num: int, story_id: str | None = None) -> str:
+                  chapter_num: int, story_id: str | None = None,
+                  revision_note: str = "") -> str:
         sys, usr = write_scene_prompt(bible_brief, scene_brief, voice_profiles,
-                                      facts_brief, prev_text, word_budget)
+                                      facts_brief, prev_text, word_budget, revision_note)
         # 字数预算 → max_tokens：中文约 1.6 token/字，留余量
         max_tok = int(word_budget * 2.2) + 512
         return await self._call_text(sys, usr, story_id=story_id, chapter_num=chapter_num,
