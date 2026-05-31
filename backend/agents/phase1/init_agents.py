@@ -17,7 +17,7 @@ from backend.models.phase1 import (
     Outline, OutlineSkeleton, VolumeList, StoryBible,
 )
 from backend.prompts.phase1.init_prompts import (
-    concept_prompt, world_core_prompt, faction_list_prompt, world_rule_prompt,
+    concept_prompt, title_prompt, world_core_prompt, faction_list_prompt, world_rule_prompt,
     character_roster_prompt, single_character_prompt,
     outline_skeleton_prompt, volume_list_prompt,
 )
@@ -35,6 +35,14 @@ class ConceptAgent(BaseAgent):
     async def run(self, *, theme: str, requirements: str = "", title: str = "", story_id: str | None = None) -> Concept:
         sys, usr = concept_prompt(theme, requirements, title)
         return await self._call_structured(sys, usr, Concept, story_id=story_id, temperature=0.7, max_tokens=2048)
+
+    async def gen_title(self, *, genre: str, tone: str, synopsis: str, ability: str,
+                        avoid: str = "", story_id: str | None = None) -> str:
+        """只重生成书名（基于已有设定），返回纯书名字符串。"""
+        sys, usr = title_prompt(genre, tone, synopsis, ability, avoid)
+        raw = await self._call_text(sys, usr, story_id=story_id, temperature=0.95, max_tokens=64)
+        t = (raw or "").strip().splitlines()[0] if raw.strip() else ""
+        return t.strip().strip("《》\"'“” ·").strip()[:30]
 
 
 class WorldBuilderAgent(BaseAgent):
