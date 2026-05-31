@@ -100,6 +100,16 @@ async def main():
         print(f"四元组增长: 第1章后={ok_rows[0]['quads']} → 末章后={ok_rows[-1]['quads']}")
         total_conflicts = sum(r["conflicts"] for r in ok_rows)
         print(f"累计一致性冲突: {total_conflicts}")
+        # 伏笔埋坑/填坑
+        async with aiosqlite.connect(s.sqlite_path) as db:
+            db.row_factory = aiosqlite.Row
+            fr = await (await db.execute(
+                "SELECT status, COUNT(*) AS n FROM foreshadowing WHERE story_id=? GROUP BY status",
+                (STORY_ID,))).fetchall()
+            fc = {r["status"]: r["n"] for r in fr}
+        planted = sum(fc.values())
+        print(f"伏笔: 埋={planted} 已回收={fc.get('resolved',0)} 待回收={fc.get('open',0)}"
+              + (f"（回收率 {fc.get('resolved',0)/planted:.0%}）" if planted else ""))
 
 
 if __name__ == "__main__":
