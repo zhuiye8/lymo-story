@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, Copy, Check, ArrowLeft } from "lucide-react";
+import { BookOpen, Copy, Check, ArrowLeft, Type } from "lucide-react";
 import { listChapters, getChapter, parseQuality } from "@/lib/api";
 import type { ChapterSummary } from "@/types";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,8 @@ export default function ChaptersPage({ params }: { params: Promise<{ id: string 
   const { id } = use(params);
   const [chapters, setChapters] = useState<ChapterSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState<number | null>(null);
+  // 记录哪一章、哪种内容刚被复制（body=正文 / title=章节名），两个按钮各自反馈
+  const [copied, setCopied] = useState<{ num: number; kind: "body" | "title" } | null>(null);
 
   useEffect(() => {
     listChapters(id)
@@ -26,14 +27,27 @@ export default function ChaptersPage({ params }: { params: Promise<{ id: string 
       .finally(() => setLoading(false));
   }, [id]);
 
-  async function copyRow(num: number) {
+  function flash(num: number, kind: "body" | "title") {
+    setCopied({ num, kind });
+    setTimeout(() => setCopied((c) => (c && c.num === num && c.kind === kind ? null : c)), 1800);
+  }
+
+  async function copyBody(num: number) {
     try {
       const ch = await getChapter(id, num);   // 列表无正文，复制时即时拉取
       await navigator.clipboard.writeText(ch.content);
-      setCopied(num);
-      setTimeout(() => setCopied((c) => (c === num ? null : c)), 1800);
+      flash(num, "body");
     } catch {
       alert("复制失败，请打开该章手动复制");
+    }
+  }
+
+  async function copyTitle(num: number, title: string) {
+    try {
+      await navigator.clipboard.writeText(title);   // 章节名列表已有，无需拉取
+      flash(num, "title");
+    } catch {
+      alert("复制失败");
     }
   }
 
@@ -75,11 +89,22 @@ export default function ChaptersPage({ params }: { params: Promise<{ id: string 
                   </Badge>
                 )}
                 <button
-                  onClick={() => copyRow(c.chapter_num)}
+                  onClick={() => copyTitle(c.chapter_num, c.title)}
+                  title="复制章节名"
+                  className="shrink-0 p-1.5 rounded-md text-muted-foreground/60 hover:text-lymo-gold-400 hover:bg-secondary/50 transition-colors"
+                >
+                  {copied?.num === c.chapter_num && copied.kind === "title" ? (
+                    <Check className="size-4 text-lymo-jade-400" />
+                  ) : (
+                    <Type className="size-4" />
+                  )}
+                </button>
+                <button
+                  onClick={() => copyBody(c.chapter_num)}
                   title="复制正文"
                   className="shrink-0 p-1.5 rounded-md text-muted-foreground/60 hover:text-lymo-gold-400 hover:bg-secondary/50 transition-colors"
                 >
-                  {copied === c.chapter_num ? (
+                  {copied?.num === c.chapter_num && copied.kind === "body" ? (
                     <Check className="size-4 text-lymo-jade-400" />
                   ) : (
                     <Copy className="size-4" />
