@@ -1,51 +1,120 @@
-export interface StoryResponse {
-  story_id: string;
+// Phase 1 类型契约。对应 backend/api/phase1_stories.py + quality_admin.py 的实际返回。
+// 旧 Phase 0 类型（KnowledgeGraph/VersionTree/Arc 等）已随后端移除而删除。
+
+export interface StorySummary {
+  id: string;
   title: string;
+  genre: string;
   theme: string;
-  status: string;
-  chapter_count: number;
-  is_published?: boolean;
+  status: string; // created/initializing/bible_ready/writing/...
+  created_at: string;
+  updated_at: string;
 }
 
-export interface ArcOutline {
-  name: string;
-  chapter_start: number;
-  chapter_end: number;
-  goal: string;
-  key_milestones: string[];
+// getStory 额外带 bible（已组装的 StoryBible）
+export interface StoryDetail extends StorySummary {
+  bible: StoryBible | Record<string, unknown>;
 }
 
-export interface LongOutline {
-  target_chapters: number;
-  arcs: ArcOutline[];
+export interface SpecialAbility {
+  name?: string;
+  description?: string;
+  rules?: string[];
+  [k: string]: unknown;
+}
+
+export interface PowerSystem {
+  name?: string;
+  levels?: string[];
+  [k: string]: unknown;
 }
 
 export interface StoryBible {
-  title: string;
-  genre: string;
-  setting: string;
-  world_rules: { rule_id: string; description: string }[];
-  power_system?: { name: string; levels: string[]; rules: string[] };
-  style_guide: {
-    tone: string;
-    pov_preference: string;
-    language_style: string;
-    dialogue_style: string;
+  concept?: {
+    title?: string;
+    genre?: string;
+    tone?: string;
+    logline?: string;
+    selling_points?: string[];
+    special_ability?: SpecialAbility;
+    [k: string]: unknown;
   };
-  taboos: string[];
-  characters: CharacterProfile[];
-  initial_conflicts: string[];
-  planned_arc: string;
-  long_outline?: LongOutline | null;
+  world?: {
+    background?: string;
+    power_system?: PowerSystem;
+    factions?: Array<Record<string, unknown>>;
+    rules?: string[];
+    [k: string]: unknown;
+  };
+  characters?: Record<string, unknown>;
+  outline?: Record<string, unknown>;
+  [k: string]: unknown;
 }
 
-export interface CharacterProfile {
+// ---- progress ----
+export interface StageInfo {
+  name: string;
+  label: string;
+  status: string; // pending/running/done/error
+  detail?: string;
+  duration_ms?: number;
+}
+
+export interface GenerationProgress {
+  story_id: string;
+  chapter_num: number;
+  elapsed_seconds: number;
+  current_stage: string | null;
+  current_stage_label: string | null;
+  error: string | null;
+  stages: StageInfo[];
+}
+
+export interface ProgressResponse {
+  progress: GenerationProgress | null;
+  status: string | null;
+  chapter_count: number;
+}
+
+// ---- characters ----
+export interface VoiceProfile {
+  tone?: string;
+  catchphrases?: string[];
+  sentence_style?: string;
+  vocabulary?: string[];
+  forbidden?: string[];
+  [k: string]: unknown;
+}
+
+export interface Character {
   character_id: string;
   name: string;
   role: string;
-  personality: string;
-  background: string;
-  goals: string[];
+  profile: Record<string, unknown>;
+  voice_profile: VoiceProfile;
+}
+
+// ---- outline ----
+export interface OutlineStage {
+  stage_num?: number;
+  stage_name: string;
+  summary: string;
+  chapter_start?: number;
+  chapter_end?: number;
+  [k: string]: unknown;
+}
+
+// ---- chapters ----
+export interface ChapterQuality {
+  composite_score?: number;
+  composite_final?: number;
+  mean_quality?: number;
+  slop_penalty?: number;
+  word_count?: number;
+  consistency_conflicts?: number;
+  dim_scores?: Record<string, number>;
+  judges?: string[];
+  [k: string]: unknown;
 }
 
 export interface ChapterSummary {
@@ -53,148 +122,117 @@ export interface ChapterSummary {
   title: string;
   pov: string;
   word_count: number;
-  has_warnings: boolean;
-  is_published?: boolean;
-}
-
-export interface ChapterDetail extends ChapterSummary {
-  story_id: string;
-  content: string;
-  events_covered: string[];
-  consistency_warnings: string[];
-}
-
-export interface GenerationStatus {
-  story_id: string;
-  status: string;
-  current_chapter: number | null;
-  error_message: string | null;
-  is_task_running?: boolean;
-}
-
-export interface ChapterVersionSummary {
-  id: number;
-  version_num: number;
-  title: string;
-  pov: string;
-  word_count: number;
-  feedback: string;
-  is_live?: boolean;
+  summary: string;
+  quality_json: string; // 需 JSON.parse
+  is_published: number;
   created_at: string;
 }
 
-export interface ChapterVersionDetail extends ChapterVersionSummary {
-  story_id: string;
-  chapter_num: number;
+export interface ChapterDetail extends ChapterSummary {
   content: string;
 }
 
-// --- Visualization types ---
-
-export interface CharacterNode {
-  id: string;
-  name: string;
-  role: string;
-}
-
-export interface RelationshipEdge {
-  source: string;
-  target: string;
-  predicate: string;
-  detail: string;
-  valid_from: number;
-  valid_to: number | null;
-}
-
-export interface KnowledgeGraphData {
-  nodes: CharacterNode[];
-  edges: RelationshipEdge[];
-}
-
-export interface StoryEvent {
-  event_id: string;
-  time: number;
+// ---- foreshadowing ----
+export interface Foreshadow {
+  id: number;
   description: string;
-  actors: string[];
-  location: string;
-  pre_events: string[];
-  effects: string[];
-  visibility: { public: boolean; known_to: string[] } | string;
+  planted_chapter: number;
+  status: "open" | "resolved";
+  resolved_chapter: number | null;
+  age?: number;
 }
 
-export interface CharacterWithArc {
+export interface ForeshadowingResponse {
+  items: Foreshadow[];
+  total: number;
+  open: number;
+  resolved: number;
+}
+
+// ---- memories ----
+export interface Memory {
+  id: number;
   character_id: string;
-  name: string;
-  role: string;
-  personality: string;
-  background: string;
-  goals: string[];
-  arc_summary: Record<string, unknown> | null;
-  arc_name: string | null;
+  character_name: string;
+  layer: number; // 0 身份核心 / 1 情感关键
+  content: string;
+  emotional_weight: number;
+  source_chapter: number;
 }
 
-// --- StoryBible V2 types ---
-
-export interface SpecialAbilityV2 {
-  name: string;
-  description: string;
-  functions: string[];
+export interface MemoriesResponse {
+  items: Memory[];
+  counts: Record<string, number>; // {L0: n, L1: n}
 }
 
-export interface FactionV2 {
-  name: string;
-  description: string;
-  stance: string;
+// ---- quality dashboard ----
+export interface StatBlock {
+  mean?: number;
+  min?: number;
+  max?: number;
+  std?: number;
+  n?: number;
+  slope_per_chapter?: number;
+  first_half_mean?: number;
+  second_half_mean?: number;
+  delta?: number;
+  [k: string]: number | undefined;
 }
 
-export interface CharacterProfileV2 {
-  character_id: string;
-  name: string;
-  role: string;
-  gender?: string;
-  age?: string;
-  appearance?: string;
-  personality: string;
-  background: string;
-  goals: string[];
-  weaknesses?: string[];
-  arc_plan?: string;
-  relationships?: { target_id: string; target_name: string; relation_type: string; description: string }[];
-  status?: string;
+export interface QualityStory {
+  story_id: string;
+  title: string | null;
+  n_chapters: number;
+  avg_composite: number | null;
 }
 
-export interface VolumeOutlineV2 {
-  volume_num: number;
-  volume_name: string;
-  chapter_start: number;
-  chapter_end: number;
-  estimated_words?: number;
-  main_plot: string;
-  subplots: string[];
-  conflicts: string[];
-  new_characters: string[];
-  key_locations: string[];
-  climax_event: string;
+export interface TrendResponse {
+  story_id: string;
+  data_ready: boolean;
+  reason: string | null;
+  data: {
+    chapters: Array<{
+      chapter_num: number;
+      composite_score: number;
+      mean_quality: number;
+      slop_penalty: number;
+      word_count: number;
+    }>;
+    aggregates: Record<string, StatBlock>;
+  } | null;
 }
 
-export interface WorldSettingV2 {
-  world_background: string;
-  special_ability?: SpecialAbilityV2 | null;
-  factions?: FactionV2[];
-  power_system?: { name: string; levels: string[]; rules: string[] };
-  world_rules?: { rule_id: string; description: string }[];
+export interface ByDimensionResponse {
+  story_id: string;
+  data_ready: boolean;
+  reason: string | null;
+  data: {
+    dimensions: string[];
+    labels: Record<string, string>;
+    per_dimension: Record<string, StatBlock>;
+  } | null;
 }
 
-export interface StoryBibleV2 extends StoryBible {
-  bible_version?: number;
-  tone?: string;
-  one_line_summary?: string;
-  synopsis?: string;
-  inspiration?: string;
-  world?: WorldSettingV2;
-  protagonist?: CharacterProfileV2 | null;
-  antagonist?: CharacterProfileV2 | null;
-  supporting_characters?: CharacterProfileV2[];
-  primary_pov?: string;
-  volumes?: VolumeOutlineV2[];
+export interface HeatmapResponse {
+  story_id: string;
+  data_ready: boolean;
+  reason: string | null;
+  data: {
+    chapters: number[];
+    dimensions: string[];
+    labels: Record<string, string>;
+    matrix: number[][];
+    meta: { score_range: [number, number]; color_scheme_hint: string };
+  } | null;
+}
+
+export interface DistributionResponse {
+  story_id: string;
+  data_ready: boolean;
+  reason: string | null;
+  data: {
+    composite_histogram: { bins: number[]; counts: number[] } | Record<string, unknown>;
+    slop_histogram: { bins: number[]; counts: number[] } | Record<string, unknown>;
+    totals: { n_chapters: number };
+  } | null;
 }

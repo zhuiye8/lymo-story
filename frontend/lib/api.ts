@@ -1,14 +1,20 @@
+// Phase 1 API 客户端。对应 backend/api/phase1_stories.py（/api/stories）
+// + quality_admin.py（/api/admin/quality）。旧 Phase 0 函数已全部移除。
 import type {
-  CharacterWithArc,
-  ChapterDetail,
+  StorySummary,
+  StoryDetail,
+  ProgressResponse,
+  Character,
+  OutlineStage,
   ChapterSummary,
-  ChapterVersionDetail,
-  ChapterVersionSummary,
-  GenerationStatus,
-  KnowledgeGraphData,
-  StoryBibleV2,
-  StoryEvent,
-  StoryResponse,
+  ChapterDetail,
+  ForeshadowingResponse,
+  MemoriesResponse,
+  QualityStory,
+  TrendResponse,
+  ByDimensionResponse,
+  HeatmapResponse,
+  DistributionResponse,
 } from "@/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
@@ -17,307 +23,119 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, init);
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`API error ${res.status}: ${text}`);
+    throw new Error(`API ${res.status}: ${text || res.statusText}`);
   }
   return res.json();
 }
 
+// ---------------- stories ----------------
+
+export interface CreateStoryInput {
+  theme: string;
+  requirements?: string;
+  genre?: string;
+  target_chapters?: number;
+  title?: string;
+}
+
 export async function createStory(
-  theme: string,
-  requirements: string = "",
-  title: string = "",
-  skipInit: boolean = false,
-): Promise<StoryResponse> {
+  input: CreateStoryInput,
+): Promise<{ story_id: string; status: string }> {
   return fetchJson(`${API_BASE}/stories`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ theme, requirements, title, skip_init: skipInit }),
+    body: JSON.stringify(input),
   });
 }
 
-export async function updateBible(
-  storyId: string,
-  bible: Record<string, unknown>
-): Promise<{ message: string; title: string }> {
-  return fetchJson(`${API_BASE}/stories/${storyId}/bible`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(bible),
-  });
-}
-
-export async function importOutline(
-  storyId: string,
-  rawText: string,
-  title: string = ""
-): Promise<{ story_id: string; title: string; status: string }> {
-  return fetchJson(`${API_BASE}/stories/${storyId}/import-outline`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ raw_text: rawText, title }),
-  });
-}
-
-export async function listStories(): Promise<StoryResponse[]> {
+export async function listStories(): Promise<StorySummary[]> {
   return fetchJson(`${API_BASE}/stories`);
 }
 
-export async function getStory(storyId: string): Promise<StoryResponse> {
+export async function getStory(storyId: string): Promise<StoryDetail> {
   return fetchJson(`${API_BASE}/stories/${storyId}`);
 }
 
-export async function deleteStory(storyId: string): Promise<void> {
-  await fetchJson(`${API_BASE}/stories/${storyId}`, { method: "DELETE" });
+export async function getProgress(storyId: string): Promise<ProgressResponse> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/progress`);
 }
 
-export async function regenerateOutline(
+export async function getCharacters(storyId: string): Promise<Character[]> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/characters`);
+}
+
+export async function getOutline(storyId: string): Promise<OutlineStage[]> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/outline`);
+}
+
+export async function generateChapter(
   storyId: string,
-  userInstructions: string = ""
-): Promise<{ message: string; volumes_count: number; history_count: number }> {
-  return fetchJson(`${API_BASE}/stories/${storyId}/outline/regenerate`, {
+  targetWords = 3500,
+): Promise<{ story_id: string; chapter_num: number; status: string }> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/generate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_instructions: userInstructions }),
+    body: JSON.stringify({ target_words: targetWords }),
   });
 }
 
-export async function cloneStoryOutline(
-  storyId: string,
-  titleSuffix: string = "（分支）"
-): Promise<{ message: string; new_story_id: string; new_title: string }> {
-  return fetchJson(`${API_BASE}/stories/${storyId}/clone-outline`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ title_suffix: titleSuffix }),
-  });
-}
-
-export async function deleteChaptersFrom(
-  storyId: string,
-  fromChapter: number
-): Promise<{ message: string; deleted_count: number; from_chapter: number }> {
-  return fetchJson(
-    `${API_BASE}/stories/${storyId}/chapters/from/${fromChapter}`,
-    { method: "DELETE" }
-  );
-}
-
-export async function getStoryBible(storyId: string): Promise<StoryBibleV2> {
-  return fetchJson(`${API_BASE}/stories/${storyId}/bible`);
-}
-
-export async function listChapters(
-  storyId: string
-): Promise<ChapterSummary[]> {
+export async function listChapters(storyId: string): Promise<ChapterSummary[]> {
   return fetchJson(`${API_BASE}/stories/${storyId}/chapters`);
 }
 
 export async function getChapter(
   storyId: string,
-  num: number
+  num: number,
 ): Promise<ChapterDetail> {
   return fetchJson(`${API_BASE}/stories/${storyId}/chapters/${num}`);
 }
 
-export async function triggerGeneration(
+export async function getForeshadowing(
   storyId: string,
-  wordCount?: number
-): Promise<{ message: string; chapter_num: number; word_count?: number }> {
-  return fetchJson(`${API_BASE}/stories/${storyId}/generate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(wordCount ? { word_count: wordCount } : {}),
-  });
+): Promise<ForeshadowingResponse> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/foreshadowing`);
 }
 
-export async function getStatus(storyId: string): Promise<GenerationStatus> {
-  return fetchJson(`${API_BASE}/stories/${storyId}/control/status`);
+export async function getMemories(storyId: string): Promise<MemoriesResponse> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/memories`);
 }
 
-export async function cancelGeneration(
-  storyId: string
-): Promise<{ story_id: string; cancelled: boolean; message: string }> {
-  return fetchJson(`${API_BASE}/stories/${storyId}/control/cancel`, {
-    method: "POST",
-  });
+// ---------------- quality dashboard ----------------
+
+const Q_BASE = `${API_BASE}/admin/quality`;
+
+export async function listQualityStories(): Promise<{ stories: QualityStory[] }> {
+  return fetchJson(`${Q_BASE}/stories`);
 }
 
-export async function publishStory(
+export async function getQualityTrend(storyId: string): Promise<TrendResponse> {
+  return fetchJson(`${Q_BASE}/story/${storyId}/trend`);
+}
+
+export async function getQualityByDimension(
   storyId: string,
-  publish: boolean
-): Promise<void> {
-  await fetchJson(`${API_BASE}/stories/${storyId}/publish`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ publish }),
-  });
+): Promise<ByDimensionResponse> {
+  return fetchJson(`${Q_BASE}/story/${storyId}/by-dimension`);
 }
 
-export async function publishChapter(
+export async function getQualityHeatmap(
   storyId: string,
-  chapterNum: number,
-  publish: boolean
-): Promise<void> {
-  await fetchJson(`${API_BASE}/stories/${storyId}/chapters/${chapterNum}/publish`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ publish }),
-  });
+): Promise<HeatmapResponse> {
+  return fetchJson(`${Q_BASE}/story/${storyId}/heatmap`);
 }
 
-export interface StageProgress {
-  name: string;
-  label: string;
-  status: string; // pending / running / done / error
-  detail: string;
-  duration_ms: number;
-}
-
-export interface GenerationProgressData {
-  story_id: string;
-  chapter_num: number;
-  elapsed_seconds: number;
-  current_stage: string | null;
-  current_stage_label: string | null;
-  error: string | null;
-  stages: StageProgress[];
-}
-
-export async function getProgress(storyId: string): Promise<GenerationProgressData> {
-  return fetchJson(`${API_BASE}/stories/${storyId}/control/progress`);
-}
-
-export async function regenerateChapter(
+export async function getQualityDistribution(
   storyId: string,
-  chapterNum: number,
-  feedback: string,
-  chaptersToInvalidate?: number[]
-): Promise<{ message: string; chapter_num: number; cascade_invalidated: number[] }> {
-  const body: Record<string, unknown> = { feedback };
-  if (chaptersToInvalidate !== undefined) {
-    body.chapters_to_invalidate = chaptersToInvalidate;
+): Promise<DistributionResponse> {
+  return fetchJson(`${Q_BASE}/story/${storyId}/distribution`);
+}
+
+// 解析章节 quality_json（字符串）→ 对象
+export function parseQuality(raw: string | undefined | null): Record<string, unknown> {
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {};
   }
-  return fetchJson(
-    `${API_BASE}/stories/${storyId}/chapters/${chapterNum}/regenerate`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }
-  );
-}
-
-export interface AffectedChapterInfo {
-  chapter_num: number;
-  source_version_id: number;
-  dep_chapters: number[];
-  memory_count: number;
-  triple_count: number;
-  state_count: number;
-  summary_exists: boolean;
-  brief: string;
-}
-
-export interface RegeneratePlanResponse {
-  target_chapter: number;
-  target_current_version_id: number | null;
-  affected_chapters: AffectedChapterInfo[];
-}
-
-export async function getRegeneratePlan(
-  storyId: string,
-  chapterNum: number,
-): Promise<RegeneratePlanResponse> {
-  return fetchJson(
-    `${API_BASE}/stories/${storyId}/chapters/${chapterNum}/regenerate/plan`,
-  );
-}
-
-export async function listChapterVersions(
-  storyId: string,
-  chapterNum: number
-): Promise<ChapterVersionSummary[]> {
-  return fetchJson(
-    `${API_BASE}/stories/${storyId}/chapters/${chapterNum}/versions`
-  );
-}
-
-export async function getChapterVersion(
-  storyId: string,
-  chapterNum: number,
-  versionId: number
-): Promise<ChapterVersionDetail> {
-  return fetchJson(
-    `${API_BASE}/stories/${storyId}/chapters/${chapterNum}/versions/${versionId}`
-  );
-}
-
-export async function restoreChapterVersion(
-  storyId: string,
-  chapterNum: number,
-  versionId: number
-): Promise<{ message: string; version_num: number }> {
-  return fetchJson(
-    `${API_BASE}/stories/${storyId}/chapters/${chapterNum}/restore/${versionId}`,
-    { method: "POST" }
-  );
-}
-
-export async function getCharacterArcHistory(
-  storyId: string,
-  characterId: string
-): Promise<{ arcs: any[]; states: any[] }> {
-  return fetchJson(
-    `${API_BASE}/stories/${storyId}/character-arcs/${characterId}`
-  );
-}
-
-// --- Visualization APIs ---
-
-export async function getCharacters(
-  storyId: string
-): Promise<CharacterWithArc[]> {
-  return fetchJson(`${API_BASE}/stories/${storyId}/characters`);
-}
-
-export async function getKnowledgeGraph(
-  storyId: string,
-  asOfChapter?: number
-): Promise<KnowledgeGraphData> {
-  const url = new URL(`${API_BASE}/stories/${storyId}/knowledge-graph`);
-  if (asOfChapter != null) url.searchParams.set("as_of_chapter", String(asOfChapter));
-  return fetchJson(url.toString());
-}
-
-export async function getEvents(storyId: string): Promise<StoryEvent[]> {
-  return fetchJson(`${API_BASE}/stories/${storyId}/events`);
-}
-
-export interface VersionTreeVersion {
-  id: number;
-  chapter_num: number;
-  version_num: number;
-  title: string;
-  pov: string;
-  word_count: number;
-  feedback: string;
-  is_live: number;
-  created_at: string;
-}
-
-export interface VersionTreeDep {
-  chapter_num: number;
-  source_version_id: number;
-  depends_on_chapter: number;
-  depends_on_version_id: number;
-  dep_type: string;
-}
-
-export interface VersionTreeData {
-  chapters: { chapter_num: number; versions: VersionTreeVersion[] }[];
-  dependencies: VersionTreeDep[];
-}
-
-export async function getVersionTree(storyId: string): Promise<VersionTreeData> {
-  return fetchJson(`${API_BASE}/stories/${storyId}/version-tree`);
 }

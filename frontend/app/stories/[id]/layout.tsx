@@ -2,8 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import { DashboardSidebar } from "@/components/lymo/dashboard-sidebar";
-import { getStory } from "@/lib/api";
-import type { StoryResponse } from "@/types";
+import { getStory, getProgress } from "@/lib/api";
 
 export default function StoryLayout({
   children,
@@ -12,34 +11,26 @@ export default function StoryLayout({
   children: React.ReactNode;
   params: Promise<{ id: string }>;
 }) {
-  const { id: storyId } = use(params);
-  const [story, setStory] = useState<StoryResponse | null>(null);
+  const { id } = use(params);
+  const [title, setTitle] = useState<string>("");
+  const [chapters, setChapters] = useState<number>(0);
 
   useEffect(() => {
-    let cancel = false;
-    const load = async () => {
-      try {
-        const s = await getStory(storyId);
-        if (!cancel) setStory(s);
-      } catch {
-        // ignore
-      }
-    };
-    load();
-    const t = setInterval(load, 5000);
+    let alive = true;
+    getStory(id)
+      .then((s) => alive && setTitle(s.title))
+      .catch(() => {});
+    getProgress(id)
+      .then((p) => alive && setChapters(p.chapter_count))
+      .catch(() => {});
     return () => {
-      cancel = true;
-      clearInterval(t);
+      alive = false;
     };
-  }, [storyId]);
+  }, [id]);
 
   return (
     <div className="flex min-h-[calc(100vh-56px)]">
-      <DashboardSidebar
-        storyId={storyId}
-        storyTitle={story?.title || story?.theme}
-        chapterCount={story?.chapter_count}
-      />
+      <DashboardSidebar storyId={id} storyTitle={title} chapterCount={chapters} />
       <div className="flex-1 min-w-0">{children}</div>
     </div>
   );

@@ -431,6 +431,28 @@ class SQLiteStore:
             )
             return {f"L{r['layer']}": r["n"] for r in await cur.fetchall()}
 
+    async def list_memories(self, story_id: str) -> list[dict]:
+        """列出全部记忆（按角色 + 情感权重，供 UI 可视化）。"""
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cur = await db.execute(
+                "SELECT id, character_id, layer, content, emotional_weight, source_chapter "
+                "FROM memories WHERE story_id=? ORDER BY layer, emotional_weight DESC, source_chapter",
+                (story_id,),
+            )
+            return [dict(r) for r in await cur.fetchall()]
+
+    async def list_foreshadowing(self, story_id: str) -> list[dict]:
+        """列出全部伏笔（open + resolved），供 UI 埋坑/填坑看板。"""
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cur = await db.execute(
+                "SELECT id, description, planted_chapter, status, resolved_chapter "
+                "FROM foreshadowing WHERE story_id=? ORDER BY planted_chapter, id",
+                (story_id,),
+            )
+            return [dict(r) for r in await cur.fetchall()]
+
     # ===================== characters =====================
 
     async def save_character(

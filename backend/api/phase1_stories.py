@@ -164,3 +164,30 @@ async def get_chapter(story_id: str, chapter_num: int, store: SQLiteStore = Depe
     if not ch:
         raise HTTPException(404, "chapter not found")
     return ch
+
+
+@router.get("/{story_id}/foreshadowing")
+async def get_foreshadowing(story_id: str, store: SQLiteStore = Depends(get_sqlite)):
+    """伏笔看板：埋坑/填坑列表 + 统计。"""
+    items = await store.list_foreshadowing(story_id)
+    chapter_count = await store.get_chapter_count(story_id)
+    for it in items:
+        if it["status"] == "open":
+            it["age"] = max(0, chapter_count - it["planted_chapter"])
+    resolved = sum(1 for it in items if it["status"] == "resolved")
+    return {
+        "items": items,
+        "total": len(items),
+        "open": len(items) - resolved,
+        "resolved": resolved,
+    }
+
+
+@router.get("/{story_id}/memories")
+async def get_memories(story_id: str, store: SQLiteStore = Depends(get_sqlite)):
+    """分层记忆看板：L0 身份核心 / L1 情感关键，按角色分组。"""
+    rows = await store.list_memories(story_id)
+    chars = {c["character_id"]: c["name"] for c in await store.list_characters(story_id)}
+    for r in rows:
+        r["character_name"] = chars.get(r["character_id"], r["character_id"])
+    return {"items": rows, "counts": await store.count_memories(story_id)}

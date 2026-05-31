@@ -5,13 +5,11 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  Globe,
+  ScrollText,
   LineChart,
-  Workflow,
-  History,
-  Orbit,
-  FileEdit,
   BookOpenText,
+  Brain,
+  Sparkles,
   ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,13 +23,12 @@ interface SidebarProps {
 
 const ITEMS = [
   { slug: "", label: "仪表盘", icon: LayoutDashboard },
+  { slug: "outline", label: "大纲", icon: ScrollText },
   { slug: "characters", label: "角色", icon: Users },
-  { slug: "world", label: "世界观", icon: Globe },
-  { slug: "galaxy", label: "3D 宇宙", icon: Orbit, accent: true },
-  { slug: "insights", label: "数据洞察", icon: LineChart },
-  { slug: "pipeline", label: "生成管线", icon: Workflow },
-  { slug: "versions", label: "版本树", icon: History },
-  { slug: "outline", label: "大纲编辑", icon: FileEdit },
+  { slug: "chapters", label: "章节", icon: BookOpenText },
+  { slug: "quality", label: "质量", icon: LineChart },
+  { slug: "memory", label: "记忆", icon: Brain },
+  { slug: "foreshadowing", label: "伏笔", icon: Sparkles },
 ];
 
 export function DashboardSidebar({ storyId, storyTitle, chapterCount }: SidebarProps) {
@@ -75,17 +72,11 @@ export function DashboardSidebar({ storyId, storyTitle, chapterCount }: SidebarP
                 "flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors",
                 active
                   ? "bg-secondary text-foreground"
-                  : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground",
-                item.accent && !active && "text-lymo-gold-400"
+                  : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
               )}
             >
               <Icon className="size-4 shrink-0" />
               <span className="truncate">{item.label}</span>
-              {item.accent && (
-                <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded bg-lymo-gold-500/15 text-lymo-gold-400 border border-lymo-gold-500/30">
-                  NEW
-                </span>
-              )}
             </Link>
           );
         })}
