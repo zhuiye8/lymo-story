@@ -53,6 +53,11 @@ class GenerateReq(BaseModel):
     target_words: int = 3000
 
 
+class RewriteReq(BaseModel):
+    revision_note: str = ""       # 可选修改意见
+    target_words: int = 3000
+
+
 class RenameReq(BaseModel):
     title: str = Field(description="新书名")
 
@@ -100,6 +105,28 @@ async def _run_chapter(app_state, story_id: str, installment_num: int, start_cha
         await store.update_story_status(story_id, "bible_ready")
     except Exception as e:
         logger.exception(f"installment {installment_num} failed for {story_id}")
+        progress.set_error(story_id, str(e)[:300])
+
+
+async def _run_rewrite(app_state, story_id: str, installment_num: int, start_chapter_num: int,
+                       target_words: int, revision_note: str):
+    """重写最新推进单元：沿用原细纲、写新稿、写后清理旧单元、不 bump installments_done。"""
+    store: SQLiteStore = app_state.sqlite
+    llm: LLMClient = app_state.llm
+    quads: KnowledgeQuads = app_state.quads
+    mem: LayeredMemory = app_state.mem
+    progress: ProgressStore = app_state.progress_store
+    try:
+        progress.start(story_id, start_chapter_num)
+        graph = build_chapter_graph(llm, store, quads, mem, progress, app_state.settings)
+        await graph.ainvoke({"story_id": story_id, "chapter_num": start_chapter_num,
+                             "installment_num": installment_num, "target_words": target_words,
+                             "rewrite": True, "revision_note": revision_note})
+        progress.finish(story_id)
+        # 重写 = 重做当前单元，绝不 bump installments_done
+        await store.update_story_status(story_id, "bible_ready")
+    except Exception as e:
+        logger.exception(f"rewrite installment {installment_num} failed for {story_id}")
         progress.set_error(story_id, str(e)[:300])
 
 
@@ -245,6 +272,47 @@ async def generate_chapter(story_id: str, req: GenerateReq, request: Request,
     asyncio.create_task(_run_chapter(
         request.app.state, story_id, installment_num, start_chapter_num, req.target_words))
     return {"story_id": story_id, "chapter_num": start_chapter_num, "status": "generating"}
+
+
+@router.get("/{story_id}/rewrite-latest/info")
+async def rewrite_latest_info(story_id: str, store: SQLiteStore = Depends(get_sqlite)):
+    """重写预览：返回将被重写的最新推进单元 + 受影响的物理章号（前端确认用）。"""
+    s = await store.get_story(story_id)
+    if not s:
+        raise HTTPException(404, "story not found")
+    latest = await store.get_installments_done(story_id)
+    if latest < 1:
+        return {"can_rewrite": False, "reason": "还没有已生成的章节", "installment_num": 0, "chapter_nums": []}
+    nums = await store.get_installment_chapter_nums(story_id, latest)
+    busy = s["status"] == "writing"
+    return {
+        "can_rewrite": bool(nums) and not busy,
+        "reason": "生成中，请稍候" if busy else ("" if nums else "最新单元无章节"),
+        "installment_num": latest,
+        "chapter_nums": nums,
+    }
+
+
+@router.post("/{story_id}/rewrite-latest")
+async def rewrite_latest(story_id: str, req: RewriteReq, request: Request,
+                         store: SQLiteStore = Depends(get_sqlite)):
+    """重写最新推进单元（切分成几章就一起重写）。只允许最新单元，避免级联。"""
+    s = await store.get_story(story_id)
+    if not s:
+        raise HTTPException(404, "story not found")
+    if s["status"] == "writing":
+        raise HTTPException(409, "正在生成/重写中，请稍候")
+    latest = await store.get_installments_done(story_id)
+    if latest < 1:
+        raise HTTPException(400, "还没有已生成的章节，无法重写")
+    nums = await store.get_installment_chapter_nums(story_id, latest)
+    if not nums:
+        raise HTTPException(400, "最新推进单元没有对应章节")
+    start_chapter_num = min(nums)
+    await store.update_story_status(story_id, "writing")
+    asyncio.create_task(_run_rewrite(
+        request.app.state, story_id, latest, start_chapter_num, req.target_words, req.revision_note.strip()))
+    return {"story_id": story_id, "installment_num": latest, "chapter_nums": nums, "status": "rewriting"}
 
 
 @router.get("/{story_id}/chapters")
