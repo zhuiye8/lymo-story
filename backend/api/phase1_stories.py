@@ -57,6 +57,10 @@ class RenameReq(BaseModel):
     title: str = Field(description="新书名")
 
 
+class BlurbReq(BaseModel):
+    blurb: str = Field(description="新的作品简介")
+
+
 # ---------- background runners ----------
 
 async def _run_init(app_state, story_id: str, theme: str, requirements: str, title: str, target_chapters: int):
@@ -153,6 +157,46 @@ async def regenerate_title(story_id: str, store: SQLiteStore = Depends(get_sqlit
         raise HTTPException(502, "书名生成失败，请重试")
     await store.update_story_title(story_id, title)
     return {"story_id": story_id, "title": title}
+
+
+@router.put("/{story_id}/blurb")
+async def update_blurb(story_id: str, req: BlurbReq, store: SQLiteStore = Depends(get_sqlite)):
+    """手动改作品简介（存进 bible.concept.blurb）。"""
+    s = await store.get_story(story_id)
+    if not s:
+        raise HTTPException(404, "story not found")
+    blurb = req.blurb.strip()
+    await store.update_concept_field(story_id, "blurb", blurb)
+    return {"story_id": story_id, "blurb": blurb}
+
+
+@router.post("/{story_id}/regenerate-blurb")
+async def regenerate_blurb(story_id: str, store: SQLiteStore = Depends(get_sqlite),
+                           llm: LLMClient = Depends(get_llm)):
+    """基于已有立意 AI 重新生成作品简介（不动其它设定）。"""
+    s = await store.get_story(story_id)
+    if not s:
+        raise HTTPException(404, "story not found")
+    concept = (s.get("bible") or {}).get("concept") or {}
+    if not concept:
+        raise HTTPException(400, "故事尚未初始化完成，无法生成简介")
+    from backend.agents.phase1.init_agents import ConceptAgent
+    agent = ConceptAgent(llm)
+    try:
+        blurb = await agent.gen_blurb(
+            title=concept.get("title", s.get("title", "")),
+            genre=concept.get("genre", s.get("genre", "")),
+            tone=concept.get("tone", ""),
+            synopsis=concept.get("synopsis", concept.get("one_line", "")),
+            ability=(concept.get("special_ability") or {}).get("name", ""),
+            story_id=story_id)
+    except Exception as e:
+        logger.warning(f"regenerate-blurb LLM failed for {story_id}: {type(e).__name__}: {e}")
+        raise HTTPException(502, "简介生成失败（模型连接异常），请重试")
+    if not blurb:
+        raise HTTPException(502, "简介生成失败，请重试")
+    await store.update_concept_field(story_id, "blurb", blurb)
+    return {"story_id": story_id, "blurb": blurb}
 
 
 @router.get("")

@@ -17,7 +17,7 @@ from backend.models.phase1 import (
     Outline, OutlineSkeleton, VolumeList, StoryBible,
 )
 from backend.prompts.phase1.init_prompts import (
-    concept_prompt, title_prompt, world_core_prompt, faction_list_prompt, world_rule_prompt,
+    concept_prompt, title_prompt, blurb_prompt, world_core_prompt, faction_list_prompt, world_rule_prompt,
     character_roster_prompt, single_character_prompt,
     outline_skeleton_prompt, volume_list_prompt,
 )
@@ -43,6 +43,13 @@ class ConceptAgent(BaseAgent):
         raw = await self._call_text(sys, usr, story_id=story_id, temperature=0.95, max_tokens=64)
         t = (raw or "").strip().splitlines()[0] if raw.strip() else ""
         return t.strip().strip("《》\"'“” ·").strip()[:30]
+
+    async def gen_blurb(self, *, title: str, genre: str, tone: str, synopsis: str,
+                        ability: str, story_id: str | None = None) -> str:
+        """只重生成作品简介（面向读者的营销文案），返回纯文本。"""
+        sys, usr = blurb_prompt(title, genre, tone, synopsis, ability)
+        raw = await self._call_text(sys, usr, story_id=story_id, temperature=0.9, max_tokens=512)
+        return (raw or "").strip()
 
 
 class WorldBuilderAgent(BaseAgent):

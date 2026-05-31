@@ -25,7 +25,11 @@ class Concept(BaseModel):
     genre: str = Field(description="题材类型，如 男频系统流")
     tone: str = Field(description="基调，如 热血爽文 / 沉稳权谋")
     one_line: str = Field(description="一句话简介")
-    synopsis: str = Field(description="200-300 字故事梗概")
+    synopsis: str = Field(description="200-300 字故事梗概（内部用，可含全局走向）")
+    blurb: str = Field(
+        default="",
+        description="面向读者的作品简介/卖点文案，100-200 字：有钩子、吊胃口、突出爽点与悬念，绝不剧透结局，结尾留悬念引人点进来"
+    )
     special_ability: SpecialAbility = Field(description="主角的金手指/核心能力")
 
 

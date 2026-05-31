@@ -10,7 +10,9 @@ from backend.prompts.phase1.shared import with_anti_slop
 def concept_prompt(theme: str, requirements: str, title: str) -> tuple[str, str]:
     system = with_anti_slop(
         "你是资深中文网文策划。根据用户的题材想法，提炼出一本【男频系统流】网络小说的核心立意："
-        "书名、题材、基调、一句话简介、200-300 字梗概、以及主角的金手指（核心特殊能力）。"
+        "书名、题材、基调、一句话简介、200-300 字梗概（synopsis，内部用可含走向）、"
+        "面向读者的作品简介（blurb，100-200 字营销文案：有钩子、突出爽点与悬念、"
+        "结尾留悬念引人点进来，绝不剧透结局）、以及主角的金手指（核心特殊能力）。"
         "立意要有爽点和钩子，符合网文读者口味，但避免烂俗。"
     )
     user = (
@@ -33,6 +35,21 @@ def title_prompt(genre: str, tone: str, synopsis: str, ability: str, avoid: str 
         f"题材：{genre}\n基调：{tone}\n金手指：{ability}\n梗概：{synopsis}\n"
         + (f"避免与此重复：{avoid}\n" if avoid else "")
         + "\n请只输出一个书名："
+    )
+    return system, user
+
+
+def blurb_prompt(title: str, genre: str, tone: str, synopsis: str, ability: str) -> tuple[str, str]:
+    """只生成作品简介（重新生成简介用）—— 面向读者的营销文案，不剧透结局。"""
+    system = with_anti_slop(
+        "你是资深中文网文编辑，专写作品简介（书封文案）。根据书名/题材/基调/梗概/金手指，"
+        "写一段面向读者的作品简介：100-200 字，开头有钩子，突出爽点与核心悬念，"
+        "语气契合题材基调，结尾留悬念引人点进来。绝不剧透结局、不剧透关键反转。"
+        "只输出简介正文，不要标题、不要解释、不要分点。"
+    )
+    user = (
+        f"书名：{title}\n题材：{genre}\n基调：{tone}\n金手指：{ability}\n剧情梗概（内部参考，勿照搬、勿剧透）：{synopsis}\n\n"
+        "请输出作品简介："
     )
     return system, user
 

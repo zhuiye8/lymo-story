@@ -335,6 +335,22 @@ class SQLiteStore:
             )
             await db.commit()
 
+    async def update_concept_field(self, story_id: str, field: str, value: str) -> None:
+        """更新 bible.concept 下的某个字段（如 blurb）。故事尚无 bible 时静默跳过。"""
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cur = await db.execute("SELECT bible_json FROM stories WHERE id = ?", (story_id,))
+            row = await cur.fetchone()
+            bible = json.loads(row["bible_json"]) if row and row["bible_json"] else {}
+            if not bible:
+                return
+            bible.setdefault("concept", {})[field] = value
+            await db.execute(
+                "UPDATE stories SET bible_json = ?, updated_at = ? WHERE id = ?",
+                (json.dumps(bible, ensure_ascii=False), _now(), story_id),
+            )
+            await db.commit()
+
     async def get_installments_done(self, story_id: str) -> int:
         """已推进的剧情单元数（≠物理章数；切分会让物理章多于单元）。"""
         async with aiosqlite.connect(self.db_path) as db:

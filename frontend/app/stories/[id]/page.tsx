@@ -3,7 +3,8 @@
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Play, Loader2, CheckCircle2, AlertCircle, Circle, BookOpen, Pencil, Check, X, Wand2 } from "lucide-react";
-import { getStory, getProgress, generateChapter, listChapters, parseQuality, renameStory, regenerateTitle } from "@/lib/api";
+import { Textarea } from "@/components/ui/textarea";
+import { getStory, getProgress, generateChapter, listChapters, parseQuality, renameStory, regenerateTitle, updateBlurb, regenerateBlurb } from "@/lib/api";
 import type { StoryDetail, ProgressResponse, ChapterSummary, StoryBible } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +41,9 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
   const [titleBusy, setTitleBusy] = useState(false);
+  const [editingBlurb, setEditingBlurb] = useState(false);
+  const [blurbDraft, setBlurbDraft] = useState("");
+  const [blurbBusy, setBlurbBusy] = useState(false);
 
   const refresh = useCallback(async () => {
     const [s, p, chs] = await Promise.all([
@@ -108,11 +112,44 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
     }
   }
 
+  function startEditBlurb(current: string) {
+    setBlurbDraft(current);
+    setEditingBlurb(true);
+  }
+
+  async function saveBlurb() {
+    setBlurbBusy(true);
+    try {
+      await updateBlurb(id, blurbDraft.trim());
+      setEditingBlurb(false);
+      await refresh();
+    } catch (e) {
+      alert(`保存简介失败：${e instanceof Error ? e.message : e}`);
+    } finally {
+      setBlurbBusy(false);
+    }
+  }
+
+  async function onRegenBlurb() {
+    setBlurbBusy(true);
+    try {
+      const r = await regenerateBlurb(id);
+      setBlurbDraft(r.blurb);
+      setEditingBlurb(true); // 重生成后进编辑态，便于确认或微调
+      await refresh();
+    } catch (e) {
+      alert(`生成简介失败：${e instanceof Error ? e.message : e}`);
+    } finally {
+      setBlurbBusy(false);
+    }
+  }
+
   if (!story) return <div className="p-8 text-muted-foreground text-sm">加载中…</div>;
 
   const bible = (story.bible ?? {}) as StoryBible;
   const concept = bible.concept ?? {};
   const ability = concept.special_ability ?? {};
+  const blurb = (concept.blurb as string | undefined) ?? "";
   const ready = status === "bible_ready" || status === "writing";
   const lastComposite = chapters.length
     ? (parseQuality(chapters[chapters.length - 1].quality_json).composite_final as number | undefined)
@@ -191,6 +228,57 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
                 {String(ability.name)}
                 {ability.description ? <span className="text-muted-foreground"> — {String(ability.description)}</span> : null}
               </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 作品简介（面向读者/投稿的营销文案） */}
+      {ready && (
+        <Card>
+          <CardHeader className="pb-2 flex-row items-center justify-between">
+            <CardTitle className="text-base font-serif">作品简介</CardTitle>
+            {!editingBlurb && (
+              <div className="flex items-center gap-1">
+                <button onClick={() => startEditBlurb(blurb)} title="编辑简介"
+                  className="text-muted-foreground hover:text-foreground transition p-1">
+                  <Pencil className="size-3.5" />
+                </button>
+                <button onClick={onRegenBlurb} disabled={blurbBusy} title="AI 重新生成简介"
+                  className="text-muted-foreground hover:text-lymo-gold-400 transition p-1 disabled:opacity-50">
+                  {blurbBusy ? <Loader2 className="size-3.5 animate-spin" /> : <Wand2 className="size-3.5" />}
+                </button>
+              </div>
+            )}
+          </CardHeader>
+          <CardContent className="text-sm">
+            {editingBlurb ? (
+              <div className="space-y-2">
+                <Textarea
+                  value={blurbDraft}
+                  onChange={(e) => setBlurbDraft(e.target.value)}
+                  disabled={blurbBusy}
+                  rows={5}
+                  placeholder="面向读者的作品简介（有钩子、不剧透结局）"
+                  className="text-sm leading-relaxed"
+                />
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="gold" onClick={saveBlurb} disabled={blurbBusy} className="h-8">
+                    {blurbBusy ? <Loader2 className="size-4 mr-1 animate-spin" /> : <Check className="size-4 mr-1" />}
+                    保存
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setEditingBlurb(false)} disabled={blurbBusy} className="h-8">
+                    <X className="size-4 mr-1" />取消
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={onRegenBlurb} disabled={blurbBusy} className="h-8 ml-auto">
+                    <Wand2 className="size-4 mr-1" />重新生成
+                  </Button>
+                </div>
+              </div>
+            ) : blurb ? (
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{blurb}</p>
+            ) : (
+              <p className="text-muted-foreground/50 italic">暂无简介，点击右上角 ✎ 编辑或 ✨ AI 生成。</p>
             )}
           </CardContent>
         </Card>

@@ -75,6 +75,25 @@ export async function regenerateTitle(
   });
 }
 
+export async function updateBlurb(
+  storyId: string,
+  blurb: string,
+): Promise<{ story_id: string; blurb: string }> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/blurb`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ blurb }),
+  });
+}
+
+export async function regenerateBlurb(
+  storyId: string,
+): Promise<{ story_id: string; blurb: string }> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/regenerate-blurb`, {
+    method: "POST",
+  });
+}
+
 export async function getProgress(storyId: string): Promise<ProgressResponse> {
   return fetchJson(`${API_BASE}/stories/${storyId}/progress`);
 }

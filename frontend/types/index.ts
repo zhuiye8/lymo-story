@@ -35,6 +35,8 @@ export interface StoryBible {
     genre?: string;
     tone?: string;
     logline?: string;
+    synopsis?: string;
+    blurb?: string;
     selling_points?: string[];
     special_ability?: SpecialAbility;
     [k: string]: unknown;
