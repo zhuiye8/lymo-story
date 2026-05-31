@@ -261,7 +261,7 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
             if skipped:
                 logger.info(f"[save] ch{cn} 去重跳过 {skipped} 个同义事实，入库 {inserted}")
 
-        # 5. 角色状态变化
+        # 6b. 角色状态变化（→ character_states 表，易变态：位置/即时状态/情绪）
         for sc in ex.state_changes:
             await store.save_character_state(
                 sid, sc.character_id, cn,

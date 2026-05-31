@@ -83,16 +83,20 @@ def build_init_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuads):
         # 3. 粗纲落库
         await store.save_rough_outline(sid, [s.model_dump() for s in bible.outline.rough_stages])
 
-        # 4. 抽初始知识四元组（从角色 + 力量体系），valid_from=0
+        # 4. 初始状态四元组（valid_from=0 设定基线）。与章节路径同一套受控谓语：
+        #    只 seed 持久状态事实——存活基线（死人复活检测的 ch0 锚点）+ 初始身份。
+        #    目标=动机非状态事实、境界序列=力量阶梯均已在 bible_brief，不入四元组。
+        from backend.memory.predicates import normalize_predicate
         init_quads: list[dict] = []
         for cd in all_chars:
-            init_quads.append({"subject": cd.name, "predicate": "角色定位", "object": cd.role})
-            if cd.goals:
-                init_quads.append({"subject": cd.name, "predicate": "目标", "object": cd.goals[:80]})
-        ps = bible.world.power_system
-        if ps.levels:
-            init_quads.append({"subject": ps.name, "predicate": "境界序列", "object": "→".join(ps.levels)})
-        await quads.add_quads_batch(sid, init_quads, source_chapter=0)
+            init_quads.append({"subject": cd.name, "predicate": "存活状态", "object": "存活"})
+            if cd.role:
+                init_quads.append({"subject": cd.name, "predicate": "身份", "object": cd.role})
+        # 防御性归一过滤（同章节路径），再去重写入
+        init_quads = [{**q, "predicate": normalize_predicate(q["predicate"])}
+                      for q in init_quads if normalize_predicate(q["predicate"])]
+        if init_quads:
+            await quads.add_quads_deduped(sid, init_quads, source_chapter=0)
 
         await store.update_story_status(sid, "bible_ready")
         return {"bible": bible}
