@@ -139,12 +139,16 @@ async def regenerate_title(story_id: str, store: SQLiteStore = Depends(get_sqlit
         raise HTTPException(400, "故事尚未初始化完成，无法生成书名")
     from backend.agents.phase1.init_agents import ConceptAgent
     agent = ConceptAgent(llm)
-    title = await agent.gen_title(
-        genre=concept.get("genre", s.get("genre", "")),
-        tone=concept.get("tone", ""),
-        synopsis=concept.get("synopsis", concept.get("one_line", "")),
-        ability=(concept.get("special_ability") or {}).get("name", ""),
-        avoid=s.get("title", ""), story_id=story_id)
+    try:
+        title = await agent.gen_title(
+            genre=concept.get("genre", s.get("genre", "")),
+            tone=concept.get("tone", ""),
+            synopsis=concept.get("synopsis", concept.get("one_line", "")),
+            ability=(concept.get("special_ability") or {}).get("name", ""),
+            avoid=s.get("title", ""), story_id=story_id)
+    except Exception as e:
+        logger.warning(f"regenerate-title LLM failed for {story_id}: {type(e).__name__}: {e}")
+        raise HTTPException(502, "书名生成失败（模型连接异常），请重试")
     if not title:
         raise HTTPException(502, "书名生成失败，请重试")
     await store.update_story_title(story_id, title)
