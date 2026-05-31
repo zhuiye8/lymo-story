@@ -48,7 +48,8 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
   }, [id]);
 
   const status = prog?.status ?? story?.status ?? "";
-  const generating = status === "writing" && !!prog?.progress && !prog.progress.error;
+  // 是否真的在生成：看进度对象是否"未完成"，而不是看 story.status（status 完成后会复位）
+  const generating = !!prog?.progress && !prog.progress.finished && !prog.progress.error;
 
   useEffect(() => {
     refresh().catch(() => {});
@@ -126,8 +127,15 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-serif flex items-center justify-between">
               <span>第 {prog.progress.chapter_num} 章 · 生成管线</span>
-              <span className="text-xs font-normal text-muted-foreground">
-                {prog.progress.elapsed_seconds}s
+              <span className="text-xs font-normal flex items-center gap-2">
+                {prog.progress.error ? (
+                  <Badge variant="destructive" className="text-[10px]">出错</Badge>
+                ) : prog.progress.finished ? (
+                  <Badge variant="jade" className="text-[10px]">已完成</Badge>
+                ) : (
+                  <Badge variant="gold" className="text-[10px]">生成中</Badge>
+                )}
+                <span className="text-muted-foreground tabular-nums">{prog.progress.elapsed_seconds}s</span>
               </span>
             </CardTitle>
           </CardHeader>

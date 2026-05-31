@@ -19,6 +19,7 @@ from backend.llm.client import LLMClient
 from backend.storage.sqlite_store import SQLiteStore
 from backend.memory.knowledge_quads import KnowledgeQuads
 from backend.memory.layered_memory import LayeredMemory
+from backend.progress import ProgressStore
 from backend.models.phase1 import Concept, WorldSetting, Characters, Outline, StoryBible
 from backend.agents.phase1.init_agents import (
     ConceptAgent, WorldBuilderAgent, CharacterDesignerAgent, OutlinePlannerAgent, assemble_bible,
@@ -39,7 +40,7 @@ class InitState(TypedDict, total=False):
 
 
 def build_init_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuads,
-                     mem: LayeredMemory):
+                     mem: LayeredMemory, progress: ProgressStore | None = None):
     concept_agent = ConceptAgent(llm)
     world_agent = WorldBuilderAgent(llm)
     char_agent = CharacterDesignerAgent(llm)
@@ -112,12 +113,20 @@ def build_init_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuads,
         await store.update_story_status(sid, "bible_ready")
         return {"bible": bible}
 
+    def _staged(name, fn):
+        """节点开头上报进度阶段（progress 为 None 时无副作用）。"""
+        async def wrapped(state: InitState) -> InitState:
+            if progress is not None:
+                progress.enter_stage(state["story_id"], name)
+            return await fn(state)
+        return wrapped
+
     g = StateGraph(InitState)
-    g.add_node("concept", concept_node)
-    g.add_node("world_build", world_node)
-    g.add_node("character_design", character_node)
-    g.add_node("outline_plan", outline_node)
-    g.add_node("assemble", assemble_node)
+    g.add_node("concept", _staged("concept", concept_node))
+    g.add_node("world_build", _staged("world_build", world_node))
+    g.add_node("character_design", _staged("character_design", character_node))
+    g.add_node("outline_plan", _staged("outline_plan", outline_node))
+    g.add_node("assemble", _staged("assemble", assemble_node))
     g.add_edge(START, "concept")
     g.add_edge("concept", "world_build")
     g.add_edge("world_build", "character_design")

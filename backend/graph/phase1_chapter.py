@@ -18,6 +18,7 @@ from backend.llm.client import LLMClient
 from backend.storage.sqlite_store import SQLiteStore
 from backend.memory.knowledge_quads import KnowledgeQuads
 from backend.memory.layered_memory import LayeredMemory
+from backend.progress import ProgressStore
 from backend.models.phase1 import StoryBible
 from backend.models.phase1_chapter import DetailedOutline, ScenePlan, ChapterExtract
 from backend.agents.phase1.chapter_agents import (
@@ -65,7 +66,7 @@ def _bible_brief(bible: dict) -> str:
 
 
 def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuads,
-                        mem: LayeredMemory):
+                        mem: LayeredMemory, progress: ProgressStore | None = None):
     outline_agent = OutlineAdvanceAgent(llm)
     plan_agent = ScenePlanAgent(llm)
     writer = SceneWriterAgent(llm)
@@ -338,13 +339,21 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
                 quality={**q, "consistency_conflicts": len(conflicts), "composite_final": round(comp, 3)})
         return {}
 
+    def _staged(name, fn):
+        """包一层：节点开头上报进度阶段（progress 为 None 时无副作用，如压测）。"""
+        async def wrapped(state: ChapterState) -> ChapterState:
+            if progress is not None:
+                progress.enter_stage(state["story_id"], name)
+            return await fn(state)
+        return wrapped
+
     g = StateGraph(ChapterState)
     for name, fn in [
         ("load_context", load_context), ("outline_advance", outline_advance),
         ("scene_plan", scene_plan), ("retrieve_memory", retrieve_memory),
         ("write_chapter", write_chapter), ("extract_memory", extract_memory), ("save", save),
     ]:
-        g.add_node(name, fn)
+        g.add_node(name, _staged(name, fn))
     g.add_edge(START, "load_context")
     g.add_edge("load_context", "outline_advance")
     g.add_edge("outline_advance", "scene_plan")

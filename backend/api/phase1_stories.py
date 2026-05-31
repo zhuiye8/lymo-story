@@ -26,7 +26,7 @@ from backend.storage.sqlite_store import SQLiteStore
 from backend.llm.client import LLMClient
 from backend.memory.knowledge_quads import KnowledgeQuads
 from backend.memory.layered_memory import LayeredMemory
-from backend.progress import ProgressStore
+from backend.progress import ProgressStore, INIT_STAGES
 from backend.graph.phase1_init import build_init_graph
 from backend.graph.phase1_chapter import build_chapter_graph
 
@@ -62,14 +62,13 @@ async def _run_init(app_state, story_id: str, theme: str, requirements: str, tit
     mem: LayeredMemory = app_state.mem
     progress: ProgressStore = app_state.progress_store
     try:
-        progress.start(story_id, 0)
-        progress.enter_stage(story_id, "init", "生成立意/世界观/角色/大纲")
-        graph = build_init_graph(llm, store, quads, mem)
+        progress.start(story_id, 0, stages=INIT_STAGES)
+        graph = build_init_graph(llm, store, quads, mem, progress)
         await graph.ainvoke({
             "story_id": story_id, "theme": theme, "requirements": requirements,
             "title": title, "target_chapters": target_chapters,
         })
-        progress.finish_stage(story_id, "init", "bible 就绪")
+        progress.finish(story_id)  # 冻结计时（状态 bible_ready 已在 assemble 节点设置）
     except Exception as e:
         logger.exception(f"init failed for {story_id}")
         progress.set_error(story_id, str(e)[:300])
@@ -84,10 +83,11 @@ async def _run_chapter(app_state, story_id: str, chapter_num: int, target_words:
     progress: ProgressStore = app_state.progress_store
     try:
         progress.start(story_id, chapter_num)
-        progress.enter_stage(story_id, "generate", f"生成第 {chapter_num} 章")
-        graph = build_chapter_graph(llm, store, quads, mem)
+        graph = build_chapter_graph(llm, store, quads, mem, progress)
         await graph.ainvoke({"story_id": story_id, "chapter_num": chapter_num, "target_words": target_words})
-        progress.finish_stage(story_id, "generate", f"第 {chapter_num} 章完成")
+        progress.finish(story_id)
+        # 复位状态：本章已落库，可生成下一章（前端"生成中"改看 progress.finished，不再看此状态）
+        await store.update_story_status(story_id, "bible_ready")
     except Exception as e:
         logger.exception(f"chapter {chapter_num} failed for {story_id}")
         progress.set_error(story_id, str(e)[:300])

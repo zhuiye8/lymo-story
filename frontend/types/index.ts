@@ -64,6 +64,7 @@ export interface GenerationProgress {
   story_id: string;
   chapter_num: number;
   elapsed_seconds: number;
+  finished: boolean;
   current_stage: string | null;
   current_stage_label: string | null;
   error: string | null;
