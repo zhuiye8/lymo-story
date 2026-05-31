@@ -117,6 +117,29 @@ export async function generateChapter(
   });
 }
 
+export interface RewriteInfo {
+  can_rewrite: boolean;
+  reason: string;
+  installment_num: number;
+  chapter_nums: number[];
+}
+
+export async function getRewriteInfo(storyId: string): Promise<RewriteInfo> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/rewrite-latest/info`);
+}
+
+export async function rewriteLatest(
+  storyId: string,
+  revisionNote = "",
+  targetWords = 3000,
+): Promise<{ story_id: string; installment_num: number; chapter_nums: number[]; status: string }> {
+  return fetchJson(`${API_BASE}/stories/${storyId}/rewrite-latest`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ revision_note: revisionNote, target_words: targetWords }),
+  });
+}
+
 export async function listChapters(storyId: string): Promise<ChapterSummary[]> {
   return fetchJson(`${API_BASE}/stories/${storyId}/chapters`);
 }

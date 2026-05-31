@@ -2,14 +2,15 @@
 
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Play, Loader2, CheckCircle2, AlertCircle, Circle, BookOpen, Pencil, Check, X, Wand2 } from "lucide-react";
+import { Play, Loader2, CheckCircle2, AlertCircle, Circle, BookOpen, Pencil, Check, X, Wand2, RefreshCw } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { getStory, getProgress, generateChapter, listChapters, parseQuality, renameStory, regenerateTitle, updateBlurb, regenerateBlurb } from "@/lib/api";
+import { getStory, getProgress, generateChapter, listChapters, parseQuality, renameStory, regenerateTitle, updateBlurb, regenerateBlurb, getRewriteInfo, rewriteLatest } from "@/lib/api";
 import type { StoryDetail, ProgressResponse, ChapterSummary, StoryBible } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 
 function StageRow({ status, label, detail }: { status: string; label: string; detail?: string }) {
   const Icon =
@@ -44,6 +45,10 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
   const [editingBlurb, setEditingBlurb] = useState(false);
   const [blurbDraft, setBlurbDraft] = useState("");
   const [blurbBusy, setBlurbBusy] = useState(false);
+  const [rewriteOpen, setRewriteOpen] = useState(false);
+  const [rewriteInfo, setRewriteInfo] = useState<{ installment_num: number; chapter_nums: number[]; can_rewrite: boolean; reason: string } | null>(null);
+  const [revisionNote, setRevisionNote] = useState("");
+  const [rewriteBusy, setRewriteBusy] = useState(false);
 
   const refresh = useCallback(async () => {
     const [s, p, chs] = await Promise.all([
@@ -144,6 +149,31 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
     }
   }
 
+  async function openRewrite() {
+    setRevisionNote("");
+    setRewriteInfo(null);
+    setRewriteOpen(true);
+    try {
+      setRewriteInfo(await getRewriteInfo(id));
+    } catch (e) {
+      alert(`获取重写信息失败：${e instanceof Error ? e.message : e}`);
+      setRewriteOpen(false);
+    }
+  }
+
+  async function confirmRewrite() {
+    setRewriteBusy(true);
+    try {
+      await rewriteLatest(id, revisionNote.trim(), targetWords);
+      setRewriteOpen(false);
+      await refresh();
+    } catch (e) {
+      alert(`重写失败：${e instanceof Error ? e.message : e}`);
+    } finally {
+      setRewriteBusy(false);
+    }
+  }
+
   if (!story) return <div className="p-8 text-muted-foreground text-sm">加载中…</div>;
 
   const bible = (story.bible ?? {}) as StoryBible;
@@ -207,12 +237,52 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
               className="h-10 w-24 text-sm tabular-nums"
             />
           </div>
+          {(prog?.chapter_count ?? 0) > 0 && (
+            <Button onClick={openRewrite} disabled={!ready || busy || generating} variant="outline" size="lg" title="重写最新推进单元">
+              <RefreshCw className="size-4 mr-1.5" /> 重写最新
+            </Button>
+          )}
           <Button onClick={onGenerate} disabled={!ready || busy || generating} variant="gold" size="lg">
             {busy || generating ? <Loader2 className="size-4 mr-1.5 animate-spin" /> : <Play className="size-4 mr-1.5" />}
             {generating ? "生成中…" : `生成第 ${prog?.chapter_count ? prog.chapter_count + 1 : 1} 章`}
           </Button>
         </div>
       </div>
+
+      {/* 重写最新推进单元 确认对话框 */}
+      <Dialog open={rewriteOpen} onOpenChange={setRewriteOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-serif flex items-center gap-2">
+              <RefreshCw className="size-4 text-lymo-gold-400" /> 重写最新推进单元
+            </DialogTitle>
+            <DialogDescription>
+              {rewriteInfo
+                ? rewriteInfo.can_rewrite
+                  ? `将重写第 ${rewriteInfo.chapter_nums.join("、")} 章（同一推进单元，共 ${rewriteInfo.chapter_nums.length} 章）。原内容会被替换且不可恢复；剧情大纲不变，可重新切分。`
+                  : `无法重写：${rewriteInfo.reason || "暂不可用"}`
+                : "加载中…"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-1">
+            <label className="text-xs text-muted-foreground">修改意见（可选）</label>
+            <Textarea
+              value={revisionNote}
+              onChange={(e) => setRevisionNote(e.target.value)}
+              rows={3}
+              placeholder="例如：节奏再快一点、加点冲突、强化主角的反应…（留空则按原大纲换一稿）"
+              disabled={rewriteBusy}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setRewriteOpen(false)} disabled={rewriteBusy}>取消</Button>
+            <Button variant="gold" onClick={confirmRewrite} disabled={rewriteBusy || !rewriteInfo?.can_rewrite}>
+              {rewriteBusy ? <Loader2 className="size-4 mr-1.5 animate-spin" /> : <RefreshCw className="size-4 mr-1.5" />}
+              确认重写
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* 立意卡片 */}
       {(concept.logline || ability.name) && (
