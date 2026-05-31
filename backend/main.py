@@ -21,6 +21,7 @@ from backend.services.task_registry import TaskRegistry
 from backend.progress import ProgressStore
 from backend.storage.sqlite_store import SQLiteStore
 from backend.storage.vector_store import VectorStore
+from backend.memory.layered_memory import LayeredMemory
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s: %(message)s")
 
@@ -41,9 +42,12 @@ async def lifespan(app: FastAPI):
     llm = LLMClient(settings, registry=model_registry, llm_logger=llm_logger)
     quads = KnowledgeQuads(settings.sqlite_path)
 
+    vector = VectorStore(settings.chroma_path)
+
     app.state.settings = settings
     app.state.sqlite = sqlite
-    app.state.vector = VectorStore(settings.chroma_path)
+    app.state.vector = vector
+    app.state.mem = LayeredMemory(sqlite, vector)
     app.state.model_registry = model_registry
     app.state.llm_logger = llm_logger
     app.state.llm = llm

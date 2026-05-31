@@ -18,7 +18,9 @@ from backend.llm.client import LLMClient
 from backend.llm.model_registry import ModelRegistry
 from backend.llm.logger import LLMLogger
 from backend.storage.sqlite_store import SQLiteStore
+from backend.storage.vector_store import VectorStore
 from backend.memory.knowledge_quads import KnowledgeQuads
+from backend.memory.layered_memory import LayeredMemory
 from backend.graph.phase1_init import build_init_graph
 from backend.graph.phase1_chapter import build_chapter_graph
 
@@ -32,22 +34,29 @@ async def main():
     store = SQLiteStore(s.sqlite_path)
     await store.initialize()
     quads = KnowledgeQuads(s.sqlite_path)
+    vector = VectorStore(s.chroma_path)
+    mem = LayeredMemory(store, vector)
     llm = LLMClient(s, registry=reg, llm_logger=LLMLogger(s.sqlite_path))
 
-    # 清理同名旧故事
+    # 清理同名旧故事（含记忆/伏笔），并重置向量集合，避免跨次污染
     import aiosqlite
     async with aiosqlite.connect(s.sqlite_path) as db:
         for t in ("chapters", "characters", "character_states", "knowledge_quads",
                   "outline_rough", "outline_detailed", "chapter_quality_scores",
-                  "chapter_quality_evaluations", "slop_findings", "stories"):
+                  "chapter_quality_evaluations", "slop_findings", "memories",
+                  "foreshadowing", "stories"):
             await db.execute(f"DELETE FROM {t} WHERE story_id = ?" if t != "stories" else "DELETE FROM stories WHERE id = ?", (STORY_ID,))
         await db.commit()
+    try:
+        vector.client.delete_collection(f"story_{STORY_ID}")
+    except Exception:
+        pass
 
     await store.create_story(STORY_ID, "压测书", genre="男频系统流")
 
     # init
     print("=== INIT ===", flush=True)
-    init = build_init_graph(llm, store, quads)
+    init = build_init_graph(llm, store, quads, mem)
     await init.ainvoke({"story_id": STORY_ID,
                         "theme": "落魄程序员觉醒代码编辑器系统,能改写现实的源码",
                         "requirements": "爽文,节奏快,有脑洞", "title": "", "target_chapters": 60})
@@ -55,7 +64,7 @@ async def main():
     print(f"init done: {len(chars)} 角色: {[c['name'] for c in chars]}", flush=True)
 
     # 连写 N 章
-    cg = build_chapter_graph(llm, store, quads)
+    cg = build_chapter_graph(llm, store, quads, mem)
     rows = []
     for n in range(1, N_CHAPTERS + 1):
         print(f"\n=== 第 {n} 章 ===", flush=True)
@@ -110,6 +119,9 @@ async def main():
         planted = sum(fc.values())
         print(f"伏笔: 埋={planted} 已回收={fc.get('resolved',0)} 待回收={fc.get('open',0)}"
               + (f"（回收率 {fc.get('resolved',0)/planted:.0%}）" if planted else ""))
+        # 分层记忆
+        mc = await store.count_memories(STORY_ID)
+        print(f"分层记忆: {mc}（L0身份核心 / L1情感关键）")
 
 
 if __name__ == "__main__":

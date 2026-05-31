@@ -6,6 +6,7 @@ from backend.llm.client import LLMClient
 from backend.llm.logger import LLMLogger
 from backend.llm.model_registry import ModelRegistry
 from backend.memory.knowledge_quads import KnowledgeQuads
+from backend.memory.layered_memory import LayeredMemory
 from backend.services.task_registry import TaskRegistry
 from backend.progress import ProgressStore
 from backend.storage.sqlite_store import SQLiteStore
@@ -26,6 +27,10 @@ def get_quads(request: Request) -> KnowledgeQuads:
 
 def get_vector(request: Request) -> VectorStore:
     return request.app.state.vector
+
+
+def get_mem(request: Request) -> LayeredMemory:
+    return request.app.state.mem
 
 
 def get_llm(request: Request) -> LLMClient:

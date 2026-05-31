@@ -399,6 +399,38 @@ class SQLiteStore:
             await db.commit()
             return cur.rowcount or 0
 
+    # ===================== 分层记忆（L0-L3，元数据；向量在 ChromaDB）=====================
+
+    async def save_memory(
+        self, story_id: str, character_id: str, *, layer: int, content: str,
+        emotional_weight: float, source_chapter: int, vector_id: str = "",
+    ) -> int:
+        """写一条记忆元数据，返回自增 id（向量库用 mem_{id} 作 vector_id 关联）。"""
+        async with aiosqlite.connect(self.db_path) as db:
+            cur = await db.execute(
+                """INSERT INTO memories
+                   (story_id, character_id, layer, content, emotional_weight, source_chapter, vector_id, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (story_id, character_id, layer, content, emotional_weight, source_chapter, vector_id, _now()),
+            )
+            await db.commit()
+            return cur.lastrowid or 0
+
+    async def set_memory_vector_id(self, mem_id: int, vector_id: str) -> None:
+        async with aiosqlite.connect(self.db_path) as db:
+            await db.execute("UPDATE memories SET vector_id=? WHERE id=?", (vector_id, mem_id))
+            await db.commit()
+
+    async def count_memories(self, story_id: str) -> dict:
+        """按 layer 统计记忆条数（压测/可观测用）。"""
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            cur = await db.execute(
+                "SELECT layer, COUNT(*) AS n FROM memories WHERE story_id=? GROUP BY layer",
+                (story_id,),
+            )
+            return {f"L{r['layer']}": r["n"] for r in await cur.fetchall()}
+
     # ===================== characters =====================
 
     async def save_character(

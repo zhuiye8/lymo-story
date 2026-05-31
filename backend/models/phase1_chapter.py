@@ -65,10 +65,23 @@ class CharacterStateChange(BaseModel):
     note: str = Field(default="", description="本章该角色的关键变化")
 
 
+class CharacterMemory(BaseModel):
+    """角色本章的情感关键记忆（L1）——喂语义记忆，维系角色情感连续性。"""
+    character_id: str = Field(description="记忆所属角色 id")
+    content: str = Field(description="该角色本章经历的要紧事/强情绪，一句话，含对象与感受")
+    emotional_weight: float = Field(
+        default=0.5,
+        description="情感强度 0-1：越刻骨越高（生死/背叛/失去/重大抉择≈0.9，日常≈0.3）"
+    )
+
+
 class ChapterExtract(BaseModel):
     """章节后抽取：新事实四元组 + 角色状态变化 + 伏笔 + 压缩摘要。"""
     new_quads: list[ExtractedQuad] = Field(default_factory=list, description="本章新增/变更的事实")
     state_changes: list[CharacterStateChange] = Field(default_factory=list, description="角色状态变化")
+    memories: list[CharacterMemory] = Field(
+        default_factory=list, description="出场角色本章的情感关键记忆（每个重要角色 0-2 条）"
+    )
     foreshadowing: list[str] = Field(default_factory=list, description="本章新埋下的伏笔（待回收）")
     resolved_foreshadowing: list[int] = Field(
         default_factory=list,

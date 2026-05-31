@@ -25,6 +25,7 @@ from backend.deps import get_sqlite, get_llm, get_quads, get_progress_store
 from backend.storage.sqlite_store import SQLiteStore
 from backend.llm.client import LLMClient
 from backend.memory.knowledge_quads import KnowledgeQuads
+from backend.memory.layered_memory import LayeredMemory
 from backend.progress import ProgressStore
 from backend.graph.phase1_init import build_init_graph
 from backend.graph.phase1_chapter import build_chapter_graph
@@ -58,11 +59,12 @@ async def _run_init(app_state, story_id: str, theme: str, requirements: str, tit
     store: SQLiteStore = app_state.sqlite
     llm: LLMClient = app_state.llm
     quads: KnowledgeQuads = app_state.quads
+    mem: LayeredMemory = app_state.mem
     progress: ProgressStore = app_state.progress_store
     try:
         progress.start(story_id, 0)
         progress.enter_stage(story_id, "init", "生成立意/世界观/角色/大纲")
-        graph = build_init_graph(llm, store, quads)
+        graph = build_init_graph(llm, store, quads, mem)
         await graph.ainvoke({
             "story_id": story_id, "theme": theme, "requirements": requirements,
             "title": title, "target_chapters": target_chapters,
@@ -78,11 +80,12 @@ async def _run_chapter(app_state, story_id: str, chapter_num: int, target_words:
     store: SQLiteStore = app_state.sqlite
     llm: LLMClient = app_state.llm
     quads: KnowledgeQuads = app_state.quads
+    mem: LayeredMemory = app_state.mem
     progress: ProgressStore = app_state.progress_store
     try:
         progress.start(story_id, chapter_num)
         progress.enter_stage(story_id, "generate", f"生成第 {chapter_num} 章")
-        graph = build_chapter_graph(llm, store, quads)
+        graph = build_chapter_graph(llm, store, quads, mem)
         await graph.ainvoke({"story_id": story_id, "chapter_num": chapter_num, "target_words": target_words})
         progress.finish_stage(story_id, "generate", f"第 {chapter_num} 章完成")
     except Exception as e:

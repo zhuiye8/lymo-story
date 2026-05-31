@@ -17,6 +17,7 @@ from langgraph.graph import END, START, StateGraph
 from backend.llm.client import LLMClient
 from backend.storage.sqlite_store import SQLiteStore
 from backend.memory.knowledge_quads import KnowledgeQuads
+from backend.memory.layered_memory import LayeredMemory
 from backend.models.phase1 import StoryBible
 from backend.models.phase1_chapter import DetailedOutline, ScenePlan, ChapterExtract
 from backend.agents.phase1.chapter_agents import (
@@ -63,7 +64,8 @@ def _bible_brief(bible: dict) -> str:
     )
 
 
-def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuads):
+def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuads,
+                        mem: LayeredMemory):
     outline_agent = OutlineAdvanceAgent(llm)
     plan_agent = ScenePlanAgent(llm)
     writer = SceneWriterAgent(llm)
@@ -142,11 +144,29 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
             for st in states if st.get("location") or st.get("status")
         ]
 
+        # 分层记忆语义召回（架构 §6.4 L2/L3）：在场角色的相关 + 情感关键记忆，
+        # 让 writer 知道角色"记得什么、在意谁"，维系情感连续性。
+        plan = state["plan"]
+        present = {plan.pov} | {c for sc in plan.scenes for c in sc.present_characters}
+        present.discard("")
+        detailed = state["detailed"]
+        query_text = f"{detailed.summary}；" + "；".join(sc.goal for sc in plan.scenes)
+        mem_lines = []
+        try:
+            recalled = await mem.recall(sid, list(present), query_text)
+            for m in recalled:
+                star = "★" if m["emotional_weight"] >= 0.7 else ""
+                mem_lines.append(f"- {star}{m['character_id']}：{m['text']}")
+        except Exception as e:
+            logger.warning(f"[retrieve_memory] ch{cn} 记忆召回失败（降级）: {type(e).__name__}: {e}")
+
         parts = []
         if hard_facts:
             parts.append("【硬约束·绝不可违反（角色生死/能力/位置/境界等）】\n" + "\n".join(hard_facts[:25]))
         if state_lines:
             parts.append("【角色当前状态·须延续】\n" + "\n".join(state_lines[:10]))
+        if mem_lines:
+            parts.append("【角色记忆·须延续情感与认知（★=刻骨）】\n" + "\n".join(mem_lines[:16]))
         if soft_facts:
             parts.append("【背景事实】\n" + "\n".join(soft_facts[:20]))
         facts = "\n\n".join(parts) if parts else "（暂无已确立事实）"
@@ -284,6 +304,16 @@ def build_chapter_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuad
                 logger.info(f"[save] ch{cn} 回收伏笔 {n} 个")
         if ex.foreshadowing:
             await store.save_foreshadowing(sid, cn, ex.foreshadowing)
+
+        # 6d. 分层记忆：写入本章角色情感关键记忆（L1）→ SQLite + ChromaDB
+        if ex.memories:
+            try:
+                wrote = await mem.remember_batch(
+                    sid, [m.model_dump() for m in ex.memories], chapter=cn)
+                if wrote:
+                    logger.info(f"[save] ch{cn} 写入角色记忆 {wrote} 条")
+            except Exception as e:
+                logger.warning(f"[save] ch{cn} 记忆写入失败（不阻断）: {type(e).__name__}: {e}")
 
         # 7. 质量落库（喂 quality_admin 4 图表）+ 一致性冲突计入 quality
         q = state.get("quality", {})

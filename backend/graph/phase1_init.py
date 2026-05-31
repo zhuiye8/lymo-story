@@ -18,6 +18,7 @@ from langgraph.graph import END, START, StateGraph
 from backend.llm.client import LLMClient
 from backend.storage.sqlite_store import SQLiteStore
 from backend.memory.knowledge_quads import KnowledgeQuads
+from backend.memory.layered_memory import LayeredMemory
 from backend.models.phase1 import Concept, WorldSetting, Characters, Outline, StoryBible
 from backend.agents.phase1.init_agents import (
     ConceptAgent, WorldBuilderAgent, CharacterDesignerAgent, OutlinePlannerAgent, assemble_bible,
@@ -37,7 +38,8 @@ class InitState(TypedDict, total=False):
     bible: StoryBible
 
 
-def build_init_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuads):
+def build_init_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuads,
+                     mem: LayeredMemory):
     concept_agent = ConceptAgent(llm)
     world_agent = WorldBuilderAgent(llm)
     char_agent = CharacterDesignerAgent(llm)
@@ -79,6 +81,15 @@ def build_init_graph(llm: LLMClient, store: SQLiteStore, quads: KnowledgeQuads):
                 voice_profile=cd.voice_profile.model_dump())
             # 角色初始状态（第 0 章 = 设定基线）
             await store.save_character_state(sid, cd.character_id, 0, status="登场前", emotional_state="")
+            # L0 身份核心记忆（恒在场，定义"这个角色是谁"）
+            identity = "；".join(p for p in [
+                f"我是{cd.name}，{cd.role}",
+                f"性格：{cd.personality}" if cd.personality else "",
+                f"出身：{cd.background}" if cd.background else "",
+                f"我想要：{cd.goals}" if cd.goals else "",
+                f"我的软肋：{cd.weaknesses}" if cd.weaknesses else "",
+            ] if p)
+            await mem.seed_identity(sid, cd.character_id, identity)
 
         # 3. 粗纲落库
         await store.save_rough_outline(sid, [s.model_dump() for s in bible.outline.rough_stages])
