@@ -36,7 +36,7 @@ export default function Dashboard({ params }: { params: Promise<{ id: string }> 
   const [prog, setProg] = useState<ProgressResponse | null>(null);
   const [chapters, setChapters] = useState<ChapterSummary[]>([]);
   const [busy, setBusy] = useState(false);
-  const [targetWords, setTargetWords] = useState(3500);
+  const [targetWords, setTargetWords] = useState(3000);
 
   const refresh = useCallback(async () => {
     const [s, p, chs] = await Promise.all([
