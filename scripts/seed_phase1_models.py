@@ -21,15 +21,16 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from backend.config import Settings
 from backend.llm.model_registry import ModelRegistry
 
-# MiMo（经 newapi 代理）—— 全部从环境变量读，不硬编码 key/代理地址进源码。
-# 用法：MIMO_API_KEY=... MIMO_API_BASE=http://<your-proxy>/v1 python scripts/seed_phase1_models.py
-MIMO_API_BASE = os.environ.get("MIMO_API_BASE", "")
-MIMO_API_KEY = os.environ.get("MIMO_API_KEY", "")
-MIMO_MODEL = os.environ.get("MIMO_MODEL", "mimo-v2.5-pro")
+# MiMo 凭证从 .env（Settings，STORY_ 前缀）读，不硬编码进源码：
+#   STORY_MIMO_ENABLED=true  STORY_MIMO_API_KEY=...  STORY_MIMO_API_BASE=http://<proxy>/v1
+# .env 已 gitignored，与 DeepSeek key 同等安全姿态。
 
 
 async def main():
     s = Settings()
+    MIMO_ENABLED = s.mimo_enabled and bool(s.mimo_api_key) and bool(s.mimo_api_base)
+    if s.mimo_enabled and not (s.mimo_api_key and s.mimo_api_base):
+        print("WARN: STORY_MIMO_ENABLED=true 但缺 key/base，跳过 MiMo（单评委降级）")
     reg = ModelRegistry(s.sqlite_path)
     ds_key = s.litellm_api_key
     ds_base = s.litellm_api_base or "https://api.deepseek.com"
@@ -52,12 +53,10 @@ async def main():
             "provider": "deepseek", "provider_options": {},
         },
     ]
-    if MIMO_API_KEY and not MIMO_API_BASE:
-        print("WARN: 设了 MIMO_API_KEY 但没设 MIMO_API_BASE，跳过 MiMo（需传代理地址）")
-    if MIMO_API_KEY and MIMO_API_BASE:
+    if MIMO_ENABLED:
         models.append({
             "id": "mimo-v2.5-pro", "display_name": "小米 MiMo V2.5 Pro（第二评委·代理）",
-            "litellm_model": f"openai/{MIMO_MODEL}", "api_key": MIMO_API_KEY, "api_base": MIMO_API_BASE,
+            "litellm_model": f"openai/{s.mimo_model}", "api_key": s.mimo_api_key, "api_base": s.mimo_api_base,
             "max_tokens": 4096, "default_temperature": 0.3,
             "cost_per_million_input": 1.0, "cost_per_million_output": 3.0, "currency": "USD",
             # provider=mimo → build_extra_body 关 thinking（reasoning 烧 token 撑爆评委 JSON）
@@ -84,14 +83,14 @@ async def main():
         # 评委
         "critic_primary": "deepseek-v4-flash",
     }
-    if MIMO_API_KEY and MIMO_API_BASE:
+    if MIMO_ENABLED:
         bindings["critic_secondary"] = "mimo-v2.5-pro"
 
     for agent, model_id in bindings.items():
         await reg.bind_agent(agent, model_id)
         print(f"[bind] {agent} -> {model_id}")
 
-    secondary = "mimo-v2.5-pro" if MIMO_API_KEY else "（未配置 MIMO_API_KEY → 单评委降级）"
+    secondary = "mimo-v2.5-pro" if MIMO_ENABLED else "（STORY_MIMO_ENABLED 未开 → 单评委降级）"
     print(f"\nDeepSeek base: {ds_base}")
     print(f"第二评委: {secondary}")
     print("done.")

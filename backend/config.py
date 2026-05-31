@@ -2,10 +2,17 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # LLM
+    # LLM（DeepSeek 主力）
     litellm_model: str = "gpt-4o"
     litellm_api_key: str = ""
     litellm_api_base: str | None = None
+
+    # 第二评委 MiMo（经 newapi 代理，订阅期）。仅 seed 脚本播种入库时用，运行时从 DB 读。
+    # disabled → 异源去偏关闭，评委降级为单评委（DeepSeek）。
+    mimo_enabled: bool = False
+    mimo_api_key: str = ""
+    mimo_api_base: str = ""            # 形如 http://<proxy>/v1
+    mimo_model: str = "mimo-v2.5-pro"
 
     # Storage paths
     sqlite_path: str = "data/story.db"
