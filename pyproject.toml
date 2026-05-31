@@ -16,6 +16,9 @@ dependencies = [
     # Phase 1: structured LLM output (Pydantic validation + reask) over LiteLLM.
     # Uses instructor.from_litellm — zero-glue with existing gateway.
     "instructor>=1.15.0",
+    # Semantic-memory embedding via local ollama (Qwen3-Embedding). Lightweight
+    # HTTP client only — the model runs in the ollama server, not in-process.
+    "ollama>=0.3.0",
 ]
 
 [project.optional-dependencies]

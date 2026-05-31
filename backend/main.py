@@ -42,7 +42,12 @@ async def lifespan(app: FastAPI):
     llm = LLMClient(settings, registry=model_registry, llm_logger=llm_logger)
     quads = KnowledgeQuads(settings.sqlite_path)
 
-    vector = VectorStore(settings.chroma_path)
+    vector = VectorStore(
+        settings.chroma_path,
+        embed_provider=settings.embed_provider,
+        embed_model=settings.embed_model,
+        ollama_base_url=settings.ollama_base_url,
+    )
 
     app.state.settings = settings
     app.state.sqlite = sqlite

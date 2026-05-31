@@ -13,6 +13,13 @@ class Settings(BaseSettings):
     data_dir: str = "data/stories"
     chroma_path: str = "data/chroma"
 
+    # 语义记忆 embedding。默认走 chromadb 内置 all-MiniLM（CPU，英文为主）。
+    # 中文小说建议 ollama + Qwen3-Embedding（本地 GPU，中文 SOTA）：
+    #   STORY_EMBED_PROVIDER=ollama  STORY_EMBED_MODEL=qwen3-embedding:4b
+    embed_provider: str = "default"            # default | ollama
+    embed_model: str = "qwen3-embedding:4b"    # ollama tag（embed_provider=ollama 时生效）
+    ollama_base_url: str = "http://localhost:11434"
+
     # Generation parameters
     max_consistency_retries: int = 2
     default_chapter_word_count: int = 3000

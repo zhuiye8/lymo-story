@@ -17,14 +17,25 @@ def _normalize_meta(metadata: dict) -> dict:
 
 
 class VectorStore:
-    def __init__(self, chroma_path: str):
+    def __init__(self, chroma_path: str, *, embed_provider: str = "default",
+                 embed_model: str = "", ollama_base_url: str = "http://localhost:11434"):
         self.client = chromadb.PersistentClient(path=chroma_path)
+        self._embed_fn = self._build_embed_fn(embed_provider, embed_model, ollama_base_url)
+
+    @staticmethod
+    def _build_embed_fn(provider: str, model: str, ollama_url: str):
+        """选 embedding function。默认 None=chromadb 内置 all-MiniLM（CPU）。
+        provider=ollama → Qwen3-Embedding 等本地 GPU 模型（中文 SOTA）。"""
+        if provider == "ollama" and model:
+            from chromadb.utils import embedding_functions as ef
+            return ef.OllamaEmbeddingFunction(url=ollama_url, model_name=model)
+        return None
 
     def get_collection(self, story_id: str) -> chromadb.Collection:
-        return self.client.get_or_create_collection(
-            name=f"story_{story_id}",
-            metadata={"hnsw:space": "cosine"},
-        )
+        kwargs: dict = {"name": f"story_{story_id}", "metadata": {"hnsw:space": "cosine"}}
+        if self._embed_fn is not None:
+            kwargs["embedding_function"] = self._embed_fn
+        return self.client.get_or_create_collection(**kwargs)
 
     def add_memory(
         self,

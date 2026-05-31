@@ -34,7 +34,9 @@ async def main():
     store = SQLiteStore(s.sqlite_path)
     await store.initialize()
     quads = KnowledgeQuads(s.sqlite_path)
-    vector = VectorStore(s.chroma_path)
+    vector = VectorStore(
+        s.chroma_path, embed_provider=s.embed_provider,
+        embed_model=s.embed_model, ollama_base_url=s.ollama_base_url)
     mem = LayeredMemory(store, vector)
     llm = LLMClient(s, registry=reg, llm_logger=LLMLogger(s.sqlite_path))
 
