@@ -2,10 +2,11 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Copy, Check } from "lucide-react";
 import { getChapter, parseQuality } from "@/lib/api";
 import type { ChapterDetail, ChapterQuality } from "@/types";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export default function ChapterReader({
   params,
@@ -16,14 +17,28 @@ export default function ChapterReader({
   const chapterNum = parseInt(num, 10);
   const [chapter, setChapter] = useState<ChapterDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState<"" | "body" | "all">("");
 
   useEffect(() => {
     setChapter(null);
     setError(null);
+    setCopied("");
     getChapter(id, chapterNum)
       .then(setChapter)
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, [id, chapterNum]);
+
+  async function copy(kind: "body" | "all") {
+    if (!chapter) return;
+    const text = kind === "all" ? `${chapter.title}\n\n${chapter.content}` : chapter.content;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(kind);
+      setTimeout(() => setCopied(""), 1800);
+    } catch {
+      alert("复制失败，请手动选择正文复制");
+    }
+  }
 
   if (error) return <div className="p-8 text-destructive text-sm">{error}</div>;
   if (!chapter) return <div className="p-8 text-muted-foreground text-sm">加载中…</div>;
@@ -57,6 +72,15 @@ export default function ChapterReader({
           {typeof q.consistency_conflicts === "number" && q.consistency_conflicts > 0 && (
             <Badge variant="destructive" className="text-[10px]">冲突 {q.consistency_conflicts}</Badge>
           )}
+          <div className="ml-auto flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => copy("all")} className="h-7 text-xs">
+              标题+正文
+            </Button>
+            <Button variant="gold" size="sm" onClick={() => copy("body")} className="h-7 text-xs">
+              {copied === "body" ? <Check className="size-3.5 mr-1" /> : <Copy className="size-3.5 mr-1" />}
+              {copied === "body" ? "已复制" : "复制正文"}
+            </Button>
+          </div>
         </div>
       </header>
 
